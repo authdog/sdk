@@ -13,14 +13,14 @@ module.exports = {
     testEnvironment: "node",
     rootDir: ".",
     collectCoverageFrom: [
-      "!<rootDir>/src/activity/*.ts",
-      "<rootDir>/src/db/**/*.ts",
-      "<rootDir>/src/jwks/**/*.ts",
-      "<rootDir>/src/oauth2/**/*.ts",
+      // "!<rootDir>/src/activity/*.ts",
+      // "<rootDir>/src/db/**/*.ts",
+      // "<rootDir>/src/jwks/**/*.ts",
+      // "<rootDir>/src/oauth2/**/*.ts",
       // "<rootDir>/src/resolvers/**/*.ts",
       // "<rootDir>/src/schema/**/*.ts",
-      "<rootDir>/src/security/**/*.ts",
-      "<rootDir>/src/utils/**/*.ts",
-      "<rootDir>/src/vendors/**/*.ts"
+      // "<rootDir>/src/security/**/*.ts",
+      // "<rootDir>/src/utils/**/*.ts",
+      // "<rootDir>/src/vendors/**/*.ts"
     ]
   };

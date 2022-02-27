@@ -25,7 +25,7 @@
   },
   "scripts": {
     "tsc": "tsc",
-    "test": "jest"
+    "test": "jest --config jest.config.js --runInBand --no-cache --verbose"
   },
   "bugs": {
     "url": "https://github.com/authdog/sdk/issues"
