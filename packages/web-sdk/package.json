@@ -13,11 +13,6 @@
   "author": "David Barrat <david@barrat.io>",
   "homepage": "https://www.authdog.com",
   "license": "MIT",
-  "main": "lib/web-sdk.js",
-  "directories": {
-    "lib": "lib",
-    "test": "__tests__"
-  },
   "files": [
     "lib"
   ],
@@ -29,6 +24,7 @@
     "url": "git+https://github.com/authdog/sdk.git"
   },
   "scripts": {
+    "tsc": "tsc",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
