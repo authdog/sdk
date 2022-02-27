@@ -1,4 +1,4 @@
-import { getParamFromUri } from './uri';
+import { getParamFromUri } from '../src/uri';
 
 describe('uri test suite', () => {
   test('getParamFromUri - available parameter', () => {
@@ -12,4 +12,14 @@ describe('uri test suite', () => {
       getParamFromUri('https://www.example.com/path?param=value', 'param2')
     ).toBe(null);
   });
+
+  test('getParamFromUri - no parameter', () => {
+    expect(getParamFromUri('https://www.example.com/path', 'param')).toBe(null);
+  })
+
+  test('getParamFromUri - no parameter and no query', () => {
+    expect(getParamFromUri('https://www.example.com/path', 'param')).toBe(null);
+  }
+  )
+
 });
