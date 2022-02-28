@@ -13,7 +13,7 @@ install:
 	yarn install
 
 test:
-	$(LERNA_RUN) test
+	$(LERNA_RUN) test --stream
 
 pretty:
 	$(BIN_NPX) prettier --write .
