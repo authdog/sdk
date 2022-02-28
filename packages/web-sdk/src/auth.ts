@@ -45,7 +45,7 @@ export const initializeFetchUser = () => {
 
   const applicationUuidFromUri = getParamFromUri(
     location.search,
-    'application_uuid'
+    'application_uuid',
   );
 
   const applicationUuidFromSessionStorage = getParamFromSessionStorage(APP_ID);
@@ -104,7 +104,7 @@ export const fetchUserInfos = async ({
     `${tenantUri}/api/v1/oauth2/application/userinfo/${applicationUuid}`,
     {
       Authorization,
-    }
+    },
   )
     .then(async (res: any) => {
       console.log('Request complete! response:');

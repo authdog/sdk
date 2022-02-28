@@ -13,9 +13,8 @@
   "author": "David Barrat <david@barrat.io>",
   "homepage": "https://www.authdog.com",
   "license": "MIT",
-  "files": [
-    "lib"
-  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.js",
   "publishConfig": {
     "access": "public"
   },
