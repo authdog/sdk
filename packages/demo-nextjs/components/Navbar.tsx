@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { Grid, GridItem, Button, Divider } from '@chakra-ui/react';
 
 import { default as Image } from 'next/image';
@@ -10,7 +11,7 @@ export const Navbar = () => {
     <div style={{ padding: '2em' }}>
       <Grid templateColumns="repeat(2, 1fr)" gap={6}>
         <GridItem w="100%" h="10">
-          <Image src={LOGO_AUTHDOG} alt="Authdog" width={190} height="100%" />
+          <img src={LOGO_AUTHDOG} alt="Authdog" width={190} height="100%" />
         </GridItem>
         <GridItem
           w="100%"

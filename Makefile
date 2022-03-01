@@ -15,7 +15,7 @@ dev_react:
 
 # TODO
 build_react:
-	$(LERNA_RUN) build_react --scope={@authdog/web-sdk,@authdog/demo-nextjs} --stream
+	export STAGE=local && $(LERNA_RUN) build_react --scope={@authdog/web-sdk,@authdog/demo-nextjs} --stream
 
 install:
 	yarn install
