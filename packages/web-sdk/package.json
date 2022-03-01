@@ -1,6 +1,6 @@
 {
   "name": "@authdog/web-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Web Toolkit to interact with Authdog services",
   "keywords": [
     "sdk",
