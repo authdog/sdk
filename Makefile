@@ -9,6 +9,10 @@ build_libs:
 dev_react:
 	$(LERNA_RUN) dev_react --scope={@authdog/web-sdk,@authdog/demo-nextjs} --stream
 
+# TODO
+build_react:
+	$(LERNA_RUN) build_react --scope={@authdog/web-sdk,@authdog/demo-nextjs} --stream
+
 install:
 	yarn install
 

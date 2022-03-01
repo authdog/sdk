@@ -7,7 +7,7 @@ const LOGO_AUTHDOG =
 
 export const Navbar = () => {
   return (
-    <>
+    <div style={{ padding: '2em' }}>
       <Grid templateColumns="repeat(2, 1fr)" gap={6}>
         <GridItem w="100%" h="10">
           <Image src={LOGO_AUTHDOG} alt="Authdog" width={190} height="100%" />
@@ -24,8 +24,7 @@ export const Navbar = () => {
       </Grid>
       <br />
       <br />
-
       <Divider />
-    </>
+    </div>
   );
 };

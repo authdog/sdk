@@ -5,10 +5,10 @@ export const Footer = () => {
     <div
       style={{
         textAlign: 'center',
-        paddingBottom: '3em',
         background: '#404040',
         color: 'white',
-        padding: '.3em',
+        paddingTop: '1em',
+        paddingBottom: '5em !important'
       }}
     >
       <br />

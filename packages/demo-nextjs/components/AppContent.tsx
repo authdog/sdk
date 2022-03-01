@@ -5,7 +5,7 @@ export const AppContent = () => {
   return (
     <div
       style={{
-        minHeight: '70vh',
+        minHeight: '65vh',
         maxWidth: '500px',
         margin: '0 auto',
       }}
