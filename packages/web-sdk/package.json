@@ -16,7 +16,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.js",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "dist"
   },
   "repository": {
     "type": "git",
