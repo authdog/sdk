@@ -16,8 +16,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.js",
   "publishConfig": {
-    "access": "public",
-    "directory": "dist"
+    "access": "public"
   },
   "repository": {
     "type": "git",
@@ -30,5 +29,5 @@
   "bugs": {
     "url": "https://github.com/authdog/sdk/issues"
   },
-  "gitHead": "139905bb6d28bb1c2c783c682be3b26a48e42c98"
+  "gitHead": "5c7228f833a4bed70db36410e707c7bfdccd1a57"
 }
