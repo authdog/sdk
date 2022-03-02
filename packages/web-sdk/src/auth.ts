@@ -33,7 +33,7 @@ export const initializeAppPage = ({
   }
 };
 
-export const initializeFetchUser = () => {
+export const initializeSession = () => {
   let credentials = {
     Authorization: null,
     applicationUuid: null,
