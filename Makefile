@@ -16,9 +16,9 @@ publish_libs:
 dev_react:
 	$(LERNA_RUN) --scope={@authdog/web-sdk,@authdog/demo-nextjs} dev_react
 
-# TODO
+# WIP
 build_react:
-	export stage=prod && $(LERNA_RUN) build_react --scope={@authdog/web-sdk,@authdog/demo-nextjs} --stream
+	$(LERNA_RUN) build_react --scope={@authdog/web-sdk,@authdog/demo-nextjs} --stream
 
 install:
 	yarn install && \

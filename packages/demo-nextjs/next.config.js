@@ -1,7 +1,10 @@
-const { resolve } = require('path');
-require('dotenv').config({
-  path: resolve(__dirname, `.env.${process.env.STAGE}`),
-});
+// const { resolve } = require('path');
+
+require('dotenv').config({ path: `.env.prod` })
+
+// {
+//   path: resolve(__dirname, `.env.prod`),
+// }
 
 const { TENANT_URI, SIGNIN_URI } = process.env;
 
