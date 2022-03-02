@@ -42,7 +42,21 @@ export const Landing = () => {
         <div>Loading...</div>
       )}
 
-      <AppContent jsonData={userInfos || null} />
+      {userInfos && (
+        <AppContent jsonData={userInfos} />
+      )}
+
+
+      { !userInfos && !isFetching && (
+        <div style={{ minHeight: '65vh' }}>
+          <h1>Welcome to Authdog</h1>
+          <p>
+            This is an example of a nextjs application using Authdog as Authentication Layer.
+          </p>
+
+          To display user information, you need to be authenticated. Click on Sign In button to authenticate.
+        </div>
+      )}
 
     </Layout>
   );
