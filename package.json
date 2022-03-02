@@ -1,5 +1,8 @@
 {
   "name": "root",
+  "workspaces": [
+    "packages/*"
+  ],
   "private": true,
   "devDependencies": {
     "@pika/pack": "^0.5.0",

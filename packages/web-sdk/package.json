@@ -1,6 +1,6 @@
 {
   "name": "@authdog/web-sdk",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Web Toolkit to interact with Authdog services",
   "keywords": [
     "sdk",
@@ -24,10 +24,14 @@
   },
   "scripts": {
     "tsc": "tsc",
-    "test": "jest --config jest.config.js --runInBand --no-cache --verbose"
+    "test": "jest --config jest.config.js --runInBand --no-cache --verbose",
+    "install_deps": "yarn install"
   },
   "bugs": {
     "url": "https://github.com/authdog/sdk/issues"
   },
-  "gitHead": "5c7228f833a4bed70db36410e707c7bfdccd1a57"
+  "gitHead": "5c7228f833a4bed70db36410e707c7bfdccd1a57",
+  "dependencies": {
+    "@authdog/demo-nextjs": "^0.1.0"
+  }
 }

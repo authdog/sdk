@@ -4,7 +4,7 @@ import { Navbar } from './Navbar';
 import { AppContent } from './AppContent';
 
 import getConfig from "next/config";
-import { fetchUserInfos, initializeFetchUser } from '@authdog/web-sdk';
+import { fetchUserInfos, initializeSession } from '@authdog/web-sdk';
 const { publicRuntimeConfig = {} } = getConfig() || {};
 const { ['TENANT_URI']: tenantUri, ['SIGNIN_URI']: signinUri } =
   publicRuntimeConfig;
@@ -15,7 +15,7 @@ export const Landing = () => {
 
   useEffect(() => {
     try {
-      const { Authorization, applicationUuid } = initializeFetchUser();
+      const { Authorization, applicationUuid } = initializeSession();
       setIsFetching(true);
       fetchUserInfos({
         applicationUuid,
