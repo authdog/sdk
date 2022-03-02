@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev_react": "next dev",
-    "build_react": "export STAGE=prod next build && next export",
+    "build_react": "next build && next export",
     "start": "next start",
     "lint": "next lint",
     "install_deps": "yarn install"
