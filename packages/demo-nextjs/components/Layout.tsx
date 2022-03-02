@@ -1,6 +1,10 @@
 import { Footer } from './Footer';
 
-export const Layout = ({ children }) => {
+interface ILayout {
+  children: React.ReactNode;
+}
+
+export const Layout = ({ children }: ILayout) => {
   return (
     <>
       <div style={{ padding: '2em' }}>{children}</div>

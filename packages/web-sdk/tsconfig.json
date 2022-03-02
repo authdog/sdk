@@ -3,5 +3,5 @@
   "compilerOptions": {
     "outDir": "dist"
   },
-  "include": ["src", "__tests__/uri.test.ts"]
+  "include": ["src"]
 }

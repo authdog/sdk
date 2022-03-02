@@ -34,10 +34,7 @@ export const initializeAppPage = ({
 };
 
 export const initializeSession = () => {
-  let credentials = {
-    Authorization: null,
-    applicationUuid: null,
-  };
+  let credentials = null;
 
   const sessionFromUri = getParamFromUri(location.search, 'token');
 
@@ -68,10 +65,12 @@ export const initializeSession = () => {
         session: sessionFromUri,
       });
 
-      credentials = {
-        Authorization: session,
-        applicationUuid,
-      };
+      if (session && applicationUuid) {
+        credentials = {
+          Authorization: session,
+          applicationUuid,
+        };
+      }
     }
   } else {
     throw new Error('unauthorized');

@@ -7,18 +7,18 @@ LERNA_RUN := $(BIN_LERNA) run
 build_libs:
 	$(LERNA_RUN) tsc
 
-lerna_add:
-	lerna add @my-scope-name/design-system-button --scope=@my-scope-name/my-design-system-form
+# lerna_add:
+# 	lerna add @my-scope-name/design-system-button --scope=@my-scope-name/my-design-system-form
 
 publish_libs:
 	$(LERNA_PUBLISH)
 
 dev_react:
-	yarn --cwd packages/demo-nextjs dev_react
+	$(LERNA_RUN) --scope={@authdog/web-sdk,@authdog/demo-nextjs} dev_react
 
 # TODO
 build_react:
-	export STAGE=local && $(LERNA_RUN) build_react --scope={@authdog/web-sdk,@authdog/demo-nextjs} --stream
+	export stage=prod && $(LERNA_RUN) build_react --scope={@authdog/web-sdk,@authdog/demo-nextjs} --stream
 
 install:
 	yarn install && \

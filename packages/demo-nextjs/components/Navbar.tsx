@@ -13,6 +13,7 @@ import {
 const LOGO_AUTHDOG =
   'https://res.cloudinary.com/authdog/image/upload/v1632157556/Web/images/corporate/Authdog_Full-Colour_lf2qex.svg';
 
+// @ts-ignore
 import {logout} from '@authdog/web-sdk'
 
 interface INavbar {

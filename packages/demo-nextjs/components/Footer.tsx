@@ -1,5 +1,3 @@
-import { Divider } from '@chakra-ui/react';
-
 export const Footer = () => {
   return (
     <div

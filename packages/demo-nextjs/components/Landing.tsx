@@ -4,6 +4,7 @@ import { Navbar } from './Navbar';
 import { AppContent } from './AppContent';
 
 import getConfig from "next/config";
+// @ts-ignore
 import { fetchUserInfos, initializeSession } from '@authdog/web-sdk';
 const { publicRuntimeConfig = {} } = getConfig() || {};
 const { ['TENANT_URI']: tenantUri, ['SIGNIN_URI']: signinUri } =
@@ -21,7 +22,7 @@ export const Landing = () => {
         applicationUuid,
         Authorization,
         tenantUri,
-      }).then((user) => {
+      }).then((user: any) => {
         if (user) {
           setUserInfos(user);
         }

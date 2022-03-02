@@ -1,7 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-      "baseUrl": ".",
+      "baseUrl": "./packages",
       "allowJs": true,
       "allowSyntheticDefaultImports": true,
       "esModuleInterop": true,
@@ -26,7 +26,7 @@
       "lib": ["dom", "es2017"],
       "strict": true,
       "paths": {
-        "@authdog/web-sdk": ["../web-sdk/dist/index.js"],
+        "@authdog/web-sdk": ["./web-sdk/dist/src/index.js"],
       }
     },
   "exclude": ["node_modules", "**/*.spec.ts"]
