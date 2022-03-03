@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev_react": "next dev",
+    "dev_react": "export STAGE=local && next dev",
     "build_react": "next build && next export",
     "start": "next start",
     "lint": "next lint",
