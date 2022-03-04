@@ -6,6 +6,8 @@ import { AppContent } from './AppContent';
 import getConfig from "next/config";
 // @ts-ignore
 import { fetchUserInfos, initializeSession } from '@authdog/web-sdk';
+import { Divider, Link } from '@chakra-ui/react';
+import { ExternalLinkIcon } from '@chakra-ui/icons';
 const { publicRuntimeConfig = {} } = getConfig() || {};
 const { ['TENANT_URI']: tenantUri, ['SIGNIN_URI']: signinUri } =
   publicRuntimeConfig;
@@ -39,7 +41,7 @@ export const Landing = () => {
       <Navbar signinUri={signinUri} user={userInfos} />
       <br />
       {isFetching && (
-        <div>Loading...</div>
+        <div style={{ minHeight: '65vh' }}>Loading...</div>
       )}
 
       {userInfos && (
@@ -55,8 +57,16 @@ export const Landing = () => {
           </p>
 
           To display user information, you need to be authenticated. Click on Sign In button to authenticate.
+
         </div>
       )}
+
+      <Divider />
+      <br />
+       
+      <Link href='https://github.com/authdog/sdk/tree/master/packages/demo-nextjs' isExternal>
+      Source code: <ExternalLinkIcon mx='2px' />
+      </Link>
 
     </Layout>
   );
