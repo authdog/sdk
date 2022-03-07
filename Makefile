@@ -18,7 +18,7 @@ DEMO_NEXTJS_SITE_ID := "0862262d-87e4-4b2c-a9cf-16ba26570352"
 build_libs:
 	$(LERNA_RUN) tsc
 
-publish_libs:
+publish_libs: build_libs
 	$(LERNA_PUBLISH)
 
 dev_react:
