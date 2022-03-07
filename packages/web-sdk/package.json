@@ -10,7 +10,7 @@
     "security",
     "oauth2"
   ],
-  "author": "David Barrat <david@barrat.io>",
+  "author": "David Barrat <david@authdog.com>",
   "homepage": "https://www.authdog.com",
   "license": "MIT",
   "main": "dist/index.js",
