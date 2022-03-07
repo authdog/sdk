@@ -30,8 +30,5 @@
   "bugs": {
     "url": "https://github.com/authdog/sdk/issues"
   },
-  "gitHead": "5c7228f833a4bed70db36410e707c7bfdccd1a57",
-  "dependencies": {
-    "@authdog/demo-nextjs": "^0.1.1"
-  }
+  "gitHead": "5c7228f833a4bed70db36410e707c7bfdccd1a57"
 }
