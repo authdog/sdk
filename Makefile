@@ -22,7 +22,7 @@ publish_libs:
 	$(LERNA_PUBLISH)
 
 dev_react:
-	$(LERNA_RUN) --scope={@authdog/web-sdk,@authdog/demo-nextjs} dev_react
+	$(LERNA_RUN) --scope={@authdog/web-sdk,@authdog/demo-nextjs} dev_react --stream
 
 build_react_demo:
 	export STAGE=prod && $(LERNA_RUN) build_react --scope={@authdog/web-sdk,@authdog/demo-nextjs} --stream
