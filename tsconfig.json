@@ -10,7 +10,7 @@
       "jsx": "preserve",
       "module": "esnext",
       "moduleResolution": "node",
-      "noEmit": true,
+      "noEmit": false,
       "noImplicitAny": true,
       "noImplicitReturns": true,
       "noImplicitThis": true,
@@ -24,10 +24,7 @@
       "target": "es5",
       "downlevelIteration": true,
       "lib": ["dom", "es2017"],
-      "strict": true,
-      "paths": {
-        "@authdog/web-sdk": ["./web-sdk/dist/src/index.js"],
-      }
+      "strict": true
     },
   "exclude": ["node_modules", "**/*.spec.ts"]
 }
