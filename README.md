@@ -1,4 +1,4 @@
-Authdog SDK
+# Authdog SDK
 
 This repository contains sdk libraries (web, native, mobile etc...) to interact with Authdog APIs/services.
 
