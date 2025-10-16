@@ -1,0 +1,121 @@
+name: Node.js SDK Tests
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'node/**'
+  #     - '.github/workflows/node-test.yml'
+  # pull_request:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'node/**'
+  #     - '.github/workflows/node-test.yml'
+
+env:
+  NODE_VERSION: "18"
+
+jobs:
+  test:
+    name: Test Node.js SDK
+    runs-on: ubuntu-20.04
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["16", "18", "20"]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: node/package-lock.json
+
+    - name: Install dependencies
+      run: |
+        cd node
+        npm ci
+
+    - name: Run linting
+      run: |
+        cd node
+        npm run lint
+
+    - name: Run tests
+      run: |
+        cd node
+        npm test
+
+    - name: Build TypeScript
+      run: |
+        cd node
+        npm run build
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: node-test-results-${{ matrix.node-version }}
+        path: node/coverage/
+
+  # security:
+  #   name: Security Audit
+  #   runs-on: ubuntu-20.04
+  #   
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
+
+  #   - name: Set up Node.js
+  #     uses: actions/setup-node@v4
+  #     with:
+  #       node-version: "18"
+  #       cache: 'npm'
+  #       cache-dependency-path: node/package-lock.json
+
+  #   - name: Install dependencies
+  #     run: |
+  #       cd node
+  #       npm ci
+
+  #   - name: Run security audit
+  #     run: |
+  #       cd node
+  #       npm audit --audit-level moderate
+
+  # build:
+  #   name: Build Node.js Package
+  #   runs-on: ubuntu-20.04
+  #   
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
+
+  #   - name: Set up Node.js
+  #     uses: actions/setup-node@v4
+  #     with:
+  #       node-version: "18"
+  #       cache: 'npm'
+  #       cache-dependency-path: node/package-lock.json
+
+  #   - name: Install dependencies
+  #     run: |
+  #       cd node
+  #       npm ci
+
+  #   - name: Build package
+  #     run: |
+  #       cd node
+  #       npm run build
+
+  #   - name: Upload build artifacts
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: node-dist
+  #       path: node/dist/

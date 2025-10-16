@@ -1,0 +1,92 @@
+name: Python SDK Tests
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'python/**'
+  #     - '.github/workflows/python-test.yml'
+  # pull_request:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'python/**'
+  #     - '.github/workflows/python-test.yml'
+
+env:
+  PYTHON_VERSION: "3.9"
+
+jobs:
+  test:
+    name: Test Python SDK
+    runs-on: ubuntu-20.04
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        cd python
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+
+    - name: Run linting
+      run: |
+        cd python
+        pip install flake8
+        flake8 authdog/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 authdog/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Run tests
+      run: |
+        cd python
+        python -m pytest --cov=authdog --cov-report=xml --cov-report=term-missing
+
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: python-coverage-${{ matrix.python-version }}
+        path: python/coverage.xml
+
+  # build:
+  #   name: Build Python Package
+  #   runs-on: ubuntu-20.04
+  #   
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
+
+  #   - name: Set up Python
+  #     uses: actions/setup-python@v4
+  #     with:
+  #       python-version: "3.9"
+
+  #   - name: Install build dependencies
+  #     run: |
+  #       cd python
+  #       python -m pip install --upgrade pip
+  #       pip install build twine
+
+  #   - name: Build package
+  #     run: |
+  #       cd python
+  #       python -m build
+
+  #   - name: Upload build artifacts
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: python-dist
+  #       path: python/dist/
