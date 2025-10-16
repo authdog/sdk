@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Authdog.Sdk</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Authdog Team</Authors>
+    <Company>Authdog</Company>
+    <Product>Authdog SDK</Product>
+    <Description>Official C# SDK for Authdog authentication and user management platform</Description>
+    <Copyright>Copyright © Authdog 2024</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/authdog/sdk</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/authdog/sdk</RepositoryUrl>
+    <PackageTags>authdog;authentication;oauth;user-management</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

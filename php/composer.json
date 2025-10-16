@@ -1,0 +1,40 @@
+{
+    "name": "authdog/php-sdk",
+    "description": "Official PHP SDK for Authdog authentication and user management platform",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["authdog", "authentication", "oauth", "user-management"],
+    "authors": [
+        {
+            "name": "Authdog Team",
+            "email": "support@authdog.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0",
+        "phpstan/phpstan": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Authdog\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Authdog\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyze": "phpstan analyse src --level=7"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
