@@ -73,12 +73,12 @@ jobs:
     #   run: |
     #     choco install cmake ninja pkgconfiglite curl openssl
 
-    - name: Set up compiler (Ubuntu GCC)
-      if: matrix.os == 'ubuntu-20.04' && matrix.compiler == 'gcc'
-      run: |
-        sudo apt-get install -y gcc-${{ matrix.compiler_version }} g++-${{ matrix.compiler_version }}
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ matrix.compiler_version }} 100
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${{ matrix.compiler_version }} 100
+    # - name: Set up compiler (Ubuntu GCC)
+    #   if: matrix.os == 'ubuntu-20.04' && matrix.compiler == 'gcc'
+    #   run: |
+    #     sudo apt-get install -y gcc-${{ matrix.compiler_version }} g++-${{ matrix.compiler_version }}
+    #     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ matrix.compiler_version }} 100
+    #     sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${{ matrix.compiler_version }} 100
 
     # - name: Set up compiler (Ubuntu Clang)
     #   if: matrix.os == 'ubuntu-latest' && matrix.compiler == 'clang'
