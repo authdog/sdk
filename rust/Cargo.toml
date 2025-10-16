@@ -1,0 +1,23 @@
+[package]
+name = "authdog"
+version = "0.1.0"
+edition = "2021"
+authors = ["Authdog <support@authdog.com>"]
+description = "Rust SDK for Authdog authentication and user management"
+license = "MIT"
+repository = "https://github.com/authdog/sdk"
+homepage = "https://github.com/authdog/sdk"
+keywords = ["authdog", "authentication", "user-management", "sdk"]
+categories = ["authentication", "web-programming::http-client"]
+
+[dependencies]
+reqwest = { version = "0.11", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+
+[dev-dependencies]
+tokio-test = "0.4"
+
+[features]
+default = []
