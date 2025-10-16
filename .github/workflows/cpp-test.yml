@@ -1,0 +1,487 @@
+name: C++ SDK Tests
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'cpp/**'
+  #     - '.github/workflows/cpp-test.yml'
+  # pull_request:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'cpp/**'
+  #     - '.github/workflows/cpp-test.yml'
+  # schedule:
+    # Run tests daily at 2 AM UTC
+    # - cron: '0 2 * * *'
+
+env:
+  # Build type
+  BUILD_TYPE: Release
+  
+  # Test timeout
+  TEST_TIMEOUT: 300
+
+jobs:
+  test:
+    name: Test C++ SDK
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        compiler: 
+          - gcc
+          - clang
+        include:
+          - os: ubuntu-latest
+            compiler: gcc
+            compiler_version: "11"
+          - os: ubuntu-latest
+            compiler: clang
+            compiler_version: "14"
+          - os: windows-latest
+            compiler: msvc
+            compiler_version: "latest"
+          - os: macos-latest
+            compiler: clang
+            compiler_version: "latest"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Set up environment variables
+      run: |
+        echo "COMPILER=${{ matrix.compiler }}" >> $GITHUB_ENV
+        echo "COMPILER_VERSION=${{ matrix.compiler_version }}" >> $GITHUB_ENV
+        echo "BUILD_DIR=build-${{ matrix.compiler }}" >> $GITHUB_ENV
+
+    - name: Install dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          ninja-build \
+          libcurl4-openssl-dev \
+          libssl-dev \
+          pkg-config \
+          valgrind \
+          gcovr \
+          lcov
+
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install cmake ninja pkg-config curl openssl
+
+    - name: Install dependencies (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        choco install cmake ninja pkgconfiglite curl openssl
+
+    - name: Set up compiler (Ubuntu GCC)
+      if: matrix.os == 'ubuntu-latest' && matrix.compiler == 'gcc'
+      run: |
+        sudo apt-get install -y gcc-${{ matrix.compiler_version }} g++-${{ matrix.compiler_version }}
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ matrix.compiler_version }} 100
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${{ matrix.compiler_version }} 100
+
+    - name: Set up compiler (Ubuntu Clang)
+      if: matrix.os == 'ubuntu-latest' && matrix.compiler == 'clang'
+      run: |
+        sudo apt-get install -y clang-${{ matrix.compiler_version }} clang++-${{ matrix.compiler_version }}
+        sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-${{ matrix.compiler_version }} 100
+        sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-${{ matrix.compiler_version }} 100
+
+    - name: Configure CMake
+      run: |
+        cd cpp
+        cmake -B ${{ env.BUILD_DIR }} \
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+          -DCMAKE_CXX_COMPILER=${{ matrix.compiler == 'gcc' && 'g++' || (matrix.compiler == 'clang' && 'clang++') || 'cl' }} \
+          -DCMAKE_C_COMPILER=${{ matrix.compiler == 'gcc' && 'gcc' || (matrix.compiler == 'clang' && 'clang') || 'cl' }} \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -DCMAKE_VERBOSE_MAKEFILE=ON \
+          -DAUTHDOG_BUILD_TESTS=ON \
+          -DAUTHDOG_BUILD_EXAMPLES=ON \
+          -DAUTHDOG_ENABLE_COVERAGE=${{ matrix.compiler == 'gcc' && 'ON' || 'OFF' }} \
+          -DAUTHDOG_ENABLE_SANITIZERS=ON \
+          -DAUTHDOG_ENABLE_VALGRIND=${{ matrix.os == 'ubuntu-latest' && 'ON' || 'OFF' }}
+
+    - name: Build
+      run: |
+        cd cpp
+        cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} --parallel
+
+    - name: Run tests
+      run: |
+        cd cpp
+        ctest --test-dir ${{ env.BUILD_DIR }} \
+          --output-on-failure \
+          --timeout ${{ env.TEST_TIMEOUT }} \
+          --parallel \
+          --schedule-random
+
+    - name: Run tests with Valgrind (Ubuntu only)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        cd cpp
+        ctest --test-dir ${{ env.BUILD_DIR }} \
+          --output-on-failure \
+          --timeout ${{ env.TEST_TIMEOUT }} \
+          --parallel \
+          --schedule-random \
+          --test-command valgrind \
+          --test-args "--leak-check=full --error-exitcode=1"
+
+    - name: Generate coverage report (GCC only)
+      if: matrix.os == 'ubuntu-latest' && matrix.compiler == 'gcc'
+      run: |
+        cd cpp
+        # Generate coverage data
+        ctest --test-dir ${{ env.BUILD_DIR }} --output-on-failure
+        
+        # Generate coverage report
+        gcovr --root . \
+          --filter "src/.*" \
+          --exclude "tests/.*" \
+          --exclude "examples/.*" \
+          --html \
+          --html-details \
+          --output ${{ env.BUILD_DIR }}/coverage.html \
+          --xml \
+          --xml-pretty \
+          --output ${{ env.BUILD_DIR }}/coverage.xml
+
+    - name: Upload coverage reports
+      if: matrix.os == 'ubuntu-latest' && matrix.compiler == 'gcc'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report-${{ matrix.compiler }}-${{ matrix.compiler_version }}
+        path: cpp/${{ env.BUILD_DIR }}/coverage.*
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.compiler_version }}
+        path: cpp/${{ env.BUILD_DIR }}/Testing/
+
+    - name: Upload build logs
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: build-logs-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.compiler_version }}
+        path: cpp/${{ env.BUILD_DIR }}/
+
+  lint:
+    name: Lint C++ Code
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang-format \
+          clang-tidy \
+          cppcheck \
+          cpplint
+
+    - name: Run clang-format check
+      run: |
+        cd cpp
+        find src include examples tests -name "*.cpp" -o -name "*.h" | \
+        xargs clang-format --dry-run --Werror
+
+    - name: Run clang-tidy
+      run: |
+        cd cpp
+        find src include examples tests -name "*.cpp" | \
+        xargs clang-tidy -p ${{ env.BUILD_DIR }} \
+          --checks=*,-llvm-header-guard,-modernize-use-trailing-return-type
+
+    - name: Run cppcheck
+      run: |
+        cd cpp
+        cppcheck --enable=all \
+          --inconclusive \
+          --std=c++17 \
+          --suppress=missingIncludeSystem \
+          --suppress=unusedFunction \
+          --suppress=unmatchedSuppression \
+          src/ include/ examples/ tests/
+
+    - name: Run cpplint
+      run: |
+        cd cpp
+        find src include examples tests -name "*.cpp" -o -name "*.h" | \
+        xargs cpplint --filter=-build/include,-build/namespaces,-build/header_guard
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          ninja-build \
+          libcurl4-openssl-dev \
+          libssl-dev \
+          pkg-config
+
+    - name: Build for security scan
+      run: |
+        cd cpp
+        cmake -B build-security \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -DAUTHDOG_BUILD_TESTS=ON \
+          -DAUTHDOG_BUILD_EXAMPLES=ON
+        cmake --build build-security --parallel
+
+    - name: Run security scan with CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: cpp
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+
+  performance:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          ninja-build \
+          libcurl4-openssl-dev \
+          libssl-dev \
+          pkg-config \
+          google-perftools
+
+    - name: Build for performance testing
+      run: |
+        cd cpp
+        cmake -B build-perf \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -DAUTHDOG_BUILD_TESTS=ON \
+          -DAUTHDOG_BUILD_EXAMPLES=ON \
+          -DAUTHDOG_ENABLE_PROFILING=ON
+        cmake --build build-perf --parallel
+
+    - name: Run performance tests
+      run: |
+        cd cpp
+        ctest --test-dir build-perf \
+          --output-on-failure \
+          --timeout 600 \
+          --parallel \
+          --schedule-random \
+          --test-command perf \
+          --test-args "stat -e cycles,instructions,cache-misses,branch-misses"
+
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-results
+        path: cpp/build-perf/Testing/
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          ninja-build \
+          libcurl4-openssl-dev \
+          libssl-dev \
+          pkg-config \
+          python3 \
+          python3-pip
+
+    - name: Install Python dependencies
+      run: |
+        pip3 install requests flask
+
+    - name: Start mock server
+      run: |
+        cd cpp
+        python3 -c "
+        from flask import Flask, jsonify, request
+        import time
+        
+        app = Flask(__name__)
+        
+        @app.route('/v1/userinfo', methods=['GET'])
+        def userinfo():
+            auth = request.headers.get('Authorization', '')
+            if not auth.startswith('Bearer '):
+                return jsonify({'error': 'Unauthorized'}), 401
+            
+            token = auth[7:]
+            if token == 'valid-token':
+                return jsonify({
+                    'meta': {'code': 200, 'message': 'OK'},
+                    'session': {'remainingSeconds': 3600},
+                    'user': {
+                        'id': 'user-123',
+                        'externalId': 'ext-123',
+                        'userName': 'testuser',
+                        'displayName': 'Test User',
+                        'nickName': 'test',
+                        'profileUrl': 'https://example.com/profile',
+                        'title': 'Developer',
+                        'userType': 'user',
+                        'preferredLanguage': 'en',
+                        'locale': 'en-US',
+                        'timezone': 'UTC',
+                        'active': True,
+                        'names': {
+                            'id': 'name-123',
+                            'formatted': 'Test User',
+                            'familyName': 'User',
+                            'givenName': 'Test',
+                            'middleName': null,
+                            'honorificPrefix': null,
+                            'honorificSuffix': null
+                        },
+                        'photos': [],
+                        'phoneNumbers': [],
+                        'addresses': [],
+                        'emails': [{
+                            'id': 'email-123',
+                            'value': 'test@example.com',
+                            'type': 'work'
+                        }],
+                        'verifications': [],
+                        'provider': 'test',
+                        'createdAt': '2023-01-01T00:00:00Z',
+                        'updatedAt': '2023-01-01T00:00:00Z',
+                        'environmentId': 'env-123'
+                    }
+                })
+            else:
+                return jsonify({'error': 'Unauthorized - invalid or expired token'}), 401
+        
+        @app.route('/delay/<int:seconds>')
+        def delay(seconds):
+            time.sleep(seconds)
+            return jsonify({'message': 'Delayed response'})
+        
+        app.run(host='0.0.0.0', port=8080, debug=False)
+        " &
+        sleep 5
+
+    - name: Build for integration testing
+      run: |
+        cd cpp
+        cmake -B build-integration \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -DAUTHDOG_BUILD_TESTS=ON \
+          -DAUTHDOG_BUILD_EXAMPLES=ON \
+          -DAUTHDOG_MOCK_SERVER_URL=http://localhost:8080
+        cmake --build build-integration --parallel
+
+    - name: Run integration tests
+      run: |
+        cd cpp
+        ctest --test-dir build-integration \
+          --output-on-failure \
+          --timeout 300 \
+          --parallel \
+          --schedule-random
+
+    - name: Stop mock server
+      run: |
+        pkill -f "python3 -c"
+
+  documentation:
+    name: Documentation Build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          ninja-build \
+          libcurl4-openssl-dev \
+          libssl-dev \
+          pkg-config \
+          doxygen \
+          graphviz
+
+    - name: Build documentation
+      run: |
+        cd cpp
+        cmake -B build-docs \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -DAUTHDOG_BUILD_DOCS=ON
+        cmake --build build-docs --parallel
+
+    - name: Upload documentation
+      uses: actions/upload-artifact@v4
+      with:
+        name: cpp-documentation
+        path: cpp/build-docs/docs/
+
+  notify:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: [test, lint, security, performance, integration, documentation]
+    if: always()
+    
+    steps:
+    - name: Notify on success
+      if: ${{ needs.test.result == 'success' && needs.lint.result == 'success' && needs.security.result == 'success' }}
+      run: |
+        echo "All C++ SDK tests passed successfully!"
+        
+    - name: Notify on failure
+      if: ${{ needs.test.result == 'failure' || needs.lint.result == 'failure' || needs.security.result == 'failure' }}
+      run: |
+        echo "C++ SDK tests failed!"
+        exit 1

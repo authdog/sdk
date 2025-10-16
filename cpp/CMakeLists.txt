@@ -4,10 +4,28 @@ project(AuthdogCppSdk VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Build options
+option(AUTHDOG_BUILD_TESTS "Build tests" ON)
+option(AUTHDOG_BUILD_EXAMPLES "Build examples" ON)
+option(AUTHDOG_BUILD_DOCS "Build documentation" OFF)
+option(AUTHDOG_ENABLE_COVERAGE "Enable coverage reporting" OFF)
+option(AUTHDOG_ENABLE_SANITIZERS "Enable sanitizers" OFF)
+option(AUTHDOG_ENABLE_PROFILING "Enable profiling" OFF)
+option(AUTHDOG_ENABLE_VALGRIND "Enable Valgrind support" OFF)
+
 # Find required packages
 find_package(nlohmann_json REQUIRED)
 find_package(cpr REQUIRED)
 find_package(Threads REQUIRED)
+
+# Find optional packages
+if(AUTHDOG_BUILD_TESTS)
+    find_package(GTest REQUIRED)
+endif()
+
+if(AUTHDOG_BUILD_DOCS)
+    find_package(Doxygen REQUIRED)
+endif()
 
 # Include directories
 include_directories(include)
@@ -48,6 +66,33 @@ target_compile_options(authdog_cpp_sdk PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
 )
 
+# Coverage options
+if(AUTHDOG_ENABLE_COVERAGE)
+    target_compile_options(authdog_cpp_sdk PRIVATE --coverage)
+    target_link_options(authdog_cpp_sdk PRIVATE --coverage)
+endif()
+
+# Sanitizer options
+if(AUTHDOG_ENABLE_SANITIZERS)
+    target_compile_options(authdog_cpp_sdk PRIVATE
+        -fsanitize=address
+        -fsanitize=undefined
+        -fsanitize=leak
+        -fno-omit-frame-pointer
+    )
+    target_link_options(authdog_cpp_sdk PRIVATE
+        -fsanitize=address
+        -fsanitize=undefined
+        -fsanitize=leak
+    )
+endif()
+
+# Profiling options
+if(AUTHDOG_ENABLE_PROFILING)
+    target_compile_options(authdog_cpp_sdk PRIVATE -pg)
+    target_link_options(authdog_cpp_sdk PRIVATE -pg)
+endif()
+
 # Install targets
 install(TARGETS authdog_cpp_sdk
     EXPORT AuthdogCppSdkTargets
@@ -62,12 +107,35 @@ install(FILES ${HEADERS}
 )
 
 # Create example executable
-add_executable(authdog_example examples/main.cpp)
-target_link_libraries(authdog_example authdog_cpp_sdk)
+if(AUTHDOG_BUILD_EXAMPLES)
+    add_executable(authdog_example examples/main.cpp)
+    target_link_libraries(authdog_example authdog_cpp_sdk)
+endif()
 
 # Tests
-enable_testing()
-add_subdirectory(tests)
+if(AUTHDOG_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+# Documentation
+if(AUTHDOG_BUILD_DOCS)
+    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+    
+    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+    
+    add_custom_target(docs
+        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM
+    )
+    
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs/
+        DESTINATION docs
+    )
+endif()
 
 # Package configuration
 include(CMakePackageConfigHelpers)
