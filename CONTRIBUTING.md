@@ -35,6 +35,16 @@ This repository contains multiple SDK implementations in different programming l
 - **Go SDK** (`/go/`)
 - **Kotlin SDK** (`/kotlin/`)
 - **Rust SDK** (`/rust/`)
+- **PHP SDK** (`/php/`)
+- **C# SDK** (`/csharp/`)
+- **C++ SDK** (`/cpp/`)
+- **Elixir SDK** (`/elixir/`)
+- **Java SDK** (`/java/`)
+- **Scala SDK** (`/scala/`)
+- **Common Lisp SDK** (`/commonlisp/`)
+- **Clojure SDK** (`/clojure/`)
+- **Swift SDK** (`/swift/`)
+- **Zig SDK** (`/zig/`)
 
 Each SDK has its own development setup. Please refer to the individual README files in each language directory for specific setup instructions.
 
@@ -111,6 +121,111 @@ Use descriptive branch names with prefixes:
 - Maintain compatibility with Rust 1.60+
 - Use proper error handling with `Result` types
 
+### PHP SDK
+
+- Follow PSR-12 coding standards
+- Use PHPStan for static analysis
+- Write tests using PHPUnit
+- Maintain compatibility with PHP 7.4+
+- Use proper type hints and PHPDoc comments
+- Follow PSR-4 autoloading standards
+
+### C# SDK
+
+- Follow Microsoft C# coding conventions
+- Use nullable reference types
+- Write tests using xUnit or NUnit
+- Maintain compatibility with .NET 6.0+
+- Use proper async/await patterns
+- Follow SOLID principles
+
+### C++ SDK
+
+- Follow Google C++ Style Guide
+- Use `clang-format` for formatting
+- Use `clang-tidy` for static analysis
+- Write tests using Google Test
+- Maintain compatibility with C++17+
+- Use RAII and smart pointers
+- Prefer `const` wherever possible
+
+### Elixir SDK
+
+- Follow Elixir Style Guide
+- Use `mix format` for formatting
+- Write tests using ExUnit
+- Maintain compatibility with Elixir 1.12+
+- Use proper pattern matching
+- Follow functional programming principles
+- Use `Credo` for code quality
+
+### Java SDK
+
+- Follow Google Java Style Guide
+- Use `google-java-format` for formatting
+- Use `SpotBugs` for static analysis
+- Write tests using JUnit 5
+- Maintain compatibility with Java 11+
+- Use `final` wherever possible
+- Prefer immutable objects
+
+### Scala SDK
+
+- Follow Scala Style Guide
+- Use `scalafmt` for formatting
+- Use `scalastyle` for style checking
+- Write tests using ScalaTest
+- Maintain compatibility with Scala 2.13+
+- Use `val` wherever possible
+- Prefer immutable data structures
+
+### Common Lisp SDK
+
+- Follow Common Lisp Style Guide
+- Use `cl-format` for formatting
+- Use meaningful variable and function names
+- Write tests using FiveAM
+- Maintain compatibility with ANSI Common Lisp
+- Use `defclass` for data structures
+- Use `handler-case` for error handling
+- Prefer `let` over `setf` for local bindings
+
+### Clojure SDK
+
+- Follow Clojure Style Guide
+- Use `cljfmt` for formatting
+- Use meaningful function and variable names
+- Write tests using Midje or clojure.test
+- Maintain compatibility with Clojure 1.11+
+- Use `defn` for functions
+- Use `try-catch` for error handling
+- Prefer `let` over `def` for local bindings
+- Use `->` and `->>` for threading
+
+### Swift SDK
+
+- Follow Swift API Design Guidelines
+- Use `swiftformat` for formatting
+- Use `swiftlint` for linting
+- Use meaningful variable and function names
+- Write tests using XCTest
+- Maintain compatibility with Swift 5.9+
+- Use `struct` for data models
+- Use `async/await` for asynchronous operations
+- Prefer `let` over `var` for immutable values
+
+### Zig SDK
+
+- Follow Zig Style Guide
+- Use `zig fmt` for formatting
+- Use meaningful variable and function names
+- Write tests using Zig's built-in testing framework
+- Maintain compatibility with Zig 0.11+
+- Use `const` for immutable values
+- Use `var` for mutable values
+- Use error unions for error handling
+- Prefer `comptime` when possible
+
 ## Testing
 
 ### Test Requirements
@@ -139,6 +254,36 @@ cd kotlin && ./gradlew test
 
 # Rust
 cd rust && cargo test
+
+# PHP
+cd php && composer test
+
+# C#
+cd csharp && dotnet test
+
+# C++
+cd cpp && mkdir build && cd build && cmake .. && make && ctest
+
+# Elixir
+cd elixir && mix test
+
+# Java
+cd java && mvn test
+
+# Scala
+cd scala && sbt test
+
+# Common Lisp
+cd commonlisp && asdf:test-system :authdog
+
+# Clojure
+cd clojure && lein test
+
+# Swift
+cd swift && swift test
+
+# Zig
+cd zig && zig build test
 ```
 
 ## Pull Request Process
