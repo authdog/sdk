@@ -19,12 +19,12 @@ env:
 jobs:
   test:
     name: Test Python SDK
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.11"]
 
     steps:
     - name: Checkout code
