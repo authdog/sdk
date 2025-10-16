@@ -14,13 +14,44 @@ option(AUTHDOG_ENABLE_PROFILING "Enable profiling" OFF)
 option(AUTHDOG_ENABLE_VALGRIND "Enable Valgrind support" OFF)
 
 # Find required packages
-find_package(nlohmann_json REQUIRED)
-find_package(cpr REQUIRED)
 find_package(Threads REQUIRED)
+
+# Fetch nlohmann_json if not found
+find_package(nlohmann_json QUIET)
+if(NOT nlohmann_json_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.11.2
+    )
+    FetchContent_MakeAvailable(nlohmann_json)
+endif()
+
+# Fetch CPR if not found
+find_package(cpr QUIET)
+if(NOT cpr_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        cpr
+        GIT_REPOSITORY https://github.com/libcpr/cpr.git
+        GIT_TAG 1.10.4
+    )
+    FetchContent_MakeAvailable(cpr)
+endif()
 
 # Find optional packages
 if(AUTHDOG_BUILD_TESTS)
-    find_package(GTest REQUIRED)
+    find_package(GTest QUIET)
+    if(NOT GTest_FOUND)
+        include(FetchContent)
+        FetchContent_Declare(
+            googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG v1.14.0
+        )
+        FetchContent_MakeAvailable(googletest)
+    endif()
 endif()
 
 if(AUTHDOG_BUILD_DOCS)

@@ -1,14 +1,25 @@
+# Find GTest (already fetched in main CMakeLists.txt)
 find_package(GTest REQUIRED)
 
 add_executable(authdog_tests
     test_authdog_client.cpp
 )
 
-target_link_libraries(authdog_tests
-    authdog_cpp_sdk
-    GTest::gtest
-    GTest::gtest_main
-)
+# Link with GTest targets
+if(TARGET GTest::gtest)
+    target_link_libraries(authdog_tests
+        authdog_cpp_sdk
+        GTest::gtest
+        GTest::gtest_main
+    )
+else()
+    # Fallback for FetchContent
+    target_link_libraries(authdog_tests
+        authdog_cpp_sdk
+        gtest
+        gtest_main
+    )
+endif()
 
 # Coverage options for tests
 if(AUTHDOG_ENABLE_COVERAGE)

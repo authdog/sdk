@@ -160,21 +160,11 @@ analyze:
 # Dependencies target
 deps:
 	@echo "Installing dependencies..."
-	@if command -v apt-get >/dev/null 2>&1; then \
-		sudo apt-get update && sudo apt-get install -y \
-			build-essential cmake ninja-build \
-			libcurl4-openssl-dev libssl-dev pkg-config \
-			libgtest-dev valgrind gcovr lcov \
-			clang-format clang-tidy cppcheck; \
-	elif command -v brew >/dev/null 2>&1; then \
-		brew install cmake ninja pkg-config curl openssl gtest valgrind gcovr lcov \
-			clang-format clang-tidy cppcheck; \
-	elif command -v pacman >/dev/null 2>&1; then \
-		sudo pacman -S --needed base-devel cmake ninja pkg-config curl openssl \
-			gtest valgrind gcovr lcov clang clang-tools-extra cppcheck; \
-	else \
-		echo "Package manager not supported. Please install dependencies manually."; \
-	fi
+	@./scripts/install_deps.sh
+
+deps-full:
+	@echo "Installing all dependencies..."
+	@./scripts/install_deps.sh --full
 
 # Help target
 help:
@@ -202,7 +192,8 @@ help:
 	@echo "  lint             - Run clang-format check"
 	@echo "  format           - Format code with clang-format"
 	@echo "  analyze          - Run static analysis"
-	@echo "  deps             - Install dependencies"
+	@echo "  deps             - Install basic dependencies"
+	@echo "  deps-full        - Install all dependencies"
 	@echo "  help             - Show this help message"
 	@echo ""
 	@echo "Environment variables:"
