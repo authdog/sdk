@@ -31,7 +31,7 @@ pub fn build(b: *std.Build) void {
     } else {
         // Zig 0.11.0 and earlier - use addModule
         const authdog_module = b.addModule("authdog", .{
-            .source_file = .{ .path = "src/lib.zig" },
+            .root_source_file = .{ .path = "src/lib.zig" },
         });
         exe.addModule("authdog", authdog_module);
     }
@@ -52,7 +52,7 @@ pub fn build(b: *std.Build) void {
     } else {
         // Zig 0.11.0 and earlier - use addModule
         const authdog_module = b.addModule("authdog", .{
-            .source_file = .{ .path = "src/lib.zig" },
+            .root_source_file = .{ .path = "src/lib.zig" },
         });
         tests.addModule("authdog", authdog_module);
     }
