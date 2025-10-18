@@ -56,7 +56,9 @@ jobs:
         run: sbt test
 
       - name: Run scalastyle
-        run: sbt scalastyle
+        run: |
+          curl -L -o scalastyle.jar https://github.com/scalastyle/scalastyle/releases/download/1.5.0/scalastyle_2.12-1.5.0-batch.jar
+          java -jar scalastyle.jar --config scalastyle-config.xml src
 
       - name: Compile sources
         run: sbt compile
