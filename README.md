@@ -3,6 +3,7 @@
 Official SDKs for Authdog authentication and user management platform.
 
 [![Python SDK Tests](https://github.com/authdog/sdk/actions/workflows/python-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/python-test.yml)
+[![Node.js SDK Tests](https://github.com/authdog/sdk/actions/workflows/node-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/node-test.yml)
 
 ## Available SDKs
 
