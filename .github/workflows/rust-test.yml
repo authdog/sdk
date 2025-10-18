@@ -56,7 +56,7 @@ jobs:
     - name: Cache cargo build
       uses: actions/cache@v4
       with:
-        path: target
+        path: rust/target
         key: ${{ runner.os }}-cargo-build-${{ matrix.rust-version }}-${{ hashFiles('rust/Cargo.toml') }}
         restore-keys: |
           ${{ runner.os }}-cargo-build-${{ matrix.rust-version }}-
@@ -80,13 +80,6 @@ jobs:
       run: |
         cd rust
         cargo doc --no-deps --document-private-items
-
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: test-results-rust-${{ matrix.rust-version }}
-        path: rust/target/test-results/
 
     - name: Upload build logs
       uses: actions/upload-artifact@v4
