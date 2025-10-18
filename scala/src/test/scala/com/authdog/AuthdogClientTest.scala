@@ -1,6 +1,6 @@
 package com.authdog
 
-import com.authdog.exceptions.{ApiException, AuthenticationException}
+import com.authdog.exceptions.ApiException
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.BeforeAndAfterEach
