@@ -562,7 +562,7 @@ test "UserInfoResponse deinit" {
     };
     defer tree.deinit();
 
-    const user_info = client.parseUserInfoResponse(json_str) catch |err| {
+    var user_info = client.parseUserInfoResponse(json_str) catch |err| {
         std.debug.print("Failed to parse user info response: {}\n", .{err});
         return;
     };
