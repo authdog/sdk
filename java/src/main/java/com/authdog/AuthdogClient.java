@@ -66,12 +66,13 @@ public class AuthdogClient implements AutoCloseable {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(url)
                 .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "authdog-java-sdk/0.1.0")
-                .addHeader("Authorization", "Bearer " + accessToken);
+                .addHeader("User-Agent", "authdog-java-sdk/0.1.0");
         
-        // Add API key if provided
+        // Use API key if provided, otherwise use access token
         if (apiKey != null) {
             requestBuilder.addHeader("Authorization", "Bearer " + apiKey);
+        } else {
+            requestBuilder.addHeader("Authorization", "Bearer " + accessToken);
         }
         
         Request request = requestBuilder.build();

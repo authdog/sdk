@@ -1,0 +1,12 @@
+com/authdog/types/Meta.class
+com/authdog/exceptions/ApiException.class
+com/authdog/types/Session.class
+com/authdog/types/UserInfoResponse.class
+com/authdog/types/Verification.class
+com/authdog/types/Names.class
+com/authdog/AuthdogClient.class
+com/authdog/types/Email.class
+com/authdog/types/User.class
+com/authdog/exceptions/AuthenticationException.class
+com/authdog/types/Photo.class
+com/authdog/exceptions/AuthdogException.class

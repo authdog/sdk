@@ -1,0 +1,12 @@
+/home/david/dev/authdog/sdk/java/src/main/java/com/authdog/types/Meta.java
+/home/david/dev/authdog/sdk/java/src/main/java/com/authdog/AuthdogClient.java
+/home/david/dev/authdog/sdk/java/src/main/java/com/authdog/exceptions/ApiException.java
+/home/david/dev/authdog/sdk/java/src/main/java/com/authdog/exceptions/AuthdogException.java
+/home/david/dev/authdog/sdk/java/src/main/java/com/authdog/types/User.java
+/home/david/dev/authdog/sdk/java/src/main/java/com/authdog/types/Session.java
+/home/david/dev/authdog/sdk/java/src/main/java/com/authdog/types/Email.java
+/home/david/dev/authdog/sdk/java/src/main/java/com/authdog/types/Photo.java
+/home/david/dev/authdog/sdk/java/src/main/java/com/authdog/types/Names.java
+/home/david/dev/authdog/sdk/java/src/main/java/com/authdog/exceptions/AuthenticationException.java
+/home/david/dev/authdog/sdk/java/src/main/java/com/authdog/types/UserInfoResponse.java
+/home/david/dev/authdog/sdk/java/src/main/java/com/authdog/types/Verification.java
