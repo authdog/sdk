@@ -1,6 +1,7 @@
 package com.authdog.sdk
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -50,8 +51,8 @@ data class User(
     val active: Boolean,
     val names: Names,
     val photos: List<Photo>,
-    val phoneNumbers: List<Any>,
-    val addresses: List<Any>,
+    val phoneNumbers: List<kotlinx.serialization.json.JsonObject>,
+    val addresses: List<kotlinx.serialization.json.JsonObject>,
     val emails: List<Email>,
     val verifications: List<Verification>,
     val provider: String,
