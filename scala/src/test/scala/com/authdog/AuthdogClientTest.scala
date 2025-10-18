@@ -1,7 +1,6 @@
 package com.authdog
 
 import com.authdog.exceptions.{ApiException, AuthenticationException}
-import com.authdog.types.{UserInfoResponse, Meta, Session, User, Names, Email, Photo, Verification}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.BeforeAndAfterEach
