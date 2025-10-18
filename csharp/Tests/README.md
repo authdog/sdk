@@ -20,7 +20,7 @@ This directory contains comprehensive tests for the Authdog C# SDK.
 ## Running Tests
 
 ### Prerequisites
-- .NET 6.0 SDK or later
+- .NET 7.0 SDK or later
 - NuGet package manager
 
 ### Commands
