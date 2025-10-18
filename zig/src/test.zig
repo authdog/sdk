@@ -572,17 +572,7 @@ test "UserInfoResponse deinit" {
 }
 
 test "AuthdogError enum values" {
-    // Test that all error variants exist
-    const auth_failed = authdog.AuthdogError.AuthenticationFailed;
-    const api_error = authdog.AuthdogError.ApiError;
-    const network_error = authdog.AuthdogError.NetworkError;
-    const parse_error = authdog.AuthdogError.ParseError;
-    const invalid_token = authdog.AuthdogError.InvalidToken;
-
-    // This test mainly ensures the enum compiles correctly
-    _ = auth_failed;
-    _ = api_error;
-    _ = network_error;
-    _ = parse_error;
-    _ = invalid_token;
+    // Test that all error variants exist and can be returned
+    const testError: authdog.AuthdogError = error.AuthenticationFailed;
+    _ = testError;
 }

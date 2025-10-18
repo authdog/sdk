@@ -91,7 +91,7 @@ pub const AuthdogClient = struct {
         }
     }
 
-    fn parseUserInfoResponse(self: *Self, json_str: []const u8) !UserInfoResponse {
+    pub fn parseUserInfoResponse(self: *Self, json_str: []const u8) !UserInfoResponse {
         var gpa = std.heap.GeneralPurposeAllocator(.{}){};
         defer _ = gpa.deinit();
         const allocator = gpa.allocator();
@@ -116,7 +116,7 @@ pub const AuthdogClient = struct {
         };
     }
 
-    fn parseMeta(self: *Self, obj: std.json.Value) !Meta {
+    pub fn parseMeta(self: *Self, obj: std.json.Value) !Meta {
         _ = self;
         return Meta{
             .code = @intCast(obj.object.get("code").?.integer),
@@ -124,14 +124,14 @@ pub const AuthdogClient = struct {
         };
     }
 
-    fn parseSession(self: *Self, obj: std.json.Value) !Session {
+    pub fn parseSession(self: *Self, obj: std.json.Value) !Session {
         _ = self;
         return Session{
             .remaining_seconds = @intCast(obj.object.get("remainingSeconds").?.integer),
         };
     }
 
-    fn parseNames(self: *Self, obj: std.json.Value) !Names {
+    pub fn parseNames(self: *Self, obj: std.json.Value) !Names {
         _ = self;
         return Names{
             .id = obj.object.get("id").?.string,
@@ -144,7 +144,7 @@ pub const AuthdogClient = struct {
         };
     }
 
-    fn parsePhoto(self: *Self, obj: std.json.Value) !Photo {
+    pub fn parsePhoto(self: *Self, obj: std.json.Value) !Photo {
         _ = self;
         return Photo{
             .id = obj.object.get("id").?.string,
@@ -153,7 +153,7 @@ pub const AuthdogClient = struct {
         };
     }
 
-    fn parseEmail(self: *Self, obj: std.json.Value) !Email {
+    pub fn parseEmail(self: *Self, obj: std.json.Value) !Email {
         _ = self;
         return Email{
             .id = obj.object.get("id").?.string,
@@ -162,7 +162,7 @@ pub const AuthdogClient = struct {
         };
     }
 
-    fn parseVerification(self: *Self, obj: std.json.Value) !Verification {
+    pub fn parseVerification(self: *Self, obj: std.json.Value) !Verification {
         _ = self;
         return Verification{
             .id = obj.object.get("id").?.string,
@@ -173,7 +173,7 @@ pub const AuthdogClient = struct {
         };
     }
 
-    fn parseUser(self: *Self, obj: std.json.Value) !User {
+    pub fn parseUser(self: *Self, obj: std.json.Value) !User {
         const names_obj = obj.object.get("names") orelse return AuthdogError.ParseError;
         const names = try self.parseNames(names_obj);
 
