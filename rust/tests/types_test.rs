@@ -1,5 +1,4 @@
 use authdog::types::*;
-use serde_json;
 
 #[test]
 fn test_user_info_response_deserialization() {
@@ -88,7 +87,7 @@ fn test_user_info_response_deserialization() {
     assert_eq!(user_info.user.preferred_language, Some("en".to_string()));
     assert_eq!(user_info.user.locale, "en-US");
     assert_eq!(user_info.user.timezone, Some("UTC".to_string()));
-    assert_eq!(user_info.user.active, true);
+    assert!(user_info.user.active);
     assert_eq!(user_info.user.environment_id, "env123");
 }
 
@@ -266,7 +265,7 @@ fn test_verification_deserialization() {
     let verification = result.unwrap();
     assert_eq!(verification.id, "verification123");
     assert_eq!(verification.email, "test@example.com");
-    assert_eq!(verification.verified, true);
+    assert!(verification.verified);
     assert_eq!(verification.created_at, "2023-01-01T00:00:00Z");
     assert_eq!(verification.updated_at, "2023-01-01T00:00:00Z");
 }

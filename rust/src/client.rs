@@ -77,21 +77,22 @@ impl AuthdogClient {
             200 => serde_json::from_str::<UserInfoResponse>(&body)
                 .map_err(|e| AuthdogError::new(format!("Failed to parse response: {}", e))),
             401 => Err(AuthenticationError::new(
-                "Unauthorized - invalid or expired token",
-            )),
+                "Unauthorized - invalid or expired token".to_string(),
+            )
+            .into()),
             500 => match serde_json::from_str::<ErrorResponse>(&body) {
                 Ok(error_response) => match error_response.error.as_str() {
-                    "GraphQL query failed" => Err(APIError::new("GraphQL query failed")),
-                    "Failed to fetch user info" => Err(APIError::new("Failed to fetch user info")),
-                    _ => Err(APIError::new(format!("HTTP error 500: {}", body))),
+                    "GraphQL query failed" => {
+                        Err(APIError::new("GraphQL query failed".to_string()).into())
+                    }
+                    "Failed to fetch user info" => {
+                        Err(APIError::new("Failed to fetch user info".to_string()).into())
+                    }
+                    _ => Err(APIError::new(format!("HTTP error 500: {}", body)).into()),
                 },
-                Err(_) => Err(APIError::new(format!("HTTP error 500: {}", body))),
+                Err(_) => Err(APIError::new(format!("HTTP error 500: {}", body)).into()),
             },
-            _ => Err(APIError::new(format!(
-                "HTTP error {}: {}",
-                status.as_u16(),
-                body
-            ))),
+            _ => Err(APIError::new(format!("HTTP error {}: {}", status.as_u16(), body)).into()),
         }
     }
 }
