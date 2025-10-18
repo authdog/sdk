@@ -3,7 +3,6 @@ defmodule AuthdogTest do
   doctest Authdog
 
   alias Authdog.Client
-  alias Authdog.Types
 
   describe "Client.new/2" do
     test "creates a client with base URL" do

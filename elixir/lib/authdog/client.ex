@@ -43,7 +43,7 @@ defmodule Authdog.Client do
 
     req_client = Req.new(
       base_url: base_url,
-      timeout: timeout,
+      receive_timeout: timeout,
       headers: [
         {"content-type", "application/json"},
         {"user-agent", "authdog-elixir-sdk/0.1.0"}
