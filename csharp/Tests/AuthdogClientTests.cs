@@ -161,7 +161,6 @@ namespace Authdog.Sdk.Tests
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AuthenticationException>(
                 () => _client.GetUserInfoAsync("invalid-token"));
-            
             exception.Message.Should().Be("Unauthorized - invalid or expired token");
         }
 
@@ -187,7 +186,6 @@ namespace Authdog.Sdk.Tests
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ApiException>(
                 () => _client.GetUserInfoAsync("token"));
-            
             exception.Message.Should().Be("GraphQL query failed");
         }
 
@@ -213,7 +211,6 @@ namespace Authdog.Sdk.Tests
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ApiException>(
                 () => _client.GetUserInfoAsync("token"));
-            
             exception.Message.Should().Be("Failed to fetch user info");
         }
 
@@ -232,7 +229,6 @@ namespace Authdog.Sdk.Tests
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ApiException>(
                 () => _client.GetUserInfoAsync("token"));
-            
             exception.Message.Should().Be("Request failed: Network error");
             exception.InnerException.Should().BeOfType<HttpRequestException>();
         }
@@ -252,7 +248,6 @@ namespace Authdog.Sdk.Tests
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ApiException>(
                 () => _client.GetUserInfoAsync("token"));
-            
             exception.Message.Should().Be("Request timeout: Request timeout");
             exception.InnerException.Should().BeOfType<TaskCanceledException>();
         }
@@ -277,7 +272,6 @@ namespace Authdog.Sdk.Tests
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ApiException>(
                 () => _client.GetUserInfoAsync("token"));
-            
             exception.Message.Should().Be("HTTP error 400: Bad Request");
         }
 
@@ -337,7 +331,6 @@ namespace Authdog.Sdk.Tests
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
                 () => _client.GetUserInfoAsync("token"));
-            
             exception.ObjectName.Should().Be(nameof(AuthdogClient));
         }
 
