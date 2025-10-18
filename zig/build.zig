@@ -22,7 +22,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    exe.root_module.addImport("authdog", lib.root_module);
+    exe.addModule("authdog", lib.root_module);
 
     b.installArtifact(exe);
 
@@ -32,7 +32,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    // No external dependencies for tests
+    tests.addModule("authdog", lib.root_module);
 
     const test_run = b.addRunArtifact(tests);
     const test_step = b.step("test", "Run unit tests");
