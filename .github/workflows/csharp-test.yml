@@ -14,7 +14,7 @@ on:
   #     - '.github/workflows/csharp-test.yml'
 
 env:
-  DOTNET_VERSION: "7.0.x"
+  DOTNET_VERSION: "8.0.x"
 
 jobs:
   test:
@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dotnet-version: ["7.0.x", "8.0.x"]
+        dotnet-version: ["8.0.x"]
 
     steps:
     - name: Checkout code
