@@ -19,11 +19,19 @@ final class AuthdogClientTest extends TestCase
         $data = [
             'user' => [
                 'id' => 'u_123',
-                'email' => 'john@example.com',
-                'name' => 'John Doe',
+                'emails' => [
+                    [
+                        'id' => 'email_123',
+                        'value' => 'john@example.com',
+                        'type' => 'work'
+                    ]
+                ],
             ],
             'meta' => [
                 'requestId' => 'req_123',
+            ],
+            'session' => [
+                'remainingSeconds' => 3600,
             ],
         ];
 
