@@ -14,6 +14,7 @@ Official SDKs for Authdog authentication and user management platform.
 [![Elixir Tests](https://github.com/authdog/sdk/actions/workflows/elixir-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/elixir-test.yml)
 [![Scala Tests](https://github.com/authdog/sdk/actions/workflows/scala-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/scala-test.yml)
 [![Clojure Tests](https://github.com/authdog/sdk/actions/workflows/clojure-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/clojure-test.yml)
+[![Common Lisp Tests](https://github.com/authdog/sdk/actions/workflows/commonlisp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/commonlisp-test.yml)
 
 ## Available SDKs
 
