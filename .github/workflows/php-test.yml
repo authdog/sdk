@@ -1,0 +1,47 @@
+name: PHP Tests
+
+on:
+  push:
+    paths:
+      - 'sdk/php/**'
+      - '.github/workflows/php-test.yml'
+  pull_request:
+    paths:
+      - 'sdk/php/**'
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.0', '8.1', '8.2', '8.3']
+
+    defaults:
+      run:
+        working-directory: sdk/php
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer
+          extensions: mbstring, curl, intl
+          ini-values: date.timezone=UTC
+          composer-cache: true
+
+      - name: Validate composer.json
+        run: composer validate --no-check-publish
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Run PHPUnit
+        run: ./vendor/bin/phpunit --configuration phpunit.xml --testdox
+
+
