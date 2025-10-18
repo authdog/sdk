@@ -33,9 +33,12 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup SBT
-        uses: olafurpg/setup-sbt@v3
-        with:
-          version: 1.9.7
+        run: |
+          curl -L -o sbt.tgz https://github.com/sbt/sbt/releases/download/v1.9.7/sbt-1.9.7.tgz
+          tar -xzf sbt.tgz
+          sudo mv sbt /opt/sbt
+          sudo ln -s /opt/sbt/bin/sbt /usr/local/bin/sbt
+          sbt sbtVersion
 
       - name: Cache SBT dependencies
         uses: actions/cache@v4
