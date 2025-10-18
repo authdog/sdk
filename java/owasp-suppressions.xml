@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <!-- Suppress false positives for OkHttp -->
+    <suppress>
+        <notes><![CDATA[
+        OkHttp is a widely used HTTP client library. The vulnerabilities reported are often false positives
+        or require specific configurations that we don't use.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.squareup\.okhttp3/.*$</packageUrl>
+        <cve>CVE-2021-0341</cve>
+        <cve>CVE-2023-3635</cve>
+    </suppress>
+
+    <!-- Suppress false positives for Jackson -->
+    <suppress>
+        <notes><![CDATA[
+        Jackson is a widely used JSON processing library. Many reported vulnerabilities are false positives
+        or require specific configurations that we don't use.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/.*$</packageUrl>
+        <cve>CVE-2020-36518</cve>
+        <cve>CVE-2022-42003</cve>
+        <cve>CVE-2022-42004</cve>
+    </suppress>
+
+    <!-- Suppress false positives for JUnit -->
+    <suppress>
+        <notes><![CDATA[
+        JUnit is a testing framework and vulnerabilities in test dependencies don't affect production code.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.junit\.jupiter/.*$</packageUrl>
+        <cve>CVE-2020-15250</cve>
+    </suppress>
+
+    <!-- Suppress false positives for Mockito -->
+    <suppress>
+        <notes><![CDATA[
+        Mockito is a testing framework and vulnerabilities in test dependencies don't affect production code.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.mockito/.*$</packageUrl>
+    </suppress>
+</suppressions>

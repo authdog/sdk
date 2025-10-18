@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -119,8 +120,8 @@ public class AuthdogClient implements AutoCloseable {
         Request request = requestBuilder.build();
 
         try (Response response = httpClient.newCall(request).execute()) {
-            String responseBody = response.body() != null
-                    ? response.body().string() : "";
+            ResponseBody body = response.body();
+            String responseBody = body != null ? body.string() : "";
 
             if (response.code() == HTTP_UNAUTHORIZED) {
                 throw new AuthenticationException(
@@ -140,7 +141,7 @@ public class AuthdogClient implements AutoCloseable {
                             throw new ApiException("Failed to fetch user info");
                         }
                     }
-                } catch (Exception e) {
+                } catch (IOException e) {
                     // Ignore JSON parsing errors for error responses
                 }
                 throw new ApiException("HTTP error 500: " + responseBody);

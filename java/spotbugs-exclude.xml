@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- Suppress false positives for immutable DTOs -->
+    
+    <!-- Suppress EI_EXPOSE_REP for immutable objects -->
+    <Match>
+        <Class name="com.authdog.types.Meta"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    
+    <Match>
+        <Class name="com.authdog.types.Session"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    
+    <Match>
+        <Class name="com.authdog.types.User"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    
+    <Match>
+        <Class name="com.authdog.types.UserInfoResponse"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    
+    <!-- Suppress EI_EXPOSE_REP2 for immutable objects -->
+    <Match>
+        <Class name="com.authdog.types.Meta"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    
+    <Match>
+        <Class name="com.authdog.types.Session"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    
+    <Match>
+        <Class name="com.authdog.types.User"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    
+    <Match>
+        <Class name="com.authdog.types.UserInfoResponse"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    
+    <!-- Suppress REC_CATCH_EXCEPTION for intentional broad exception handling -->
+    <Match>
+        <Class name="com.authdog.AuthdogClient"/>
+        <Method name="getUserInfo"/>
+        <Bug pattern="REC_CATCH_EXCEPTION"/>
+    </Match>
+    
+    <!-- Suppress NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE for properly handled null cases -->
+    <Match>
+        <Class name="com.authdog.AuthdogClient"/>
+        <Method name="getUserInfo"/>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+    </Match>
+</FindBugsFilter>

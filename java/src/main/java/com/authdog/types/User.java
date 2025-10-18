@@ -1,6 +1,8 @@
 package com.authdog.types;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -357,7 +359,7 @@ public final class User {
      * @return User photos
      */
     public List<Photo> getPhotos() {
-        return photos;
+        return photos != null ? Collections.unmodifiableList(photos) : null;
     }
 
     /**
@@ -365,7 +367,7 @@ public final class User {
      * @param photosParam User photos
      */
     public void setPhotos(final List<Photo> photosParam) {
-        this.photos = photosParam;
+        this.photos = photosParam != null ? new ArrayList<>(photosParam) : null;
     }
 
     /**
@@ -373,7 +375,8 @@ public final class User {
      * @return Phone numbers
      */
     public List<Object> getPhoneNumbers() {
-        return phoneNumbers;
+        return phoneNumbers != null
+            ? Collections.unmodifiableList(phoneNumbers) : null;
     }
 
     /**
@@ -381,7 +384,8 @@ public final class User {
      * @param phoneNumbersParam Phone numbers
      */
     public void setPhoneNumbers(final List<Object> phoneNumbersParam) {
-        this.phoneNumbers = phoneNumbersParam;
+        this.phoneNumbers = phoneNumbersParam != null
+            ? new ArrayList<>(phoneNumbersParam) : null;
     }
 
     /**
@@ -389,7 +393,8 @@ public final class User {
      * @return Addresses
      */
     public List<Object> getAddresses() {
-        return addresses;
+        return addresses != null
+            ? Collections.unmodifiableList(addresses) : null;
     }
 
     /**
@@ -397,7 +402,8 @@ public final class User {
      * @param addressesParam Addresses
      */
     public void setAddresses(final List<Object> addressesParam) {
-        this.addresses = addressesParam;
+        this.addresses = addressesParam != null
+            ? new ArrayList<>(addressesParam) : null;
     }
 
     /**
@@ -405,7 +411,7 @@ public final class User {
      * @return Email addresses
      */
     public List<Email> getEmails() {
-        return emails;
+        return emails != null ? Collections.unmodifiableList(emails) : null;
     }
 
     /**
@@ -413,7 +419,7 @@ public final class User {
      * @param emailsParam Email addresses
      */
     public void setEmails(final List<Email> emailsParam) {
-        this.emails = emailsParam;
+        this.emails = emailsParam != null ? new ArrayList<>(emailsParam) : null;
     }
 
     /**
@@ -421,7 +427,8 @@ public final class User {
      * @return Verification status
      */
     public List<Verification> getVerifications() {
-        return verifications;
+        return verifications != null
+            ? Collections.unmodifiableList(verifications) : null;
     }
 
     /**
@@ -429,7 +436,8 @@ public final class User {
      * @param verificationsParam Verification status
      */
     public void setVerifications(final List<Verification> verificationsParam) {
-        this.verifications = verificationsParam;
+        this.verifications = verificationsParam != null
+            ? new ArrayList<>(verificationsParam) : null;
     }
 
     /**

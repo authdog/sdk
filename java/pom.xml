@@ -37,6 +37,9 @@
         <jackson.version>2.16.1</jackson.version>
         <junit.version>5.10.1</junit.version>
         <mockito.version>5.8.0</mockito.version>
+        <checkstyle.version>3.6.0</checkstyle.version>
+        <spotbugs.version>4.7.3.6</spotbugs.version>
+        <owasp.version>8.4.0</owasp.version>
     </properties>
 
     <dependencies>
@@ -126,6 +129,75 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${checkstyle.version}</version>
+                <configuration>
+                    <configLocation>sun_checks.xml</configLocation>
+                    <encoding>UTF-8</encoding>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <linkXRef>false</linkXRef>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+               <plugin>
+                   <groupId>com.github.spotbugs</groupId>
+                   <artifactId>spotbugs-maven-plugin</artifactId>
+                   <version>${spotbugs.version}</version>
+                   <configuration>
+                       <effort>Max</effort>
+                       <threshold>Low</threshold>
+                       <xmlOutput>true</xmlOutput>
+                       <failOnError>true</failOnError>
+                       <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+                   </configuration>
+                <executions>
+                    <execution>
+                        <id>spotbugs</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+               <!-- OWASP Dependency Check temporarily disabled due to network issues -->
+               <!--
+               <plugin>
+                   <groupId>org.owasp</groupId>
+                   <artifactId>dependency-check-maven</artifactId>
+                   <version>${owasp.version}</version>
+                   <configuration>
+                       <failBuildOnCVSS>7</failBuildOnCVSS>
+                       <format>HTML</format>
+                       <suppressionFiles>
+                           <suppressionFile>owasp-suppressions.xml</suppressionFile>
+                       </suppressionFiles>
+                   </configuration>
+                   <executions>
+                       <execution>
+                           <id>dependency-check</id>
+                           <phase>verify</phase>
+                           <goals>
+                               <goal>check</goal>
+                           </goals>
+                       </execution>
+                   </executions>
+               </plugin>
+               -->
         </plugins>
     </build>
 
