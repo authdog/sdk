@@ -30,7 +30,6 @@ namespace Authdog
             _httpClient = httpClient ?? new HttpClient();
 
             // Set default headers
-            _httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "authdog-csharp-sdk/0.1.0");
 
             if (!string.IsNullOrEmpty(_apiKey))
