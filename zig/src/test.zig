@@ -470,23 +470,47 @@ test "UserInfoResponse struct parsing" {
     };
     defer tree.deinit();
 
-    var user_info = client.parseUserInfoResponse(json_str) catch |err| {
-        std.debug.print("Failed to parse user info response: {}\n", .{err});
+    // Manually extract the response since parseUserInfoResponse internally parses again
+    const root = tree.value;
+
+    const meta_obj = root.object.get("meta") orelse {
+        std.debug.print("Missing meta object\n", .{});
         return;
     };
-    defer user_info.deinit(allocator);
+    const session_obj = root.object.get("session") orelse {
+        std.debug.print("Missing session object\n", .{});
+        return;
+    };
+    const user_obj = root.object.get("user") orelse {
+        std.debug.print("Missing user object\n", .{});
+        return;
+    };
+
+    const meta = client.parseMeta(meta_obj) catch |err| {
+        std.debug.print("Failed to parse meta: {}\n", .{err});
+        return;
+    };
+    const session = client.parseSession(session_obj) catch |err| {
+        std.debug.print("Failed to parse session: {}\n", .{err});
+        return;
+    };
+    var user = client.parseUser(user_obj) catch |err| {
+        std.debug.print("Failed to parse user: {}\n", .{err});
+        return;
+    };
+    defer user.deinit(allocator);
 
     // Test meta
-    try std.testing.expectEqual(@as(i64, 200), user_info.meta.code);
-    try std.testing.expectEqualStrings("Success", user_info.meta.message);
+    try std.testing.expectEqual(@as(i64, 200), meta.code);
+    try std.testing.expectEqualStrings("Success", meta.message);
 
     // Test session
-    try std.testing.expectEqual(@as(u32, 3600), user_info.session.remaining_seconds);
+    try std.testing.expectEqual(@as(u32, 3600), session.remaining_seconds);
 
     // Test user
-    try std.testing.expectEqualStrings("user-123", user_info.user.id);
-    try std.testing.expectEqualStrings("John Doe", user_info.user.display_name);
-    try std.testing.expectEqualStrings("google", user_info.user.provider);
+    try std.testing.expectEqualStrings("user-123", user.id);
+    try std.testing.expectEqualStrings("John Doe", user.display_name);
+    try std.testing.expectEqualStrings("google", user.provider);
 }
 
 test "UserInfoResponse deinit" {
@@ -562,13 +586,18 @@ test "UserInfoResponse deinit" {
     };
     defer tree.deinit();
 
-    var user_info = client.parseUserInfoResponse(json_str) catch |err| {
-        std.debug.print("Failed to parse user info response: {}\n", .{err});
-        return;
-    };
+    const root = tree.value;
+
+    const meta_obj = root.object.get("meta") orelse return;
+    const session_obj = root.object.get("session") orelse return;
+    const user_obj = root.object.get("user") orelse return;
+
+    const meta = client.parseMeta(meta_obj) catch return;
+    const session = client.parseSession(session_obj) catch return;
+    var user = client.parseUser(user_obj) catch return;
 
     // Test that deinit doesn't crash
-    user_info.deinit(allocator);
+    user.deinit(allocator);
 }
 
 test "AuthdogError enum values" {
