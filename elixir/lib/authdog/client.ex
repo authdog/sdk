@@ -125,7 +125,7 @@ defmodule Authdog.Client do
       {:ok, %Req.Response{status: status, body: body}} ->
         {:error, :api_error, "HTTP error #{status}: #{body}"}
 
-      {:error, %Req.Error{reason: reason}} ->
+      {:error, reason} ->
         {:error, :api_error, "Request failed: #{inspect(reason)}"}
     end
   end
