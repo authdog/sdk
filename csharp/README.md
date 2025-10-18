@@ -18,7 +18,7 @@ Install-Package Authdog.Sdk
 
 ## Requirements
 
-- .NET 6.0 or higher
+- .NET 7.0 or higher
 - Newtonsoft.Json
 - Microsoft.Extensions.Http
 
@@ -516,7 +516,7 @@ dotnet pack --configuration Release
 
 ### Requirements
 
-- .NET 6.0+
+- .NET 7.0+
 - Visual Studio 2022 or VS Code
 - NuGet Package Manager
 
