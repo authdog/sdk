@@ -36,7 +36,6 @@ jobs:
           tools: composer
           extensions: mbstring, curl, intl
           ini-values: date.timezone=UTC
-          composer-cache: true
 
       - name: Validate composer.json
         run: composer validate --no-check-publish
