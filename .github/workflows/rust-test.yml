@@ -36,13 +36,20 @@ jobs:
         toolchain: ${{ matrix.rust-version }}
         components: rustfmt, clippy
 
+    - name: Regenerate Cargo.lock for compatibility
+      run: |
+        # Remove existing lock file to regenerate with current toolchain
+        rm -f Cargo.lock
+        cargo generate-lockfile
+      working-directory: rust
+
     - name: Cache cargo registry
       uses: actions/cache@v4
       with:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-        key: ${{ runner.os }}-cargo-${{ matrix.rust-version }}-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-${{ matrix.rust-version }}-${{ hashFiles('rust/Cargo.toml') }}
         restore-keys: |
           ${{ runner.os }}-cargo-${{ matrix.rust-version }}-
 
@@ -50,7 +57,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: target
-        key: ${{ runner.os }}-cargo-build-${{ matrix.rust-version }}-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-build-${{ matrix.rust-version }}-${{ hashFiles('rust/Cargo.toml') }}
         restore-keys: |
           ${{ runner.os }}-cargo-build-${{ matrix.rust-version }}-
 
