@@ -27,6 +27,10 @@ pub fn build(b: *std.Build) void {
     // Use root_module.addImport for Zig 0.12.0+
     exe.root_module.addImport("authdog", &lib.root_module);
 
+    // Provide a dedicated step to build the example
+    const example_step = b.step("example", "Build example executable");
+    example_step.dependOn(&exe.step);
+
     b.installArtifact(exe);
 
     // Create tests

@@ -64,7 +64,7 @@ jobs:
     - name: Build example
       run: |
         cd zig
-        zig build-exe examples/main.zig -I src --main-pkg-path src
+        zig build example
     
     - name: Generate documentation
       run: |
