@@ -65,7 +65,7 @@ pub const AuthdogClient = struct {
         // For now, we'll proceed without custom headers for the initial implementation
 
         // Send request
-        try req.send(.{});
+        try req.send();
         try req.wait();
 
         // Check response status
