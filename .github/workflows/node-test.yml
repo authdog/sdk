@@ -30,17 +30,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: latest
+
     - name: Set up Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'pnpm'
         cache-dependency-path: node/pnpm-lock.yaml
-
-    - name: Install pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: latest
 
     - name: Install dependencies
       run: |
@@ -77,17 +77,13 @@ jobs:
   #   - name: Checkout code
   #     uses: actions/checkout@v4
 
+
   #   - name: Set up Node.js
   #     uses: actions/setup-node@v4
   #     with:
   #       node-version: "18"
   #       cache: 'pnpm'
   #       cache-dependency-path: node/pnpm-lock.yaml
-
-  #   - name: Install pnpm
-  #     uses: pnpm/action-setup@v4
-  #     with:
-  #       version: latest
 
   #   - name: Install dependencies
   #     run: |
@@ -107,17 +103,17 @@ jobs:
   #   - name: Checkout code
   #     uses: actions/checkout@v4
 
+  #   - name: Install pnpm
+  #     uses: pnpm/action-setup@v4
+  #     with:
+  #       version: latest
+
   #   - name: Set up Node.js
   #     uses: actions/setup-node@v4
   #     with:
   #       node-version: "18"
   #       cache: 'pnpm'
   #       cache-dependency-path: node/pnpm-lock.yaml
-
-  #   - name: Install pnpm
-  #     uses: pnpm/action-setup@v4
-  #     with:
-  #       version: latest
 
   #   - name: Install dependencies
   #     run: |
