@@ -16,25 +16,24 @@ pub fn main() !void {
         switch (err) {
             authdog.AuthdogError.AuthenticationFailed => {
                 std.log.err("Authentication failed: invalid or expired token", .{});
-                return;
             },
             authdog.AuthdogError.ApiError => {
                 std.log.err("API error: request failed", .{});
-                return;
             },
             authdog.AuthdogError.NetworkError => {
                 std.log.err("Network error: connection failed", .{});
-                return;
             },
             authdog.AuthdogError.ParseError => {
                 std.log.err("Parse error: invalid response format", .{});
-                return;
             },
             authdog.AuthdogError.InvalidToken => {
                 std.log.err("Invalid token provided", .{});
-                return;
+            },
+            else => {
+                std.log.err("Unexpected error occurred", .{});
             },
         }
+        return;
     };
 
     // Print user information
