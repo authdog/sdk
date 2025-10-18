@@ -116,14 +116,14 @@ defmodule Authdog.Client do
               "Failed to fetch user info" ->
                 {:error, :api_error, "Failed to fetch user info"}
               _ ->
-                {:error, :api_error, "HTTP error 500: #{body}"}
+                {:error, :api_error, "HTTP error 500: #{inspect(body)}"}
             end
           _ ->
-            {:error, :api_error, "HTTP error 500: #{body}"}
+            {:error, :api_error, "HTTP error 500: #{inspect(body)}"}
         end
 
       {:ok, %Req.Response{status: status, body: body}} ->
-        {:error, :api_error, "HTTP error #{status}: #{body}"}
+        {:error, :api_error, "HTTP error #{status}: #{inspect(body)}"}
 
       {:error, reason} ->
         {:error, :api_error, "Request failed: #{inspect(reason)}"}
