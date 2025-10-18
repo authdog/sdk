@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura,json,lcov</Format>
+          <Exclude>[*]*.Migrations.*</Exclude>
+          <Exclude>[*]*.Program</Exclude>
+          <Exclude>[*]*.Startup</Exclude>
+          <Exclude>[*.Tests]*</Exclude>
+          <Exclude>[*.Test]*</Exclude>
+          <Exclude>[xunit.*]*</Exclude>
+          <Exclude>[Moq]*</Exclude>
+          <Exclude>[FluentAssertions]*</Exclude>
+          <Exclude>[Microsoft.AspNetCore.Mvc.Testing]*</Exclude>
+          <Exclude>[Microsoft.Extensions.Http]*</Exclude>
+          <Exclude>[Microsoft.NET.Test.Sdk]*</Exclude>
+          <Exclude>[xunit.runner.visualstudio]*</Exclude>
+          <Exclude>[coverlet.collector]*</Exclude>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

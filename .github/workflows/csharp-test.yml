@@ -1,0 +1,295 @@
+name: C# SDK Tests
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'csharp/**'
+  #     - '.github/workflows/csharp-test.yml'
+  # pull_request:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'csharp/**'
+  #     - '.github/workflows/csharp-test.yml'
+
+env:
+  DOTNET_VERSION: "6.0.x"
+
+jobs:
+  test:
+    name: Test C# SDK
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        dotnet-version: ["6.0.x", "7.0.x", "8.0.x"]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET ${{ matrix.dotnet-version }}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Verify .NET installation
+      run: |
+        dotnet --version
+        dotnet --info
+
+    - name: Restore dependencies
+      run: |
+        cd csharp
+        dotnet restore
+
+    - name: Build solution
+      run: |
+        cd csharp
+        dotnet build --no-restore --configuration Release
+
+    - name: Run tests
+      run: |
+        cd csharp
+        dotnet test --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: csharp-test-results-${{ matrix.dotnet-version }}
+        path: csharp/TestResults/
+        if-no-files-found: warn
+
+  build:
+    name: Build C# SDK
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: |
+        cd csharp
+        dotnet restore
+
+    - name: Build solution
+      run: |
+        cd csharp
+        dotnet build --no-restore --configuration Release
+
+    - name: Pack NuGet package
+      run: |
+        cd csharp
+        dotnet pack --no-build --configuration Release --output ./nupkg
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: csharp-nuget-package
+        path: csharp/nupkg/*.nupkg
+
+  lint:
+    name: Lint C# SDK
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Install dotnet-format
+      run: dotnet tool install -g dotnet-format
+
+    - name: Run dotnet-format check
+      run: |
+        cd csharp
+        dotnet format --verify-no-changes --verbosity diagnostic
+
+    - name: Install SonarAnalyzer.CSharp
+      run: |
+        cd csharp
+        dotnet add package SonarAnalyzer.CSharp --version 9.25.0.78984
+
+    - name: Run SonarAnalyzer
+      run: |
+        cd csharp
+        dotnet build --configuration Release --verbosity normal
+
+  security:
+    name: Security Audit C# SDK
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Install security-scan
+      run: dotnet tool install --global security-scan
+
+    - name: Run security scan
+      run: |
+        cd csharp
+        security-scan Authdog.Sdk.csproj
+
+    - name: Upload security report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: csharp-security-report
+        path: csharp/security-report.html
+        if-no-files-found: warn
+
+  benchmark:
+    name: Benchmark C# SDK
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: |
+        cd csharp
+        dotnet restore
+
+    - name: Build solution
+      run: |
+        cd csharp
+        dotnet build --no-restore --configuration Release
+
+    - name: Run benchmarks
+      run: |
+        cd csharp
+        dotnet run --configuration Release --project Tests/Authdog.Sdk.Tests.csproj -- --filter "*Benchmark*" || echo "No benchmarks found"
+
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: csharp-benchmark-results
+        path: csharp/BenchmarkDotNet.Artifacts/
+        if-no-files-found: warn
+
+  coverage:
+    name: Code Coverage C# SDK
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: |
+        cd csharp
+        dotnet restore
+
+    - name: Build solution
+      run: |
+        cd csharp
+        dotnet build --no-restore --configuration Release
+
+    - name: Run tests with coverage
+      run: |
+        cd csharp
+        dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./TestResults --settings coverlet.runsettings
+
+    - name: Install ReportGenerator
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+    - name: Generate coverage report
+      run: |
+        cd csharp
+        reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -targetdir:"CoverageReport" -reporttypes:"Html;Cobertura"
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: csharp-coverage-report
+        path: csharp/CoverageReport/
+        if-no-files-found: warn
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      if: always()
+      with:
+        file: csharp/CoverageReport/Cobertura.xml
+        flags: csharp
+        name: csharp-coverage
+        fail_ci_if_error: false
