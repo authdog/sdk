@@ -11,19 +11,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    // Add HTTP client dependency
-    const ziggy_http_dep = b.dependency("ziggy-http", .{
-        .target = target,
-        .optimize = optimize,
-    });
-    lib.root_module.addImport("ziggy-http", ziggy_http_dep.module("ziggy-http"));
-
-    // Add JSON parsing dependency
-    const json_dep = b.dependency("json", .{
-        .target = target,
-        .optimize = optimize,
-    });
-    lib.root_module.addImport("json", json_dep.module("json"));
+    // No external dependencies - using standard library only
 
     b.installArtifact(lib);
 
@@ -35,8 +23,6 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     exe.root_module.addImport("authdog", lib.root_module);
-    exe.root_module.addImport("ziggy-http", ziggy_http_dep.module("ziggy-http"));
-    exe.root_module.addImport("json", json_dep.module("json"));
 
     b.installArtifact(exe);
 
@@ -46,8 +32,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    tests.root_module.addImport("ziggy-http", ziggy_http_dep.module("ziggy-http"));
-    tests.root_module.addImport("json", json_dep.module("json"));
+    // No external dependencies for tests
 
     const test_run = b.addRunArtifact(tests);
     const test_step = b.step("test", "Run unit tests");

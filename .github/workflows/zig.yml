@@ -33,10 +33,10 @@ jobs:
     - name: Verify Zig installation
       run: zig version
     
-    - name: Fetch dependencies
+    - name: Check dependencies
       run: |
         cd zig
-        zig build deps || echo "Dependencies already fetched"
+        echo "No external dependencies required"
     
     - name: Run tests
       run: |

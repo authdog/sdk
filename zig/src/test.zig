@@ -1,5 +1,4 @@
 const std = @import("std");
-const json = @import("json");
 const authdog = @import("lib.zig");
 
 pub fn runTests() void {
@@ -50,7 +49,7 @@ test "Meta struct parsing" {
     defer client.deinit();
 
     // Mock JSON object for meta
-    var parser = json.Parser.init(allocator, .alloc_always);
+    var parser = std.std.json.Parser.init(allocator, .alloc_always);
     defer parser.deinit();
 
     const json_str = "{\"code\": 200, \"message\": \"Success\"}";
@@ -81,7 +80,7 @@ test "Session struct parsing" {
     defer client.deinit();
 
     // Mock JSON object for session
-    var parser = json.Parser.init(allocator, .alloc_always);
+    var parser = std.json.Parser.init(allocator, .alloc_always);
     defer parser.deinit();
 
     const json_str = "{\"remainingSeconds\": 3600}";
@@ -111,7 +110,7 @@ test "Names struct parsing" {
     defer client.deinit();
 
     // Mock JSON object for names
-    var parser = json.Parser.init(allocator, .alloc_always);
+    var parser = std.json.Parser.init(allocator, .alloc_always);
     defer parser.deinit();
 
     const json_str = "{\"id\": \"name-123\", \"formatted\": \"John Doe\", \"familyName\": \"Doe\", \"givenName\": \"John\", \"middleName\": \"William\", \"honorificPrefix\": \"Mr.\", \"honorificSuffix\": \"Jr.\"}";
@@ -147,7 +146,7 @@ test "Names struct parsing with null optional fields" {
     defer client.deinit();
 
     // Mock JSON object for names with null optional fields
-    var parser = json.Parser.init(allocator, .alloc_always);
+    var parser = std.json.Parser.init(allocator, .alloc_always);
     defer parser.deinit();
 
     const json_str = "{\"id\": \"name-123\", \"familyName\": \"Doe\", \"givenName\": \"John\"}";
@@ -183,7 +182,7 @@ test "Photo struct parsing" {
     defer client.deinit();
 
     // Mock JSON object for photo
-    var parser = json.Parser.init(allocator, .alloc_always);
+    var parser = std.json.Parser.init(allocator, .alloc_always);
     defer parser.deinit();
 
     const json_str = "{\"id\": \"photo-123\", \"value\": \"https://example.com/photo.jpg\", \"type\": \"profile\"}";
@@ -215,7 +214,7 @@ test "Email struct parsing" {
     defer client.deinit();
 
     // Mock JSON object for email
-    var parser = json.Parser.init(allocator, .alloc_always);
+    var parser = std.json.Parser.init(allocator, .alloc_always);
     defer parser.deinit();
 
     const json_str = "{\"id\": \"email-123\", \"value\": \"john@example.com\", \"type\": \"work\"}";
@@ -247,7 +246,7 @@ test "Email struct parsing without type" {
     defer client.deinit();
 
     // Mock JSON object for email without type
-    var parser = json.Parser.init(allocator, .alloc_always);
+    var parser = std.json.Parser.init(allocator, .alloc_always);
     defer parser.deinit();
 
     const json_str = "{\"id\": \"email-123\", \"value\": \"john@example.com\"}";
@@ -279,7 +278,7 @@ test "Verification struct parsing" {
     defer client.deinit();
 
     // Mock JSON object for verification
-    var parser = json.Parser.init(allocator, .alloc_always);
+    var parser = std.json.Parser.init(allocator, .alloc_always);
     defer parser.deinit();
 
     const json_str = "{\"id\": \"verification-123\", \"email\": \"john@example.com\", \"verified\": true, \"createdAt\": \"2023-01-01T00:00:00Z\", \"updatedAt\": \"2023-01-02T00:00:00Z\"}";
@@ -313,7 +312,7 @@ test "User struct parsing" {
     defer client.deinit();
 
     // Mock JSON object for user
-    var parser = json.Parser.init(allocator, .alloc_always);
+    var parser = std.json.Parser.init(allocator, .alloc_always);
     defer parser.deinit();
 
     const json_str = 
@@ -430,7 +429,7 @@ test "UserInfoResponse struct parsing" {
     defer client.deinit();
 
     // Mock JSON object for user info response
-    var parser = json.Parser.init(allocator, .alloc_always);
+    var parser = std.json.Parser.init(allocator, .alloc_always);
     defer parser.deinit();
 
     const json_str = 
@@ -502,7 +501,7 @@ test "UserInfoResponse deinit" {
     defer client.deinit();
 
     // Mock JSON object for user info response
-    var parser = json.Parser.init(allocator, .alloc_always);
+    var parser = std.json.Parser.init(allocator, .alloc_always);
     defer parser.deinit();
 
     const json_str = 

@@ -1,6 +1,4 @@
 const std = @import("std");
-const json = @import("json");
-const ziggy_http = @import("ziggy-http");
 
 pub const AuthdogError = error{
     AuthenticationFailed,
@@ -42,40 +40,45 @@ pub const AuthdogClient = struct {
         const url = try std.fmt.allocPrint(allocator, "{s}/v1/userinfo", .{self.base_url});
         defer allocator.free(url);
 
-        var headers = ziggy_http.Headers.init(allocator);
-        defer headers.deinit();
+        // Parse the URL
+        const uri = std.Uri.parse(url) catch return AuthdogError.NetworkError;
+        
+        // Create HTTP client
+        var client = std.http.Client{ .allocator = allocator };
+        defer client.deinit();
 
-        try headers.put("Content-Type", "application/json");
-        try headers.put("User-Agent", "authdog-zig-sdk/0.1.0");
-        try headers.put("Authorization", try std.fmt.allocPrint(allocator, "Bearer {s}", .{access_token}));
+        // Create request
+        var req = try client.open(.GET, uri, .{});
+        defer req.deinit();
+
+        // Set headers
+        try req.headers.append("Content-Type", "application/json");
+        try req.headers.append("User-Agent", "authdog-zig-sdk/0.1.0");
+        try req.headers.append("Authorization", try std.fmt.allocPrint(allocator, "Bearer {s}", .{access_token}));
 
         // Add API key if provided
         if (self.api_key) |key| {
-            try headers.put("Authorization", try std.fmt.allocPrint(allocator, "Bearer {s}", .{key}));
+            try req.headers.append("Authorization", try std.fmt.allocPrint(allocator, "Bearer {s}", .{key}));
         }
 
-        var client = ziggy_http.Client.init(allocator, .{});
-        defer client.deinit();
+        // Send request
+        try req.send(.{});
+        try req.wait();
 
-        const response = client.get(url, .{
-            .headers = headers,
-            .timeout_ms = self.timeout_ms,
-        }) catch |err| {
-            return switch (err) {
-                error.Timeout, error.ConnectionRefused, error.HostUnreachable => AuthdogError.NetworkError,
-                else => AuthdogError.NetworkError,
-            };
-        };
-        defer response.deinit();
-
-        switch (response.status) {
-            200 => {
-                const body = response.body orelse return AuthdogError.ParseError;
+        // Check response status
+        switch (req.response.status) {
+            .ok => {
+                // Read response body
+                const body = try req.reader().readAllAlloc(allocator, 1024 * 1024);
+                defer allocator.free(body);
+                
                 return self.parseUserInfoResponse(body);
             },
-            401 => return AuthdogError.AuthenticationFailed,
-            500 => {
-                const body = response.body orelse return AuthdogError.ApiError;
+            .unauthorized => return AuthdogError.AuthenticationFailed,
+            .internal_server_error => {
+                const body = try req.reader().readAllAlloc(allocator, 1024 * 1024);
+                defer allocator.free(body);
+                
                 if (std.mem.indexOf(u8, body, "GraphQL query failed")) |_| {
                     return AuthdogError.ApiError;
                 } else if (std.mem.indexOf(u8, body, "Failed to fetch user info")) |_| {
@@ -93,7 +96,7 @@ pub const AuthdogClient = struct {
         defer _ = gpa.deinit();
         const allocator = gpa.allocator();
 
-        var parser = json.Parser.init(allocator, .alloc_always);
+        var parser = std.json.Parser.init(allocator, .alloc_always);
         defer parser.deinit();
 
         const tree = parser.parse(json_str) catch return AuthdogError.ParseError;
@@ -116,22 +119,22 @@ pub const AuthdogClient = struct {
         };
     }
 
-    fn parseMeta(self: *Self, obj: json.Value) !Meta {
+    fn parseMeta(self: *Self, obj: std.json.Value) !Meta {
         _ = self;
         return Meta{
-            .code = obj.object.get("code").?.integer,
+            .code = @intCast(obj.object.get("code").?.integer),
             .message = obj.object.get("message").?.string,
         };
     }
 
-    fn parseSession(self: *Self, obj: json.Value) !Session {
+    fn parseSession(self: *Self, obj: std.json.Value) !Session {
         _ = self;
         return Session{
             .remaining_seconds = @intCast(obj.object.get("remainingSeconds").?.integer),
         };
     }
 
-    fn parseNames(self: *Self, obj: json.Value) !Names {
+    fn parseNames(self: *Self, obj: std.json.Value) !Names {
         _ = self;
         return Names{
             .id = obj.object.get("id").?.string,
@@ -144,7 +147,7 @@ pub const AuthdogClient = struct {
         };
     }
 
-    fn parsePhoto(self: *Self, obj: json.Value) !Photo {
+    fn parsePhoto(self: *Self, obj: std.json.Value) !Photo {
         _ = self;
         return Photo{
             .id = obj.object.get("id").?.string,
@@ -153,7 +156,7 @@ pub const AuthdogClient = struct {
         };
     }
 
-    fn parseEmail(self: *Self, obj: json.Value) !Email {
+    fn parseEmail(self: *Self, obj: std.json.Value) !Email {
         _ = self;
         return Email{
             .id = obj.object.get("id").?.string,
@@ -162,7 +165,7 @@ pub const AuthdogClient = struct {
         };
     }
 
-    fn parseVerification(self: *Self, obj: json.Value) !Verification {
+    fn parseVerification(self: *Self, obj: std.json.Value) !Verification {
         _ = self;
         return Verification{
             .id = obj.object.get("id").?.string,
@@ -173,7 +176,7 @@ pub const AuthdogClient = struct {
         };
     }
 
-    fn parseUser(self: *Self, obj: json.Value) !User {
+    fn parseUser(self: *Self, obj: std.json.Value) !User {
         const names_obj = obj.object.get("names") orelse return AuthdogError.ParseError;
         const names = try self.parseNames(names_obj);
 

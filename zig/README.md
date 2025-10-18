@@ -8,7 +8,7 @@ Official Zig SDK for Authdog authentication and user management platform.
 - **Comprehensive Type System**: Full support for all Authdog data types
 - **Error Handling**: Robust error handling with specific error types
 - **Memory Safe**: Leverages Zig's memory safety features
-- **Zero Dependencies**: Minimal external dependencies
+- **Zero Dependencies**: Uses only Zig's standard library
 
 ## Installation
 
@@ -39,20 +39,7 @@ exe.root_module.addImport("authdog", authdog_dep.module("authdog"));
 
 1. Clone this repository
 2. Copy the `src/` directory to your project
-3. Add the dependencies to your `build.zig.zon`:
-
-```zig
-.dependencies = .{
-    .@"ziggy-http" = .{
-        .url = "https://github.com/karlseguin/ziggy-http/archive/refs/heads/main.tar.gz",
-        .hash = "12200000000000000000000000000000000000000000000000000000000000000000",
-    },
-    .json = .{
-        .url = "https://github.com/karlseguin/json.zig/archive/refs/heads/main.tar.gz",
-        .hash = "12200000000000000000000000000000000000000000000000000000000000000000",
-    },
-},
-```
+3. No additional dependencies required - uses only Zig's standard library
 
 ## Quick Start
 
@@ -298,8 +285,7 @@ The build system supports:
 
 ## Dependencies
 
-- **ziggy-http**: HTTP client library
-- **json.zig**: JSON parsing library
+- **None**: Uses only Zig's standard library (`std.http` and `std.json`)
 
 ## Requirements
 
@@ -321,8 +307,7 @@ The build system supports:
 git clone https://github.com/authdog/sdk.git
 cd sdk/zig
 
-# Install dependencies
-zig build deps
+# No dependencies to install
 
 # Run tests
 zig build test

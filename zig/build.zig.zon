@@ -4,16 +4,7 @@
     .description = "Official Zig SDK for Authdog authentication and user management platform",
     .minimum_zig_version = "0.11.0",
     .license = "MIT",
-    .dependencies = .{
-        .@"ziggy-http" = .{
-            .url = "https://github.com/karlseguin/ziggy-http/archive/refs/heads/main.tar.gz",
-            .hash = "12200000000000000000000000000000000000000000000000000000000000000000",
-        },
-        .json = .{
-            .url = "https://github.com/karlseguin/json.zig/archive/refs/heads/main.tar.gz",
-            .hash = "12200000000000000000000000000000000000000000000000000000000000000000",
-        },
-    },
+    .dependencies = .{},
     .paths = .{
         "",
     },
