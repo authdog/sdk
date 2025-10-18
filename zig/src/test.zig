@@ -53,7 +53,7 @@ test "Meta struct parsing" {
     defer parser.deinit();
 
     const json_str = "{\"code\": 200, \"message\": \"Success\"}";
-    const tree = parser.parse(json_str) catch |err| {
+    const tree = parser.parseFromSlice(std.json.Value, json_str) catch |err| {
         std.debug.print("Failed to parse JSON: {}\n", .{err});
         return;
     };
@@ -84,7 +84,7 @@ test "Session struct parsing" {
     defer parser.deinit();
 
     const json_str = "{\"remainingSeconds\": 3600}";
-    const tree = parser.parse(json_str) catch |err| {
+    const tree = parser.parseFromSlice(std.json.Value, json_str) catch |err| {
         std.debug.print("Failed to parse JSON: {}\n", .{err});
         return;
     };
@@ -114,7 +114,7 @@ test "Names struct parsing" {
     defer parser.deinit();
 
     const json_str = "{\"id\": \"name-123\", \"formatted\": \"John Doe\", \"familyName\": \"Doe\", \"givenName\": \"John\", \"middleName\": \"William\", \"honorificPrefix\": \"Mr.\", \"honorificSuffix\": \"Jr.\"}";
-    const tree = parser.parse(json_str) catch |err| {
+    const tree = parser.parseFromSlice(std.json.Value, json_str) catch |err| {
         std.debug.print("Failed to parse JSON: {}\n", .{err});
         return;
     };
@@ -150,7 +150,7 @@ test "Names struct parsing with null optional fields" {
     defer parser.deinit();
 
     const json_str = "{\"id\": \"name-123\", \"familyName\": \"Doe\", \"givenName\": \"John\"}";
-    const tree = parser.parse(json_str) catch |err| {
+    const tree = parser.parseFromSlice(std.json.Value, json_str) catch |err| {
         std.debug.print("Failed to parse JSON: {}\n", .{err});
         return;
     };
@@ -186,7 +186,7 @@ test "Photo struct parsing" {
     defer parser.deinit();
 
     const json_str = "{\"id\": \"photo-123\", \"value\": \"https://example.com/photo.jpg\", \"type\": \"profile\"}";
-    const tree = parser.parse(json_str) catch |err| {
+    const tree = parser.parseFromSlice(std.json.Value, json_str) catch |err| {
         std.debug.print("Failed to parse JSON: {}\n", .{err});
         return;
     };
@@ -218,7 +218,7 @@ test "Email struct parsing" {
     defer parser.deinit();
 
     const json_str = "{\"id\": \"email-123\", \"value\": \"john@example.com\", \"type\": \"work\"}";
-    const tree = parser.parse(json_str) catch |err| {
+    const tree = parser.parseFromSlice(std.json.Value, json_str) catch |err| {
         std.debug.print("Failed to parse JSON: {}\n", .{err});
         return;
     };
@@ -250,7 +250,7 @@ test "Email struct parsing without type" {
     defer parser.deinit();
 
     const json_str = "{\"id\": \"email-123\", \"value\": \"john@example.com\"}";
-    const tree = parser.parse(json_str) catch |err| {
+    const tree = parser.parseFromSlice(std.json.Value, json_str) catch |err| {
         std.debug.print("Failed to parse JSON: {}\n", .{err});
         return;
     };
@@ -282,7 +282,7 @@ test "Verification struct parsing" {
     defer parser.deinit();
 
     const json_str = "{\"id\": \"verification-123\", \"email\": \"john@example.com\", \"verified\": true, \"createdAt\": \"2023-01-01T00:00:00Z\", \"updatedAt\": \"2023-01-02T00:00:00Z\"}";
-    const tree = parser.parse(json_str) catch |err| {
+    const tree = parser.parseFromSlice(std.json.Value, json_str) catch |err| {
         std.debug.print("Failed to parse JSON: {}\n", .{err});
         return;
     };
@@ -364,7 +364,7 @@ test "User struct parsing" {
         \\}
     ;
 
-    const tree = parser.parse(json_str) catch |err| {
+    const tree = parser.parseFromSlice(std.json.Value, json_str) catch |err| {
         std.debug.print("Failed to parse JSON: {}\n", .{err});
         return;
     };
@@ -464,7 +464,7 @@ test "UserInfoResponse struct parsing" {
         \\}
     ;
 
-    const tree = parser.parse(json_str) catch |err| {
+    const tree = parser.parseFromSlice(std.json.Value, json_str) catch |err| {
         std.debug.print("Failed to parse JSON: {}\n", .{err});
         return;
     };
@@ -556,7 +556,7 @@ test "UserInfoResponse deinit" {
         \\}
     ;
 
-    const tree = parser.parse(json_str) catch |err| {
+    const tree = parser.parseFromSlice(std.json.Value, json_str) catch |err| {
         std.debug.print("Failed to parse JSON: {}\n", .{err});
         return;
     };

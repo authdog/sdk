@@ -99,7 +99,7 @@ pub const AuthdogClient = struct {
         var parser = std.json.Parser.init(allocator, .alloc_always);
         defer parser.deinit();
 
-        const tree = parser.parse(json_str) catch return AuthdogError.ParseError;
+        const tree = parser.parseFromSlice(std.json.Value, json_str) catch return AuthdogError.ParseError;
         defer tree.deinit();
 
         const root = tree.root;
