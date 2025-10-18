@@ -10,6 +10,7 @@ Official SDKs for Authdog authentication and user management platform.
 [![C++ SDK Tests](https://github.com/authdog/sdk/actions/workflows/cpp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/cpp-test.yml)
 [![Kotlin SDK Tests](https://github.com/authdog/sdk/actions/workflows/kotlin-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/kotlin-test.yml)
 [![Rust SDK Tests](https://github.com/authdog/sdk/actions/workflows/rust-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/rust-test.yml)
+[![PHP Tests](https://github.com/authdog/sdk/actions/workflows/php-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/php-test.yml)
 
 ## Available SDKs
 
