@@ -300,7 +300,7 @@ pub const UserInfoResponse = struct {
     session: Session,
     user: User,
 
-    pub fn deinit(self: *UserInfoResponse, allocator: std.mem.Allocator) void {
+    pub fn deinit(self: *const UserInfoResponse, allocator: std.mem.Allocator) void {
         self.user.deinit(allocator);
     }
 };

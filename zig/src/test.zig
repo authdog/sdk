@@ -59,7 +59,7 @@ test "Meta struct parsing" {
     };
     defer tree.deinit();
 
-    const meta = client.parseMeta(tree.root) catch |err| {
+    const meta = client.parseMeta(tree.value) catch |err| {
         std.debug.print("Failed to parse meta: {}\n", .{err});
         return;
     };
@@ -90,7 +90,7 @@ test "Session struct parsing" {
     };
     defer tree.deinit();
 
-    const session = client.parseSession(tree.root) catch |err| {
+    const session = client.parseSession(tree.value) catch |err| {
         std.debug.print("Failed to parse session: {}\n", .{err});
         return;
     };
@@ -120,7 +120,7 @@ test "Names struct parsing" {
     };
     defer tree.deinit();
 
-    const names = client.parseNames(tree.root) catch |err| {
+    const names = client.parseNames(tree.value) catch |err| {
         std.debug.print("Failed to parse names: {}\n", .{err});
         return;
     };
@@ -156,7 +156,7 @@ test "Names struct parsing with null optional fields" {
     };
     defer tree.deinit();
 
-    const names = client.parseNames(tree.root) catch |err| {
+    const names = client.parseNames(tree.value) catch |err| {
         std.debug.print("Failed to parse names: {}\n", .{err});
         return;
     };
@@ -192,7 +192,7 @@ test "Photo struct parsing" {
     };
     defer tree.deinit();
 
-    const photo = client.parsePhoto(tree.root) catch |err| {
+    const photo = client.parsePhoto(tree.value) catch |err| {
         std.debug.print("Failed to parse photo: {}\n", .{err});
         return;
     };
@@ -224,7 +224,7 @@ test "Email struct parsing" {
     };
     defer tree.deinit();
 
-    const email = client.parseEmail(tree.root) catch |err| {
+    const email = client.parseEmail(tree.value) catch |err| {
         std.debug.print("Failed to parse email: {}\n", .{err});
         return;
     };
@@ -256,7 +256,7 @@ test "Email struct parsing without type" {
     };
     defer tree.deinit();
 
-    const email = client.parseEmail(tree.root) catch |err| {
+    const email = client.parseEmail(tree.value) catch |err| {
         std.debug.print("Failed to parse email: {}\n", .{err});
         return;
     };
@@ -288,7 +288,7 @@ test "Verification struct parsing" {
     };
     defer tree.deinit();
 
-    const verification = client.parseVerification(tree.root) catch |err| {
+    const verification = client.parseVerification(tree.value) catch |err| {
         std.debug.print("Failed to parse verification: {}\n", .{err});
         return;
     };
@@ -370,7 +370,7 @@ test "User struct parsing" {
     };
     defer tree.deinit();
 
-    const user = client.parseUser(tree.root) catch |err| {
+    const user = client.parseUser(tree.value) catch |err| {
         std.debug.print("Failed to parse user: {}\n", .{err});
         return;
     };
