@@ -7,6 +7,28 @@
 
 namespace authdog {
 
+// Custom serialization for std::optional<std::string>
+namespace nlohmann {
+    template<>
+    struct adl_serializer<std::optional<std::string>> {
+        static void to_json(json& j, const std::optional<std::string>& opt) {
+            if (opt.has_value()) {
+                j = opt.value();
+            } else {
+                j = nullptr;
+            }
+        }
+
+        static void from_json(const json& j, std::optional<std::string>& opt) {
+            if (j.is_null()) {
+                opt = std::nullopt;
+            } else {
+                opt = j.get<std::string>();
+            }
+        }
+    };
+}
+
 /**
  * Metadata in the response
  */
