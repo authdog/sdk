@@ -33,7 +33,7 @@ defmodule AuthdogTest do
     test "handles successful response" do
       # This would require mocking HTTP requests in a real test
       # For now, we'll test the error cases and structure
-      client = Client.new("https://api.authdog.com")
+      _client = Client.new("https://api.authdog.com")
       
       # Test that the function exists and has correct arity
       assert function_exported?(Client, :get_user_info, 2)
