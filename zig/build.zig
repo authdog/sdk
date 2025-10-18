@@ -24,17 +24,8 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     
-    // Version-agnostic module linking
-    if (@hasDecl(std.Build.Step.Compile, "root_module")) {
-        // Zig 0.12.0 and later
-        exe.root_module.addImport("authdog", &lib.root_module);
-    } else {
-        // Zig 0.11.0 and earlier - use addModule
-        const authdog_module = b.addModule("authdog", .{
-            .root_source_file = .{ .path = "src/lib.zig" },
-        });
-        exe.addModule("authdog", authdog_module);
-    }
+    // Use root_module.addImport for Zig 0.12.0+
+    exe.root_module.addImport("authdog", &lib.root_module);
 
     b.installArtifact(exe);
 
@@ -45,17 +36,8 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     
-    // Version-agnostic module linking for tests
-    if (@hasDecl(std.Build.Step.Compile, "root_module")) {
-        // Zig 0.12.0 and later
-        tests.root_module.addImport("authdog", &lib.root_module);
-    } else {
-        // Zig 0.11.0 and earlier - use addModule
-        const authdog_module = b.addModule("authdog", .{
-            .root_source_file = .{ .path = "src/lib.zig" },
-        });
-        tests.addModule("authdog", authdog_module);
-    }
+    // Use root_module.addImport for Zig 0.12.0+
+    tests.root_module.addImport("authdog", &lib.root_module);
 
     const test_run = b.addRunArtifact(tests);
     const test_step = b.step("test", "Run unit tests");
