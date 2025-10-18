@@ -32,6 +32,11 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: 'temurin'
 
+      - name: Setup SBT
+        uses: olafurpg/setup-sbt@v3
+        with:
+          version: 1.9.7
+
       - name: Cache SBT dependencies
         uses: actions/cache@v4
         with:
