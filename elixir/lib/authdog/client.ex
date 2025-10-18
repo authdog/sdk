@@ -102,6 +102,7 @@ defmodule Authdog.Client do
           {:ok, data} ->
             user_info = Authdog.Types.UserInfoResponse.from_map(data)
             {:ok, user_info}
+
           {:error, _} ->
             {:error, :api_error, "Failed to parse response"}
         end
@@ -115,11 +116,14 @@ defmodule Authdog.Client do
             case error_message do
               "GraphQL query failed" ->
                 {:error, :api_error, "GraphQL query failed"}
+
               "Failed to fetch user info" ->
                 {:error, :api_error, "Failed to fetch user info"}
+
               _ ->
                 {:error, :api_error, "HTTP error 500: #{inspect(body)}"}
             end
+
           _ ->
             {:error, :api_error, "HTTP error 500: #{inspect(body)}"}
         end
