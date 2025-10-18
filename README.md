@@ -16,6 +16,7 @@ Official SDKs for Authdog authentication and user management platform.
 [![Clojure Tests](https://github.com/authdog/sdk/actions/workflows/clojure-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/clojure-test.yml)
 [![Common Lisp Tests](https://github.com/authdog/sdk/actions/workflows/commonlisp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/commonlisp-test.yml)
 [![Swift Tests](https://github.com/authdog/sdk/actions/workflows/swift-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/swift-test.yml)
+[![Zig Tests](https://github.com/authdog/sdk/actions/workflows/zig-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/zig-test.yml)
 
 ## Available SDKs
 
