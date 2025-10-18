@@ -27,10 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [
-          # gcc,
-          clang
-          ]
+        compiler: [gcc, clang]
 
     steps:
     - name: Checkout code
@@ -52,6 +49,7 @@ jobs:
         if [ "${{ matrix.compiler }}" = "clang" ]; then
           sudo apt-get install -y clang
         fi
+        # GCC is already included in build-essential
 
     - name: Configure CMake
       run: |
