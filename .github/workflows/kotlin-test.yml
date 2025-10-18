@@ -1,0 +1,78 @@
+name: Kotlin SDK Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'kotlin/**'
+      - '.github/workflows/kotlin-test.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'kotlin/**'
+      - '.github/workflows/kotlin-test.yml'
+
+env:
+  GRADLE_VERSION: "8.5"
+  JAVA_VERSION: "17"
+
+jobs:
+  test:
+    name: Test Kotlin SDK
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        java-version: ["17", "21"]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK ${{ matrix.java-version }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: 'temurin'
+
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Make gradlew executable
+      run: chmod +x ./kotlin/gradlew
+
+    - name: Run tests
+      run: |
+        cd kotlin
+        ./gradlew test --no-daemon
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-java-${{ matrix.java-version }}
+        path: kotlin/build/test-results/
+
+    - name: Upload build logs
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: build-logs-java-${{ matrix.java-version }}
+        path: kotlin/build/
+
+    - name: Generate test report
+      uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: Kotlin SDK Tests (Java ${{ matrix.java-version }})
+        path: kotlin/build/test-results/test/*.xml
+        reporter: java-junit
