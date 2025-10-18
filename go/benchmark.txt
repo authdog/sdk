@@ -1,2 +1,8 @@
+goos: linux
+goarch: amd64
+pkg: github.com/authdog/go-sdk
+cpu: Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz
+BenchmarkClient_GetUserInfo-8   	    9702	    109643 ns/op	   10480 B/op	     105 allocs/op
+BenchmarkClient_NewClient-8     	1000000000	         1.109 ns/op	       0 B/op	       0 allocs/op
 PASS
-ok  	github.com/authdog/go-sdk	0.216s
+ok  	github.com/authdog/go-sdk	3.123s
