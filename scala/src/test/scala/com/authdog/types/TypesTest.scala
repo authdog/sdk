@@ -12,8 +12,8 @@ class TypesTest extends AnyFlatSpec with Matchers {
     val result = decode[Meta](json)
     
     result shouldBe a[Right[_, _]]
-    result.right.get.code shouldBe 200
-    result.right.get.message shouldBe "Success"
+    result.fold(throw _, identity).code shouldBe 200
+    result.fold(throw _, identity).message shouldBe "Success"
   }
   
   it should "be encoded to JSON" in {
@@ -29,7 +29,7 @@ class TypesTest extends AnyFlatSpec with Matchers {
     val result = decode[Session](json)
     
     result shouldBe a[Right[_, _]]
-    result.right.get.remainingSeconds shouldBe 3600
+    result.fold(throw _, identity).remainingSeconds shouldBe 3600
   }
   
   it should "be encoded to JSON" in {
@@ -52,7 +52,7 @@ class TypesTest extends AnyFlatSpec with Matchers {
     val result = decode[Names](json)
     
     result shouldBe a[Right[_, _]]
-    val names = result.right.get
+    val names = result.fold(throw _, identity)
     names.id shouldBe "name_123"
     names.formatted shouldBe Some("John Doe")
     names.familyName shouldBe "Doe"
@@ -89,7 +89,7 @@ class TypesTest extends AnyFlatSpec with Matchers {
     val result = decode[Photo](json)
     
     result shouldBe a[Right[_, _]]
-    val photo = result.right.get
+    val photo = result.fold(throw _, identity)
     photo.id shouldBe "photo_123"
     photo.value shouldBe "https://example.com/photo.jpg"
     photo.`type` shouldBe "profile"
@@ -113,7 +113,7 @@ class TypesTest extends AnyFlatSpec with Matchers {
     val result = decode[Email](json)
     
     result shouldBe a[Right[_, _]]
-    val email = result.right.get
+    val email = result.fold(throw _, identity)
     email.id shouldBe "email_123"
     email.value shouldBe "john@example.com"
     email.`type` shouldBe Some("work")
@@ -128,7 +128,7 @@ class TypesTest extends AnyFlatSpec with Matchers {
     val result = decode[Email](json)
     
     result shouldBe a[Right[_, _]]
-    val email = result.right.get
+    val email = result.fold(throw _, identity)
     email.id shouldBe "email_123"
     email.value shouldBe "john@example.com"
     email.`type` shouldBe None
@@ -154,7 +154,7 @@ class TypesTest extends AnyFlatSpec with Matchers {
     val result = decode[Verification](json)
     
     result shouldBe a[Right[_, _]]
-    val verification = result.right.get
+    val verification = result.fold(throw _, identity)
     verification.id shouldBe "verification_123"
     verification.email shouldBe "john@example.com"
     verification.verified shouldBe true
@@ -235,7 +235,7 @@ class TypesTest extends AnyFlatSpec with Matchers {
     val result = decode[User](json)
     
     result shouldBe a[Right[_, _]]
-    val user = result.right.get
+    val user = result.fold(throw _, identity)
     user.id shouldBe "user_123"
     user.externalId shouldBe "ext_123"
     user.userName shouldBe "johndoe"
@@ -374,7 +374,7 @@ class TypesTest extends AnyFlatSpec with Matchers {
     val result = decode[UserInfoResponse](json)
     
     result shouldBe a[Right[_, _]]
-    val response = result.right.get
+    val response = result.fold(throw _, identity)
     response.meta.code shouldBe 200
     response.meta.message shouldBe "Success"
     response.session.remainingSeconds shouldBe 3600
