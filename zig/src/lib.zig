@@ -287,7 +287,7 @@ pub const User = struct {
     updated_at: []const u8,
     environment_id: []const u8,
 
-    pub fn deinit(self: *User, allocator: std.mem.Allocator) void {
+    pub fn deinit(self: *const User, allocator: std.mem.Allocator) void {
         _ = allocator; // Mark as intentionally unused
         self.photos.deinit();
         self.emails.deinit();
