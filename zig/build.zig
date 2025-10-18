@@ -25,7 +25,7 @@ pub fn build(b: *std.Build) void {
     });
     
     // Version-agnostic module linking
-    if (@hasField(@TypeOf(exe), "root_module")) {
+    if (@hasDecl(std.Build.Step.Compile, "root_module")) {
         // Zig 0.12.0 and later
         exe.root_module.addImport("authdog", &lib.root_module);
     } else {
@@ -46,7 +46,7 @@ pub fn build(b: *std.Build) void {
     });
     
     // Version-agnostic module linking for tests
-    if (@hasField(@TypeOf(tests), "root_module")) {
+    if (@hasDecl(std.Build.Step.Compile, "root_module")) {
         // Zig 0.12.0 and later
         tests.root_module.addImport("authdog", &lib.root_module);
     } else {
