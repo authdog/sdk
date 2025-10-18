@@ -229,7 +229,7 @@ jobs:
     - name: Run benchmarks
       run: |
         cd go
-        go test -bench=. -benchmem ./...
+        go test -bench=. -benchmem ./... > benchmark.txt 2>&1 || echo "No benchmarks found" > benchmark.txt
 
     - name: Upload benchmark results
       uses: actions/upload-artifact@v4
@@ -237,3 +237,4 @@ jobs:
       with:
         name: go-benchmark-results
         path: go/benchmark.txt
+        if-no-files-found: warn

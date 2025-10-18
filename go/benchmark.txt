@@ -1,0 +1,2 @@
+PASS
+ok  	github.com/authdog/go-sdk	0.216s
