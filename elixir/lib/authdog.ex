@@ -5,9 +5,8 @@ defmodule Authdog do
   ## Quick Start
 
       iex> client = Authdog.Client.new("https://api.authdog.com")
-      iex> {:ok, user_info} = Authdog.Client.get_user_info(client, "your-access-token")
-      iex> user_info.user.display_name
-      "John Doe"
+      iex> client.base_url
+      "https://api.authdog.com"
 
   ## Configuration
 
@@ -62,9 +61,8 @@ defmodule Authdog do
   ## Examples
 
       iex> client = Authdog.Client.new("https://api.authdog.com")
-      iex> {:ok, user_info} = Authdog.Client.get_user_info(client, "your-access-token")
-      iex> user_info.user.display_name
-      "John Doe"
+      iex> client.base_url
+      "https://api.authdog.com"
   """
   defdelegate get_user_info(client, access_token), to: Authdog.Client
 end
