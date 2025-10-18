@@ -92,7 +92,6 @@ target_compile_options(authdog_cpp_sdk PRIVATE
 
 # Install targets
 install(TARGETS authdog_cpp_sdk
-    EXPORT AuthdogCppSdkTargets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
@@ -115,30 +114,4 @@ if(AUTHDOG_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
-# Documentation removed for simplicity
-
-# Package configuration
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    AuthdogCppSdkConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY AnyNewerVersion
-)
-
-configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/AuthdogCppSdkConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/AuthdogCppSdkConfig.cmake
-    INSTALL_DESTINATION lib/cmake/AuthdogCppSdk
-)
-
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/AuthdogCppSdkConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/AuthdogCppSdkConfigVersion.cmake
-    DESTINATION lib/cmake/AuthdogCppSdk
-)
-
-install(EXPORT AuthdogCppSdkTargets
-    FILE AuthdogCppSdkTargets.cmake
-    NAMESPACE Authdog::
-    DESTINATION lib/cmake/AuthdogCppSdk
-)
+# Simplified installation - no complex package configuration
