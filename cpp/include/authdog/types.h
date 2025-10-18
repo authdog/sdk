@@ -5,8 +5,6 @@
 #include <optional>
 #include <nlohmann/json.hpp>
 
-namespace authdog {
-
 // Custom serialization for std::optional<std::string>
 namespace nlohmann {
     template<>
@@ -28,6 +26,8 @@ namespace nlohmann {
         }
     };
 }
+
+namespace authdog {
 
 /**
  * Metadata in the response
