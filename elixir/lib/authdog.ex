@@ -17,11 +17,11 @@ defmodule Authdog do
 
       case Authdog.Client.get_user_info(client, "token") do
         {:ok, user_info} -> 
-          IO.puts("User: #{user_info.user.display_name}")
+          IO.puts("User: " <> user_info.user.display_name)
         {:error, :authentication_error, message} -> 
-          IO.puts("Authentication failed: #{message}")
+          IO.puts("Authentication failed: " <> message)
         {:error, :api_error, message} -> 
-          IO.puts("API error: #{message}")
+          IO.puts("API error: " <> message)
       end
   """
 
