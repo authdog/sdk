@@ -52,21 +52,21 @@ jobs:
         cd node
         pnpm run lint
 
-    - name: Run tests
+    - name: Run tests with coverage
       run: |
         cd node
-        pnpm test
+        pnpm run test:coverage
 
     - name: Build TypeScript
       run: |
         cd node
         pnpm run build
 
-    - name: Upload test results
+    - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: node-test-results-${{ matrix.node-version }}
+        name: node-coverage-${{ matrix.node-version }}
         path: node/coverage/
 
   # security:
