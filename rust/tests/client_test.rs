@@ -1,4 +1,4 @@
-use authdog::{AuthdogClient, AuthdogClientConfig, AuthdogError, AuthenticationError, APIError};
+use authdog::{APIError, AuthdogClient, AuthdogClientConfig, AuthdogError, AuthenticationError};
 use mockito::{mock, server_url, Matcher};
 use serde_json::json;
 use std::time::Duration;
@@ -11,7 +11,7 @@ async fn test_client_constructor_with_base_url() {
         api_key: None,
         timeout: Some(Duration::from_secs(10)),
     };
-    
+
     let client = AuthdogClient::new(config);
     assert!(client.is_ok());
 }
@@ -23,7 +23,7 @@ async fn test_client_constructor_with_trailing_slash() {
         api_key: None,
         timeout: Some(Duration::from_secs(10)),
     };
-    
+
     let client = AuthdogClient::new(config);
     assert!(client.is_ok());
 }
@@ -35,7 +35,7 @@ async fn test_client_constructor_with_api_key() {
         api_key: Some("test-api-key".to_string()),
         timeout: Some(Duration::from_secs(10)),
     };
-    
+
     let client = AuthdogClient::new(config);
     assert!(client.is_ok());
 }
@@ -47,7 +47,7 @@ async fn test_client_constructor_with_timeout() {
         api_key: None,
         timeout: Some(Duration::from_secs(30)),
     };
-    
+
     let client = AuthdogClient::new(config);
     assert!(client.is_ok());
 }
@@ -59,7 +59,7 @@ async fn test_client_constructor_without_timeout() {
         api_key: None,
         timeout: None,
     };
-    
+
     let client = AuthdogClient::new(config);
     assert!(client.is_ok());
 }

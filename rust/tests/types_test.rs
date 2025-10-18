@@ -69,7 +69,7 @@ fn test_user_info_response_deserialization() {
 
     let result: Result<UserInfoResponse, _> = serde_json::from_str(json_string);
     assert!(result.is_ok());
-    
+
     let user_info = result.unwrap();
     assert_eq!(user_info.meta.code, 200);
     assert_eq!(user_info.meta.message, "Success");
@@ -79,7 +79,10 @@ fn test_user_info_response_deserialization() {
     assert_eq!(user_info.user.user_name, "testuser");
     assert_eq!(user_info.user.display_name, "Test User");
     assert_eq!(user_info.user.nick_name, Some("test".to_string()));
-    assert_eq!(user_info.user.profile_url, Some("https://example.com/profile".to_string()));
+    assert_eq!(
+        user_info.user.profile_url,
+        Some("https://example.com/profile".to_string())
+    );
     assert_eq!(user_info.user.title, Some("Developer".to_string()));
     assert_eq!(user_info.user.user_type, Some("employee".to_string()));
     assert_eq!(user_info.user.preferred_language, Some("en".to_string()));
@@ -127,7 +130,7 @@ fn test_user_info_response_with_null_optional_fields() {
 
     let result: Result<UserInfoResponse, _> = serde_json::from_str(json_string);
     assert!(result.is_ok());
-    
+
     let user_info = result.unwrap();
     assert_eq!(user_info.user.nick_name, None);
     assert_eq!(user_info.user.profile_url, None);
@@ -146,7 +149,7 @@ fn test_meta_deserialization() {
     let json_string = r#"{"code": 200, "message": "Success"}"#;
     let result: Result<Meta, _> = serde_json::from_str(json_string);
     assert!(result.is_ok());
-    
+
     let meta = result.unwrap();
     assert_eq!(meta.code, 200);
     assert_eq!(meta.message, "Success");
@@ -157,7 +160,7 @@ fn test_session_deserialization() {
     let json_string = r#"{"remainingSeconds": 3600}"#;
     let result: Result<Session, _> = serde_json::from_str(json_string);
     assert!(result.is_ok());
-    
+
     let session = result.unwrap();
     assert_eq!(session.remaining_seconds, 3600);
 }
@@ -175,10 +178,10 @@ fn test_names_deserialization_with_optional_fields() {
         "honorificSuffix": "Jr."
     }
     "#;
-    
+
     let result: Result<Names, _> = serde_json::from_str(json_string);
     assert!(result.is_ok());
-    
+
     let names = result.unwrap();
     assert_eq!(names.id, "name123");
     assert_eq!(names.formatted, Some("Test User".to_string()));
@@ -198,10 +201,10 @@ fn test_photo_deserialization() {
         "type": "profile"
     }
     "#;
-    
+
     let result: Result<Photo, _> = serde_json::from_str(json_string);
     assert!(result.is_ok());
-    
+
     let photo = result.unwrap();
     assert_eq!(photo.id, "photo123");
     assert_eq!(photo.value, "https://example.com/photo.jpg");
@@ -217,10 +220,10 @@ fn test_email_deserialization_with_optional_type() {
         "type": "work"
     }
     "#;
-    
+
     let result: Result<Email, _> = serde_json::from_str(json_string);
     assert!(result.is_ok());
-    
+
     let email = result.unwrap();
     assert_eq!(email.id, "email123");
     assert_eq!(email.value, "test@example.com");
@@ -235,10 +238,10 @@ fn test_email_deserialization_without_type() {
         "value": "test@example.com"
     }
     "#;
-    
+
     let result: Result<Email, _> = serde_json::from_str(json_string);
     assert!(result.is_ok());
-    
+
     let email = result.unwrap();
     assert_eq!(email.id, "email123");
     assert_eq!(email.value, "test@example.com");
@@ -256,10 +259,10 @@ fn test_verification_deserialization() {
         "updatedAt": "2023-01-01T00:00:00Z"
     }
     "#;
-    
+
     let result: Result<Verification, _> = serde_json::from_str(json_string);
     assert!(result.is_ok());
-    
+
     let verification = result.unwrap();
     assert_eq!(verification.id, "verification123");
     assert_eq!(verification.email, "test@example.com");
@@ -273,7 +276,7 @@ fn test_error_response_deserialization() {
     let json_string = r#"{"error": "GraphQL query failed"}"#;
     let result: Result<ErrorResponse, _> = serde_json::from_str(json_string);
     assert!(result.is_ok());
-    
+
     let error_response = result.unwrap();
     assert_eq!(error_response.error, "GraphQL query failed");
 }
@@ -321,7 +324,7 @@ fn test_types_implement_clone() {
             environment_id: "env123".to_string(),
         },
     };
-    
+
     let cloned = user_info.clone();
     assert_eq!(cloned.meta.code, user_info.meta.code);
     assert_eq!(cloned.user.id, user_info.user.id);
@@ -333,7 +336,7 @@ fn test_types_implement_debug() {
         code: 200,
         message: "Success".to_string(),
     };
-    
+
     let debug_string = format!("{:?}", meta);
     assert!(debug_string.contains("200"));
     assert!(debug_string.contains("Success"));
