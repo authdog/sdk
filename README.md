@@ -12,6 +12,7 @@ Official SDKs for Authdog authentication and user management platform.
 [![Rust SDK Tests](https://github.com/authdog/sdk/actions/workflows/rust-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/rust-test.yml)
 [![PHP Tests](https://github.com/authdog/sdk/actions/workflows/php-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/php-test.yml)
 [![Elixir Tests](https://github.com/authdog/sdk/actions/workflows/elixir-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/elixir-test.yml)
+[![Scala Tests](https://github.com/authdog/sdk/actions/workflows/scala-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/scala-test.yml)
 
 ## Available SDKs
 
