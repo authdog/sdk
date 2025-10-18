@@ -572,7 +572,7 @@ test "UserInfoResponse deinit" {
 }
 
 test "AuthdogError enum values" {
-    // Test that all error variants exist and can be returned
-    const testError: authdog.AuthdogError = error.AuthenticationFailed;
-    _ = testError;
+    // Test that we can return errors
+    const result: authdog.AuthdogError!void = error.AuthenticationFailed;
+    try std.testing.expectError(error.AuthenticationFailed, result);
 }
