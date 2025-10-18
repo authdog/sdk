@@ -3,11 +3,11 @@ name: PHP Tests
 on:
   push:
     paths:
-      - 'sdk/php/**'
+      - 'php/**'
       - '.github/workflows/php-test.yml'
   pull_request:
     paths:
-      - 'sdk/php/**'
+      - 'php/**'
 
 jobs:
   phpunit:
@@ -19,7 +19,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: sdk/php
+        working-directory: php
 
     steps:
       - name: Checkout
