@@ -61,7 +61,7 @@ public:
             }
         }
         
-        if (!response.status_code == 200) {
+        if (response.status_code != 200) {
             throw ApiException("HTTP error " + std::to_string(response.status_code) + ": " + response.text);
         }
         
