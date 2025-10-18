@@ -31,13 +31,25 @@ jobs:
         version: ${{ matrix.zig-version }}
     
     - name: Verify Zig installation
-      run: zig version
+      run: |
+        zig version
+        echo "ZIG_LOCAL_CACHE_DIR: $ZIG_LOCAL_CACHE_DIR"
+        echo "ZIG_GLOBAL_CACHE_DIR: $ZIG_GLOBAL_CACHE_DIR"
     
     - name: Clear Zig cache
       run: |
         cd zig
         rm -rf zig-cache .zig-cache || echo "No cache to clear"
+        rm -rf ~/.cache/zig || echo "No global cache to clear"
+        rm -rf $ZIG_LOCAL_CACHE_DIR || echo "No local cache to clear"
+        rm -rf $ZIG_GLOBAL_CACHE_DIR || echo "No global cache to clear"
         echo "No external dependencies required"
+    
+    - name: Validate build configuration
+      run: |
+        cd zig
+        cat build.zig.zon
+        echo "Build configuration validated"
     
     - name: Run tests
       run: |
@@ -76,6 +88,7 @@ jobs:
       run: |
         cd zig
         rm -rf zig-cache .zig-cache || echo "No cache to clear"
+        rm -rf ~/.cache/zig || echo "No global cache to clear"
     
     - name: Install zigfmt
       run: |
@@ -109,6 +122,7 @@ jobs:
       run: |
         cd zig
         rm -rf zig-cache .zig-cache || echo "No cache to clear"
+        rm -rf ~/.cache/zig || echo "No global cache to clear"
     
     - name: Run security analysis
       run: |

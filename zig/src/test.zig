@@ -49,7 +49,7 @@ test "Meta struct parsing" {
     defer client.deinit();
 
     // Mock JSON object for meta
-    var parser = std.std.json.Parser.init(allocator, .alloc_always);
+    var parser = std.json.Parser.init(allocator, .alloc_always);
     defer parser.deinit();
 
     const json_str = "{\"code\": 200, \"message\": \"Success\"}";
