@@ -165,10 +165,10 @@ func TestErrorTypes(t *testing.T) {
 func TestErrorWrapping(t *testing.T) {
 	// Test that errors can be wrapped and unwrapped properly
 	originalErr := &AuthenticationError{Message: "original error"}
-	
+
 	// Simulate error wrapping (common pattern in Go)
 	wrappedErr := &AuthenticationError{Message: "wrapped: " + originalErr.Error()}
-	
+
 	if wrappedErr.Error() != "wrapped: original error" {
 		t.Errorf("Error wrapping failed: got %v, want 'wrapped: original error'", wrappedErr.Error())
 	}
@@ -178,17 +178,17 @@ func TestErrorComparison(t *testing.T) {
 	err1 := &AuthenticationError{Message: "same message"}
 	err2 := &AuthenticationError{Message: "same message"}
 	err3 := &AuthenticationError{Message: "different message"}
-	
+
 	// Test that errors with same message are not equal (different instances)
 	if err1 == err2 {
 		t.Error("Different error instances should not be equal")
 	}
-	
+
 	// Test that errors with different messages are not equal
 	if err1 == err3 {
 		t.Error("Errors with different messages should not be equal")
 	}
-	
+
 	// Test that error messages are equal
 	if err1.Error() != err2.Error() {
 		t.Error("Errors with same message should have equal Error() output")

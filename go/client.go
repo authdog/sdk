@@ -47,7 +47,7 @@ func NewClient(config ClientConfig) *Client {
 // GetUserInfo retrieves user information using an access token
 func (c *Client) GetUserInfo(ctx context.Context, accessToken string) (*UserInfoResponse, error) {
 	url := fmt.Sprintf("%s/v1/userinfo", c.baseURL)
-	
+
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)

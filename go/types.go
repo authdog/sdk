@@ -22,39 +22,39 @@ type Session struct {
 
 // User represents user information
 type User struct {
-	ID                 string        `json:"id"`
-	ExternalID         string        `json:"externalId"`
-	UserName           string        `json:"userName"`
-	DisplayName        string        `json:"displayName"`
-	NickName           *string       `json:"nickName"`
-	ProfileURL         *string       `json:"profileUrl"`
-	Title              *string       `json:"title"`
-	UserType           *string       `json:"userType"`
-	PreferredLanguage  *string       `json:"preferredLanguage"`
-	Locale             string        `json:"locale"`
-	Timezone           *string       `json:"timezone"`
-	Active             bool          `json:"active"`
-	Names              Names         `json:"names"`
-	Photos             []Photo       `json:"photos"`
-	PhoneNumbers       []interface{} `json:"phoneNumbers"`
-	Addresses          []interface{} `json:"addresses"`
-	Emails             []Email       `json:"emails"`
-	Verifications      []Verification `json:"verifications"`
-	Provider           string        `json:"provider"`
-	CreatedAt          time.Time     `json:"createdAt"`
-	UpdatedAt          string        `json:"updatedAt"`
-	EnvironmentID      string        `json:"environmentId"`
+	ID                string         `json:"id"`
+	ExternalID        string         `json:"externalId"`
+	UserName          string         `json:"userName"`
+	DisplayName       string         `json:"displayName"`
+	NickName          *string        `json:"nickName"`
+	ProfileURL        *string        `json:"profileUrl"`
+	Title             *string        `json:"title"`
+	UserType          *string        `json:"userType"`
+	PreferredLanguage *string        `json:"preferredLanguage"`
+	Locale            string         `json:"locale"`
+	Timezone          *string        `json:"timezone"`
+	Active            bool           `json:"active"`
+	Names             Names          `json:"names"`
+	Photos            []Photo        `json:"photos"`
+	PhoneNumbers      []interface{}  `json:"phoneNumbers"`
+	Addresses         []interface{}  `json:"addresses"`
+	Emails            []Email        `json:"emails"`
+	Verifications     []Verification `json:"verifications"`
+	Provider          string         `json:"provider"`
+	CreatedAt         time.Time      `json:"createdAt"`
+	UpdatedAt         string         `json:"updatedAt"`
+	EnvironmentID     string         `json:"environmentId"`
 }
 
 // Names represents user name information
 type Names struct {
-	ID               string  `json:"id"`
-	Formatted        *string `json:"formatted"`
-	FamilyName       string  `json:"familyName"`
-	GivenName        string  `json:"givenName"`
-	MiddleName       *string `json:"middleName"`
-	HonorificPrefix  *string `json:"honorificPrefix"`
-	HonorificSuffix  *string `json:"honorificSuffix"`
+	ID              string  `json:"id"`
+	Formatted       *string `json:"formatted"`
+	FamilyName      string  `json:"familyName"`
+	GivenName       string  `json:"givenName"`
+	MiddleName      *string `json:"middleName"`
+	HonorificPrefix *string `json:"honorificPrefix"`
+	HonorificSuffix *string `json:"honorificSuffix"`
 }
 
 // Photo represents a user photo
