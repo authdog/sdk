@@ -370,7 +370,7 @@ test "User struct parsing" {
     };
     defer tree.deinit();
 
-    const user = client.parseUser(tree.value) catch |err| {
+    var user = client.parseUser(tree.value) catch |err| {
         std.debug.print("Failed to parse user: {}\n", .{err});
         return;
     };
@@ -470,7 +470,7 @@ test "UserInfoResponse struct parsing" {
     };
     defer tree.deinit();
 
-    const user_info = client.parseUserInfoResponse(json_str) catch |err| {
+    var user_info = client.parseUserInfoResponse(json_str) catch |err| {
         std.debug.print("Failed to parse user info response: {}\n", .{err});
         return;
     };
