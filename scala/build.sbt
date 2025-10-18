@@ -35,7 +35,8 @@ lazy val root = (project in file("."))
       "-Ywarn-numeric-widen",
       "-Ywarn-value-discard",
       "-Xfatal-warnings",
-      "-language:implicitConversions"
+      "-language:implicitConversions",
+      "-Ymacro-annotations"
     ),
     
     // Publishing settings
