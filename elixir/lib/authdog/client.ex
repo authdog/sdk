@@ -3,6 +3,8 @@ defmodule Authdog.Client do
   Authdog API client for making HTTP requests.
   """
 
+  alias Authdog.Types.UserInfoResponse
+
   defstruct [
     :base_url,
     :api_key,
@@ -80,59 +82,71 @@ defmodule Authdog.Client do
       "John Doe"
   """
   @spec get_user_info(t(), String.t()) ::
-          {:ok, Authdog.Types.UserInfoResponse.t()}
+          {:ok, UserInfoResponse.t()}
           | {:error, :authentication_error, String.t()}
           | {:error, :api_error, String.t()}
   def get_user_info(%__MODULE__{} = client, access_token) do
-    headers = [
-      {"authorization", "Bearer #{access_token}"}
-    ]
-
-    # Add API key if provided
-    headers =
-      if client.api_key do
-        [{"authorization", "Bearer #{client.api_key}"} | headers]
-      else
-        headers
-      end
+    headers = build_headers(client, access_token)
 
     case Req.get(client.req_client, url: "/v1/userinfo", headers: headers) do
       {:ok, %Req.Response{status: 200, body: body}} ->
-        case Jason.decode(body) do
-          {:ok, data} ->
-            user_info = Authdog.Types.UserInfoResponse.from_map(data)
-            {:ok, user_info}
-
-          {:error, _} ->
-            {:error, :api_error, "Failed to parse response"}
-        end
+        handle_success_response(body)
 
       {:ok, %Req.Response{status: 401}} ->
         {:error, :authentication_error, "Unauthorized - invalid or expired token"}
 
       {:ok, %Req.Response{status: 500, body: body}} ->
-        case Jason.decode(body) do
-          {:ok, %{"error" => error_message}} ->
-            case error_message do
-              "GraphQL query failed" ->
-                {:error, :api_error, "GraphQL query failed"}
-
-              "Failed to fetch user info" ->
-                {:error, :api_error, "Failed to fetch user info"}
-
-              _ ->
-                {:error, :api_error, "HTTP error 500: #{inspect(body)}"}
-            end
-
-          _ ->
-            {:error, :api_error, "HTTP error 500: #{inspect(body)}"}
-        end
+        handle_server_error(body)
 
       {:ok, %Req.Response{status: status, body: body}} ->
         {:error, :api_error, "HTTP error #{status}: #{inspect(body)}"}
 
       {:error, reason} ->
         {:error, :api_error, "Request failed: #{inspect(reason)}"}
+    end
+  end
+
+  defp build_headers(client, access_token) do
+    headers = [{"authorization", "Bearer #{access_token}"}]
+
+    if client.api_key do
+      [{"authorization", "Bearer #{client.api_key}"} | headers]
+    else
+      headers
+    end
+  end
+
+  defp handle_success_response(body) do
+    case Jason.decode(body) do
+      {:ok, data} ->
+        user_info = UserInfoResponse.from_map(data)
+        {:ok, user_info}
+
+      {:error, _} ->
+        {:error, :api_error, "Failed to parse response"}
+    end
+  end
+
+  defp handle_server_error(body) do
+    case Jason.decode(body) do
+      {:ok, %{"error" => error_message}} ->
+        handle_error_message(error_message, body)
+
+      _ ->
+        {:error, :api_error, "HTTP error 500: #{inspect(body)}"}
+    end
+  end
+
+  defp handle_error_message(error_message, body) do
+    case error_message do
+      "GraphQL query failed" ->
+        {:error, :api_error, "GraphQL query failed"}
+
+      "Failed to fetch user info" ->
+        {:error, :api_error, "Failed to fetch user info"}
+
+      _ ->
+        {:error, :api_error, "HTTP error 500: #{inspect(body)}"}
     end
   end
 end
