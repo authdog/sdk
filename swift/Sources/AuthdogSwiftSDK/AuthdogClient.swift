@@ -1,12 +1,14 @@
 import Foundation
 import Alamofire
 
+typealias HTTPSession = Alamofire.Session
+
 /// Main client for interacting with Authdog API
 public class AuthdogClient {
     private let baseURL: String
     private let apiKey: String?
     private let timeout: TimeInterval
-    private let session: Session
+    private let session: HTTPSession
     
     /// Initialize the Authdog client
     /// - Parameters:
