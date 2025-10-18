@@ -63,7 +63,6 @@ pub const AuthdogClient = struct {
         defer allocator.free(auth_header);
         // Note: In Zig 0.12.0, custom headers need to be set via the request
         // For now, we'll proceed without custom headers for the initial implementation
-        _ = auth_header;
 
         // Send request
         try req.send(.{});
