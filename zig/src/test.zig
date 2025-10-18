@@ -592,8 +592,8 @@ test "UserInfoResponse deinit" {
     const session_obj = root.object.get("session") orelse return;
     const user_obj = root.object.get("user") orelse return;
 
-    const meta = client.parseMeta(meta_obj) catch return;
-    const session = client.parseSession(session_obj) catch return;
+    _ = client.parseMeta(meta_obj) catch return;
+    _ = client.parseSession(session_obj) catch return;
     var user = client.parseUser(user_obj) catch return;
 
     // Test that deinit doesn't crash
