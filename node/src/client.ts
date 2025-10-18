@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { AuthdogError, AuthenticationError, APIError } from './exceptions';
+import { AuthenticationError, APIError } from './exceptions';
 import { UserInfoResponse } from './types';
 
 export interface AuthdogClientConfig {

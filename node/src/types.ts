@@ -36,8 +36,8 @@ export interface UserInfoResponse {
       value: string;
       type: string;
     }>;
-    phoneNumbers: Array<any>;
-    addresses: Array<any>;
+    phoneNumbers: Array<unknown>;
+    addresses: Array<unknown>;
     emails: Array<{
       id: string;
       value: string;
