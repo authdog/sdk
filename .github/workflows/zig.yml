@@ -33,9 +33,10 @@ jobs:
     - name: Verify Zig installation
       run: zig version
     
-    - name: Check dependencies
+    - name: Clear Zig cache
       run: |
         cd zig
+        rm -rf zig-cache .zig-cache || echo "No cache to clear"
         echo "No external dependencies required"
     
     - name: Run tests
@@ -71,6 +72,11 @@ jobs:
       with:
         version: '0.12.0'
     
+    - name: Clear Zig cache
+      run: |
+        cd zig
+        rm -rf zig-cache .zig-cache || echo "No cache to clear"
+    
     - name: Install zigfmt
       run: |
         # zigfmt is included with Zig 0.12.0+
@@ -98,6 +104,11 @@ jobs:
       uses: mlugg/setup-zig@v2
       with:
         version: '0.12.0'
+    
+    - name: Clear Zig cache
+      run: |
+        cd zig
+        rm -rf zig-cache .zig-cache || echo "No cache to clear"
     
     - name: Run security analysis
       run: |
