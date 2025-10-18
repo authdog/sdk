@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using Authdog.Exceptions;
 using FluentAssertions;
 using Xunit;

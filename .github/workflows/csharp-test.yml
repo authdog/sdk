@@ -51,17 +51,17 @@ jobs:
     - name: Restore dependencies
       run: |
         cd csharp
-        dotnet restore
+        dotnet restore Authdog.Sdk.sln
 
     - name: Build solution
       run: |
         cd csharp
-        dotnet build --no-restore --configuration Release
+        dotnet build Authdog.Sdk.sln --no-restore --configuration Release
 
     - name: Run tests
       run: |
         cd csharp
-        dotnet test --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults
+        dotnet test Authdog.Sdk.sln --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
@@ -95,12 +95,12 @@ jobs:
     - name: Restore dependencies
       run: |
         cd csharp
-        dotnet restore
+        dotnet restore Authdog.Sdk.sln
 
     - name: Build solution
       run: |
         cd csharp
-        dotnet build --no-restore --configuration Release
+        dotnet build Authdog.Sdk.sln --no-restore --configuration Release
 
     - name: Pack NuGet package
       run: |
@@ -134,13 +134,18 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
+    - name: Restore dependencies
+      run: |
+        cd csharp
+        dotnet restore Authdog.Sdk.sln
+
     - name: Install dotnet-format
       run: dotnet tool install -g dotnet-format
 
     - name: Run dotnet-format check
       run: |
         cd csharp
-        dotnet format --verify-no-changes --verbosity diagnostic
+        dotnet format Authdog.Sdk.sln --verify-no-changes --verbosity diagnostic
 
     - name: Install SonarAnalyzer.CSharp
       run: |
@@ -150,7 +155,7 @@ jobs:
     - name: Run SonarAnalyzer
       run: |
         cd csharp
-        dotnet build --configuration Release --verbosity normal
+        dotnet build Authdog.Sdk.sln --configuration Release --verbosity normal
 
   security:
     name: Security Audit C# SDK
@@ -172,6 +177,11 @@ jobs:
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: |
+        cd csharp
+        dotnet restore Authdog.Sdk.sln
 
     - name: Install security-scan
       run: dotnet tool install --global security-scan
@@ -213,17 +223,17 @@ jobs:
     - name: Restore dependencies
       run: |
         cd csharp
-        dotnet restore
+        dotnet restore Authdog.Sdk.sln
 
     - name: Build solution
       run: |
         cd csharp
-        dotnet build --no-restore --configuration Release
+        dotnet build Authdog.Sdk.sln --no-restore --configuration Release
 
     - name: Run benchmarks
       run: |
         cd csharp
-        dotnet run --configuration Release --project Tests/Authdog.Sdk.Tests.csproj -- --filter "*Benchmark*" || echo "No benchmarks found"
+        dotnet test Authdog.Sdk.sln --no-build --configuration Release --filter "*Benchmark*" || echo "No benchmarks found"
 
     - name: Upload benchmark results
       uses: actions/upload-artifact@v4
@@ -257,17 +267,17 @@ jobs:
     - name: Restore dependencies
       run: |
         cd csharp
-        dotnet restore
+        dotnet restore Authdog.Sdk.sln
 
     - name: Build solution
       run: |
         cd csharp
-        dotnet build --no-restore --configuration Release
+        dotnet build Authdog.Sdk.sln --no-restore --configuration Release
 
     - name: Run tests with coverage
       run: |
         cd csharp
-        dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./TestResults --settings coverlet.runsettings
+        dotnet test Authdog.Sdk.sln --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./TestResults --settings Tests/coverlet.runsettings
 
     - name: Install ReportGenerator
       run: dotnet tool install -g dotnet-reportgenerator-globaltool
