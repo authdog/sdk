@@ -12,9 +12,7 @@ target_link_libraries(authdog_tests
 
 # Enable GoogleTest discovery
 include(GoogleTest)
-gtest_discover_tests(authdog_tests)
-
-# Set test timeout
-set_tests_properties(authdog_tests PROPERTIES
-    TIMEOUT 300
+gtest_discover_tests(authdog_tests
+    PROPERTIES
+        TIMEOUT 300
 )
