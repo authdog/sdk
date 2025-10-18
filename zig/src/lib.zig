@@ -291,6 +291,7 @@ pub const User = struct {
     environment_id: []const u8,
 
     pub fn deinit(self: *User, allocator: std.mem.Allocator) void {
+        _ = allocator; // Mark as intentionally unused
         self.photos.deinit();
         self.emails.deinit();
         self.verifications.deinit();
