@@ -1,7 +1,5 @@
 package authdog
 
-import "fmt"
-
 // AuthdogError represents the base error type for all Authdog SDK errors
 type AuthdogError struct {
 	Message string

@@ -1,7 +1,6 @@
 package authdog
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
