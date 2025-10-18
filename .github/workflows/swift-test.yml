@@ -1,0 +1,52 @@
+name: Swift Tests
+
+on:
+  push:
+    paths:
+      - 'swift/**'
+      - '.github/workflows/swift-test.yml'
+  pull_request:
+    paths:
+      - 'swift/**'
+
+jobs:
+  test:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        xcode: ['15.1', '15.2']
+        destination: ['generic/platform=iOS', 'generic/platform=macOS']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: sudo xcode-select --switch /Applications/Xcode_${{ matrix.xcode }}.app
+
+      - name: Build
+        run: |
+          cd swift
+          swift build
+
+      - name: Run tests
+        run: |
+          cd swift
+          swift test
+
+      - name: Run tests on iOS
+        if: matrix.destination == 'generic/platform=iOS'
+        run: |
+          cd swift
+          xcodebuild test \
+            -scheme AuthdogSwiftSDK \
+            -destination '${{ matrix.destination }}'
+
+      - name: Run tests on macOS
+        if: matrix.destination == 'generic/platform=macOS'
+        run: |
+          cd swift
+          xcodebuild test \
+            -scheme AuthdogSwiftSDK \
+            -destination '${{ matrix.destination }}'
