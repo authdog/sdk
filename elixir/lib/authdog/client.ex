@@ -11,11 +11,11 @@ defmodule Authdog.Client do
   ]
 
   @type t :: %__MODULE__{
-    base_url: String.t(),
-    api_key: String.t() | nil,
-    timeout: integer(),
-    req_client: Req.Request.t()
-  }
+          base_url: String.t(),
+          api_key: String.t() | nil,
+          timeout: integer(),
+          req_client: Req.Request.t()
+        }
 
   @doc """
   Creates a new Authdog client.
@@ -41,14 +41,15 @@ defmodule Authdog.Client do
     api_key = Keyword.get(opts, :api_key)
     timeout = Keyword.get(opts, :timeout, 10_000)
 
-    req_client = Req.new(
-      base_url: base_url,
-      receive_timeout: timeout,
-      headers: [
-        {"content-type", "application/json"},
-        {"user-agent", "authdog-elixir-sdk/0.1.0"}
-      ]
-    )
+    req_client =
+      Req.new(
+        base_url: base_url,
+        receive_timeout: timeout,
+        headers: [
+          {"content-type", "application/json"},
+          {"user-agent", "authdog-elixir-sdk/0.1.0"}
+        ]
+      )
 
     %__MODULE__{
       base_url: base_url,
@@ -78,21 +79,22 @@ defmodule Authdog.Client do
       iex> user_info.user.display_name
       "John Doe"
   """
-  @spec get_user_info(t(), String.t()) :: 
-    {:ok, Authdog.Types.UserInfoResponse.t()} | 
-    {:error, :authentication_error, String.t()} | 
-    {:error, :api_error, String.t()}
+  @spec get_user_info(t(), String.t()) ::
+          {:ok, Authdog.Types.UserInfoResponse.t()}
+          | {:error, :authentication_error, String.t()}
+          | {:error, :api_error, String.t()}
   def get_user_info(%__MODULE__{} = client, access_token) do
     headers = [
       {"authorization", "Bearer #{access_token}"}
     ]
 
     # Add API key if provided
-    headers = if client.api_key do
-      [{"authorization", "Bearer #{client.api_key}"} | headers]
-    else
-      headers
-    end
+    headers =
+      if client.api_key do
+        [{"authorization", "Bearer #{client.api_key}"} | headers]
+      else
+        headers
+      end
 
     case Req.get(client.req_client, url: "/v1/userinfo", headers: headers) do
       {:ok, %Req.Response{status: 200, body: body}} ->

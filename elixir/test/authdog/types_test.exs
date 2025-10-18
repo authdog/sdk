@@ -6,7 +6,7 @@ defmodule Authdog.TypesTest do
     test "from_map/1 creates Meta struct" do
       data = %{"code" => 200, "message" => "Success"}
       meta = Types.Meta.from_map(data)
-      
+
       assert meta.code == 200
       assert meta.message == "Success"
     end
@@ -16,7 +16,7 @@ defmodule Authdog.TypesTest do
     test "from_map/1 creates Session struct" do
       data = %{"remainingSeconds" => 3600}
       session = Types.Session.from_map(data)
-      
+
       assert session.remaining_seconds == 3600
     end
   end
@@ -32,9 +32,9 @@ defmodule Authdog.TypesTest do
         "honorificPrefix" => "Mr.",
         "honorificSuffix" => "Jr."
       }
-      
+
       names = Types.Names.from_map(data)
-      
+
       assert names.id == "name_123"
       assert names.formatted == "John Doe"
       assert names.family_name == "Doe"
@@ -47,9 +47,14 @@ defmodule Authdog.TypesTest do
 
   describe "Types.Photo" do
     test "from_map/1 creates Photo struct" do
-      data = %{"id" => "photo_123", "value" => "https://example.com/photo.jpg", "type" => "profile"}
+      data = %{
+        "id" => "photo_123",
+        "value" => "https://example.com/photo.jpg",
+        "type" => "profile"
+      }
+
       photo = Types.Photo.from_map(data)
-      
+
       assert photo.id == "photo_123"
       assert photo.value == "https://example.com/photo.jpg"
       assert photo.type == "profile"
@@ -60,7 +65,7 @@ defmodule Authdog.TypesTest do
     test "from_map/1 creates Email struct" do
       data = %{"id" => "email_123", "value" => "john@example.com", "type" => "work"}
       email = Types.Email.from_map(data)
-      
+
       assert email.id == "email_123"
       assert email.value == "john@example.com"
       assert email.type == "work"
@@ -69,7 +74,7 @@ defmodule Authdog.TypesTest do
     test "from_map/1 handles nil type" do
       data = %{"id" => "email_123", "value" => "john@example.com", "type" => nil}
       email = Types.Email.from_map(data)
-      
+
       assert email.id == "email_123"
       assert email.value == "john@example.com"
       assert email.type == nil
@@ -85,9 +90,9 @@ defmodule Authdog.TypesTest do
         "createdAt" => "2023-01-01T00:00:00Z",
         "updatedAt" => "2023-01-02T00:00:00Z"
       }
-      
+
       verification = Types.Verification.from_map(data)
-      
+
       assert verification.id == "verification_123"
       assert verification.email == "john@example.com"
       assert verification.verified == true
@@ -142,9 +147,9 @@ defmodule Authdog.TypesTest do
         "updatedAt" => "2023-01-02T00:00:00Z",
         "environmentId" => "env_123"
       }
-      
+
       user = Types.User.from_map(data)
-      
+
       assert user.id == "user_123"
       assert user.external_id == "ext_123"
       assert user.user_name == "johndoe"
@@ -161,20 +166,20 @@ defmodule Authdog.TypesTest do
       assert user.created_at == "2023-01-01T00:00:00Z"
       assert user.updated_at == "2023-01-02T00:00:00Z"
       assert user.environment_id == "env_123"
-      
+
       # Test nested structures
       assert %Types.Names{} = user.names
       assert user.names.given_name == "John"
       assert user.names.family_name == "Doe"
-      
+
       assert length(user.photos) == 1
       assert %Types.Photo{} = hd(user.photos)
       assert hd(user.photos).value == "https://example.com/photo.jpg"
-      
+
       assert length(user.emails) == 1
       assert %Types.Email{} = hd(user.emails)
       assert hd(user.emails).value == "john@example.com"
-      
+
       assert length(user.verifications) == 1
       assert %Types.Verification{} = hd(user.verifications)
       assert hd(user.verifications).verified == true
@@ -221,16 +226,16 @@ defmodule Authdog.TypesTest do
           "environmentId" => "env_123"
         }
       }
-      
+
       response = Types.UserInfoResponse.from_map(data)
-      
+
       assert %Types.Meta{} = response.meta
       assert response.meta.code == 200
       assert response.meta.message == "Success"
-      
+
       assert %Types.Session{} = response.session
       assert response.session.remaining_seconds == 3600
-      
+
       assert %Types.User{} = response.user
       assert response.user.id == "user_123"
       assert response.user.display_name == "John Doe"
