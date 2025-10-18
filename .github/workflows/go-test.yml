@@ -37,6 +37,16 @@ jobs:
         cache: true
         cache-dependency-path: go/go.sum
 
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('go/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
     - name: Verify Go installation
       run: |
         go version
@@ -94,6 +104,16 @@ jobs:
         cache: true
         cache-dependency-path: go/go.sum
 
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('go/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
     - name: Build Go module
       run: |
         cd go
@@ -118,6 +138,24 @@ jobs:
         go-version: ${{ env.GO_VERSION }}
         cache: true
         cache-dependency-path: go/go.sum
+
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('go/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Cache golangci-lint
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/golangci-lint
+        key: ${{ runner.os }}-golangci-lint-${{ hashFiles('go/.golangci.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-golangci-lint-
 
     - name: Install golangci-lint
       uses: golangci/golangci-lint-action@v3
@@ -145,6 +183,16 @@ jobs:
         cache: true
         cache-dependency-path: go/go.sum
 
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('go/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
     - name: Install gosec
       run: go install github.com/securego/gosec/v2/cmd/gosec@latest
 
@@ -167,6 +215,16 @@ jobs:
         go-version: ${{ env.GO_VERSION }}
         cache: true
         cache-dependency-path: go/go.sum
+
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('go/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
 
     - name: Run benchmarks
       run: |
