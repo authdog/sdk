@@ -145,9 +145,6 @@ async fn test_get_user_info_with_valid_token() {
     let client = AuthdogClient::new(config).unwrap();
     let result = client.get_user_info("valid-token").await;
 
-    if let Err(e) = &result {
-        println!("Error: {}", e);
-    }
     assert!(result.is_ok());
     let user_info = result.unwrap();
     assert_eq!(user_info.user.id, "user123");
