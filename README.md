@@ -7,6 +7,7 @@ Official SDKs for Authdog authentication and user management platform.
 [![Go SDK Tests](https://github.com/authdog/sdk/actions/workflows/go-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/go-test.yml)
 [![Java SDK Tests](https://github.com/authdog/sdk/actions/workflows/java-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/java-test.yml)
 [![C# SDK Tests](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml)
+[![C++ SDK Tests](https://github.com/authdog/sdk/actions/workflows/cpp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/cpp-test.yml)
 
 ## Available SDKs
 
