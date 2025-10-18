@@ -12,7 +12,7 @@ public struct Meta: Codable {
 }
 
 /// Session information
-public struct Session: Codable {
+public struct AuthdogSession: Codable {
     public let remainingSeconds: Int
     
     public init(remainingSeconds: Int) {
@@ -144,10 +144,10 @@ public struct User: Codable {
 /// Response from the /v1/userinfo endpoint
 public struct UserInfoResponse: Codable {
     public let meta: Meta
-    public let session: Session
+    public let session: AuthdogSession
     public let user: User
     
-    public init(meta: Meta, session: Session, user: User) {
+    public init(meta: Meta, session: AuthdogSession, user: User) {
         self.meta = meta
         self.session = session
         self.user = user

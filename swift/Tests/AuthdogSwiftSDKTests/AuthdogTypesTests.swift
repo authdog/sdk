@@ -26,7 +26,7 @@ final class AuthdogTypesTests: XCTestCase {
         """
         
         let data = json.data(using: .utf8)!
-        let session = try! JSONDecoder().decode(Session.self, from: data)
+        let session = try! JSONDecoder().decode(AuthdogSession.self, from: data)
         
         XCTAssertEqual(session.remainingSeconds, 3600)
     }
