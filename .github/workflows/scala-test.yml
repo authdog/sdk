@@ -54,9 +54,3 @@ jobs:
 
       - name: Run tests
         run: sbt test
-
-      - name: Compile sources
-        run: sbt compile
-
-      - name: Compile tests
-        run: sbt test:compile
