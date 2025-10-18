@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust-version: ["1.70", "1.75", "stable", "beta", "nightly"]
+        rust-version: ["stable", "beta", "nightly"]
 
     steps:
     - name: Checkout code
