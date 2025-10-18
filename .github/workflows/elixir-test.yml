@@ -15,8 +15,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        elixir: ['1.15', '1.16', '1.17']
-        otp: ['26', '27']
+        elixir: ['1.17']
+        otp: ['27']
 
     defaults:
       run:
