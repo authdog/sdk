@@ -6,7 +6,7 @@ import sttp.client3._
 import sttp.client3.circe._
 import io.circe.generic.auto._
 import scala.concurrent.duration._
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 /**
  * Main client for interacting with Authdog API
@@ -52,7 +52,7 @@ class AuthdogClient(
             // Try to parse error response
             Try {
               import io.circe.parser._
-              parse(error).flatMap(_.hcursor.get[String]("error")).toOption match {
+              parse(error.toString).flatMap(_.hcursor.get[String]("error")).toOption match {
                 case Some("GraphQL query failed") => throw ApiException("GraphQL query failed")
                 case Some("Failed to fetch user info") => throw ApiException("Failed to fetch user info")
                 case _ => throw ApiException(s"HTTP error 500: $error")
