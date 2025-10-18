@@ -47,8 +47,11 @@ pub const AuthdogClient = struct {
         var client = std.http.Client{ .allocator = allocator };
         defer client.deinit();
 
-        // Create request
-        var req = try client.open(.GET, uri, .{});
+        // Create request with required buffer for response headers
+        var server_header_buffer: [4096]u8 = undefined;
+        var req = try client.open(.GET, uri, .{
+            .server_header_buffer = &server_header_buffer,
+        });
         defer req.deinit();
 
         // Set headers
