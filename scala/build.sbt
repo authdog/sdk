@@ -18,8 +18,16 @@ lazy val root = (project in file("."))
       // Test dependencies
       "org.scalatest" %% "scalatest" % "3.2.17" % Test,
       "org.mockito" % "mockito-core" % "5.8.0" % Test,
-      "org.scalamock" %% "scalamock" % "5.2.0" % Test
+      "org.scalamock" %% "scalamock" % "5.2.0" % Test,
+      "org.scalastyle" %% "scalastyle" % "1.0.0" % Test
     ),
+    
+    // Test configuration
+    Test / parallelExecution := false,
+    Test / logBuffered := false,
+    
+    // Scalastyle configuration
+    scalastyleConfig := baseDirectory.value / "scalastyle-config.xml",
     
     // Compiler options
     scalacOptions ++= Seq(
