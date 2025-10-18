@@ -42,7 +42,7 @@ pub fn build(b: *std.Build) void {
 
     // Create tests
     const tests = b.addTest(.{
-        .root_source_file = .{ .path = "src/lib.zig" },
+        .root_source_file = .{ .path = "src/test.zig" },
         .target = target,
         .optimize = optimize,
     });
