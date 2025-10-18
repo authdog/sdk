@@ -6,7 +6,7 @@ pub fn build(b: *std.Build) void {
 
     // Create authdog module
     const authdog_module = b.addModule("authdog", .{
-        .root_source_file = .{ .path = "src/lib.zig" },
+        .source_file = .{ .path = "src/lib.zig" },
     });
 
     // Create static library
