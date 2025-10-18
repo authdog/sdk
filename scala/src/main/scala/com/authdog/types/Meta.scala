@@ -1,7 +1,7 @@
 package com.authdog.types
 
-import io.circe.generic.semiauto._
-import io.circe.{Decoder, Encoder}
+import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.syntax._
 
 /**
  * Metadata in the response
@@ -12,6 +12,13 @@ case class Meta(
 )
 
 object Meta {
-  implicit val decoder: Decoder[Meta] = deriveDecoder[Meta]
-  implicit val encoder: Encoder[Meta] = deriveEncoder[Meta]
+  implicit val decoder: Decoder[Meta] = (c: HCursor) => for {
+    code <- c.downField("code").as[Int]
+    message <- c.downField("message").as[String]
+  } yield Meta(code, message)
+  
+  implicit val encoder: Encoder[Meta] = (meta: Meta) => Json.obj(
+    "code" -> meta.code.asJson,
+    "message" -> meta.message.asJson
+  )
 }

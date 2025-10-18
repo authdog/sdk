@@ -1,7 +1,7 @@
 package com.authdog.types
 
-import io.circe.generic.semiauto._
-import io.circe.{Decoder, Encoder}
+import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.syntax._
 
 /**
  * User photo
@@ -13,6 +13,15 @@ case class Photo(
 )
 
 object Photo {
-  implicit val decoder: Decoder[Photo] = deriveDecoder[Photo]
-  implicit val encoder: Encoder[Photo] = deriveEncoder[Photo]
+  implicit val decoder: Decoder[Photo] = (c: HCursor) => for {
+    id <- c.downField("id").as[String]
+    value <- c.downField("value").as[String]
+    `type` <- c.downField("type").as[String]
+  } yield Photo(id, value, `type`)
+  
+  implicit val encoder: Encoder[Photo] = (photo: Photo) => Json.obj(
+    "id" -> photo.id.asJson,
+    "value" -> photo.value.asJson,
+    "type" -> photo.`type`.asJson
+  )
 }

@@ -1,7 +1,7 @@
 package com.authdog.types
 
-import io.circe.generic.semiauto._
-import io.circe.{Decoder, Encoder}
+import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.syntax._
 
 /**
  * Session information
@@ -11,6 +11,11 @@ case class Session(
 )
 
 object Session {
-  implicit val decoder: Decoder[Session] = deriveDecoder[Session]
-  implicit val encoder: Encoder[Session] = deriveEncoder[Session]
+  implicit val decoder: Decoder[Session] = (c: HCursor) => for {
+    remainingSeconds <- c.downField("remainingSeconds").as[Int]
+  } yield Session(remainingSeconds)
+  
+  implicit val encoder: Encoder[Session] = (session: Session) => Json.obj(
+    "remainingSeconds" -> session.remainingSeconds.asJson
+  )
 }
