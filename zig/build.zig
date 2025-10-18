@@ -4,6 +4,12 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    // Create authdog module
+    const authdog_module = b.createModule(.{
+        .root_source_file = .{ .path = "src/lib.zig" },
+    });
+
+    // Create static library
     const lib = b.addStaticLibrary(.{
         .name = "authdog",
         .root_source_file = .{ .path = "src/lib.zig" },
@@ -22,7 +28,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    exe.root_module.addImport("authdog", &lib.root_module);
+    exe.addModule("authdog", authdog_module);
 
     b.installArtifact(exe);
 
@@ -32,7 +38,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    tests.root_module.addImport("authdog", &lib.root_module);
+    tests.addModule("authdog", authdog_module);
 
     const test_run = b.addRunArtifact(tests);
     const test_step = b.step("test", "Run unit tests");
