@@ -17,4 +17,9 @@ class Email
         $this->value = $data['value'] ?? '';
         $this->type = $data['type'] ?? null;
     }
+
+    public function getAddress(): string
+    {
+        return $this->value;
+    }
 }

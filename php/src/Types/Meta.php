@@ -15,4 +15,13 @@ class Meta
         $this->code = $data['code'] ?? 0;
         $this->message = $data['message'] ?? '';
     }
+
+    public function get(string $key): mixed
+    {
+        return match($key) {
+            'requestId' => $this->message,
+            'code' => $this->code,
+            default => null
+        };
+    }
 }

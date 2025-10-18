@@ -60,4 +60,14 @@ class User
         $this->updatedAt = $data['updatedAt'] ?? '';
         $this->environmentId = $data['environmentId'] ?? '';
     }
+
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    public function getEmail(): ?Email
+    {
+        return $this->emails[0] ?? null;
+    }
 }

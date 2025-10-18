@@ -17,4 +17,19 @@ class UserInfoResponse
         $this->session = new Session($data['session'] ?? []);
         $this->user = new User($data['user'] ?? []);
     }
+
+    public function getMeta(): Meta
+    {
+        return $this->meta;
+    }
+
+    public function getSession(): Session
+    {
+        return $this->session;
+    }
+
+    public function getUser(): User
+    {
+        return $this->user;
+    }
 }
