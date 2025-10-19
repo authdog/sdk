@@ -51,23 +51,25 @@ type AuthdogClient (config: AuthdogClientConfig) =
             use! resp = httpClient.SendAsync(req)
             let! body = resp.Content.ReadAsStringAsync()
             if resp.StatusCode = System.Net.HttpStatusCode.Unauthorized then
-                return raise (AuthenticationException("Unauthorized - invalid or expired token"))
+                return! Task.FromException<string>(AuthenticationException("Unauthorized - invalid or expired token"))
             elif int resp.StatusCode = 500 then
                 try
                     use doc = JsonDocument.Parse(body)
                     let root = doc.RootElement
-                    if root.TryGetProperty("error", ref (Unchecked.defaultof<JsonElement>)) then
-                        let err = root.GetProperty("error").GetString()
+                    // Get optional error field
+                    let mutable errEl = Unchecked.defaultof<JsonElement>
+                    if root.TryGetProperty("error", &errEl) then
+                        let err = errEl.GetString()
                         match err with
-                        | "GraphQL query failed" -> return raise (ApiException("GraphQL query failed"))
-                        | "Failed to fetch user info" -> return raise (ApiException("Failed to fetch user info"))
+                        | "GraphQL query failed" -> return! Task.FromException<string>(ApiException("GraphQL query failed"))
+                        | "Failed to fetch user info" -> return! Task.FromException<string>(ApiException("Failed to fetch user info"))
                         | _ -> ()
                 with _ -> ()
             if not resp.IsSuccessStatusCode then
-                return raise (ApiException(sprintf "HTTP error %d: %s" (int resp.StatusCode) body))
+                return! Task.FromException<string>(ApiException(sprintf "HTTP error %d: %s" (int resp.StatusCode) body))
             return body
         with
-        | :? AuthenticationException as e -> return raise e
-        | :? ApiException as e -> return raise e
-        | e -> return raise (ApiException("Request failed: " + e.Message))
+        | :? AuthenticationException as e -> return! Task.FromException<string>(e)
+        | :? ApiException as e -> return! Task.FromException<string>(e)
+        | e -> return! Task.FromException<string>(ApiException("Request failed: " + e.Message))
     }
