@@ -18,5 +18,9 @@ jobs:
         shell: pwsh
         working-directory: powershell
         run: |
-          Install-Module -Name Pester -Force -Scope CurrentUser -SkipPublisherCheck
-          Invoke-Pester -Path ./Tests -CI
+          # Install Pester if not already available
+          if (-not (Get-Module -ListAvailable -Name Pester)) {
+            Install-Module -Name Pester -Force -Scope CurrentUser -SkipPublisherCheck
+          }
+          # Run tests with proper configuration
+          Invoke-Pester -Path ./Tests -CI -OutputFormat NUnitXml -OutputFile test-results.xml
