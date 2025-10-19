@@ -9,7 +9,7 @@ open Xunit
 open Authdog
 
 let toTask (t: Task<'T>) : Task =
-    (t.ContinueWith(fun (_: Task<'T>) -> ()) :> Task)
+    (t :> Task)
 
 type MockHandler(handler: HttpRequestMessage -> HttpResponseMessage) =
     inherit HttpMessageHandler()
