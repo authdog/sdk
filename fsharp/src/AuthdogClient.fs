@@ -69,7 +69,7 @@ type AuthdogClient (config: AuthdogClientConfig) =
                 raise (ApiException(sprintf "HTTP error %d: %s" (int resp.StatusCode) body))
             return body
         with
-        | :? AuthenticationException as e -> raise e
-        | :? ApiException as e -> raise e
-        | e -> raise (ApiException("Request failed: " + e.Message))
+        | :? AuthenticationException as e -> return! Task.FromException<string>(e)
+        | :? ApiException as e -> return! Task.FromException<string>(e)
+        | e -> return! Task.FromException<string>(ApiException("Request failed: " + e.Message))
     }
