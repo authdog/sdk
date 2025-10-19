@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'spec_helper'
 require_relative "../lib/authdog"
 
 RSpec.describe Authdog::Client do
