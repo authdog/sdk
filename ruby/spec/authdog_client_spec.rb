@@ -9,7 +9,7 @@ RSpec.describe Authdog::Client do
 
   it "retrieves userinfo successfully" do
     stub_request(:get, "#{base_url}/v1/userinfo")
-      .with(headers: hash_including({"Authorization" => "Bearer token"}))
+      .with(headers: {"Authorization" => "Bearer token"})
       .to_return(status: 200, body: {meta: {code: 200, message: "OK"}, session: {remainingSeconds: 3600}, user: {id: "123"}}.to_json, headers: {"Content-Type" => "application/json"})
 
     resp = client.get_userinfo("token")
