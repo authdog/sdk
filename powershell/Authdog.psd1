@@ -6,6 +6,7 @@
     CompanyName       = 'Authdog'
     Description       = 'Authdog PowerShell SDK'
     PowerShellVersion = '5.1'
+    CompatiblePSEditions = @('Core','Desktop')
     FunctionsToExport = @('Get-AuthdogUserInfo')
     PrivateData       = @{}
 }
