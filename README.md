@@ -2,6 +2,8 @@
 
 Official SDKs for Authdog authentication and user management platform.
 
+## SDK Health Status
+
 [![Python SDK Tests](https://github.com/authdog/sdk/actions/workflows/python-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/python-test.yml)
 [![Node.js SDK Tests](https://github.com/authdog/sdk/actions/workflows/node-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/node-test.yml)
 [![Go SDK Tests](https://github.com/authdog/sdk/actions/workflows/go-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/go-test.yml)
@@ -18,7 +20,6 @@ Official SDKs for Authdog authentication and user management platform.
 [![Swift Tests](https://github.com/authdog/sdk/actions/workflows/swift-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/swift-test.yml)
 [![Zig Tests](https://github.com/authdog/sdk/actions/workflows/zig-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/zig-test.yml)
 [![F# SDK](https://github.com/authdog/sdk/actions/workflows/fsharp.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/fsharp.yml)
-[![Rust SDK Tests](https://github.com/authdog/sdk/actions/workflows/rust-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/rust-test.yml)
 [![OCaml SDK](https://github.com/authdog/sdk/actions/workflows/ocaml.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/ocaml.yml)
 [![PowerShell SDK](https://github.com/authdog/sdk/actions/workflows/powershell.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/powershell.yml)
 [![Dart SDK](https://github.com/authdog/sdk/actions/workflows/dart.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/dart.yml)
@@ -26,25 +27,38 @@ Official SDKs for Authdog authentication and user management platform.
 
 ## Available SDKs
 
+### Core SDKs
 - [Python SDK](./python/) - Python SDK for Authdog
 - [Node.js SDK](./node/) - Node.js/TypeScript SDK for Authdog
 - [Go SDK](./go/) - Go SDK for Authdog
-- [Kotlin SDK](./kotlin/) - Kotlin SDK for Authdog
 - [Rust SDK](./rust/) - Rust SDK for Authdog
-- [PHP SDK](./php/) - PHP SDK for Authdog
+- [Java SDK](./java/) - Java SDK for Authdog
 - [C# SDK](./csharp/) - C# SDK for Authdog
+
+### Additional Languages
+- [Kotlin SDK](./kotlin/) - Kotlin SDK for Authdog
+- [PHP SDK](./php/) - PHP SDK for Authdog
 - [C++ SDK](./cpp/) - C++ SDK for Authdog
 - [Elixir SDK](./elixir/) - Elixir SDK for Authdog
-- [Java SDK](./java/) - Java SDK for Authdog
 - [Scala SDK](./scala/) - Scala SDK for Authdog
-- [Common Lisp SDK](./commonlisp/) - Common Lisp SDK for Authdog
-- [Clojure SDK](./clojure/) - Clojure SDK for Authdog
 - [Swift SDK](./swift/) - Swift SDK for Authdog
 - [Zig SDK](./zig/) - Zig SDK for Authdog
 
-## Quick Start
+### Functional Languages
+- [Common Lisp SDK](./commonlisp/) - Common Lisp SDK for Authdog
+- [Clojure SDK](./clojure/) - Clojure SDK for Authdog
+- [F# SDK](./fsharp/) - F# SDK for Authdog
+- [OCaml SDK](./ocaml/) - OCaml SDK for Authdog
 
-### Python
+### Scripting & Other
+- [PowerShell SDK](./powershell/) - PowerShell SDK for Authdog
+- [Dart SDK](./dart/) - Dart SDK for Authdog
+
+## Quick Start Examples
+
+### Python SDK
+
+[![Python SDK Tests](https://github.com/authdog/sdk/actions/workflows/python-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/python-test.yml)
 
 ```python
 from authdog import AuthdogClient
@@ -60,7 +74,9 @@ print(f"User: {user_info['user']['displayName']}")
 client.close()
 ```
 
-### Node.js
+### Node.js SDK
+
+[![Node.js SDK Tests](https://github.com/authdog/sdk/actions/workflows/node-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/node-test.yml)
 
 ```typescript
 import { AuthdogClient } from '@authdog/node-sdk';
@@ -75,7 +91,9 @@ const userInfo = await client.getUserInfo('your-access-token');
 console.log(`User: ${userInfo.user.displayName}`);
 ```
 
-### Go
+### Go SDK
+
+[![Go SDK Tests](https://github.com/authdog/sdk/actions/workflows/go-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/go-test.yml)
 
 ```go
 package main
@@ -106,7 +124,9 @@ func main() {
 }
 ```
 
-### Kotlin
+### Kotlin SDK
+
+[![Kotlin SDK Tests](https://github.com/authdog/sdk/actions/workflows/kotlin-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/kotlin-test.yml)
 
 ```kotlin
 import com.authdog.sdk.*
@@ -127,7 +147,9 @@ fun main() = runBlocking {
 }
 ```
 
-### Rust
+### Rust SDK
+
+[![Rust SDK Tests](https://github.com/authdog/sdk/actions/workflows/rust-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/rust-test.yml)
 
 ```rust
 use authdog::{AuthdogClient, AuthdogClientConfig};
@@ -151,7 +173,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### PHP
+### PHP SDK
+
+[![PHP Tests](https://github.com/authdog/sdk/actions/workflows/php-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/php-test.yml)
 
 ```php
 <?php
@@ -179,7 +203,9 @@ try {
 $client->close();
 ```
 
-### C#
+### C# SDK
+
+[![C# SDK Tests](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml)
 
 ```csharp
 using Authdog;
@@ -209,7 +235,9 @@ finally
 }
 ```
 
-### C++
+### C++ SDK
+
+[![C++ SDK Tests](https://github.com/authdog/sdk/actions/workflows/cpp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/cpp-test.yml)
 
 ```cpp
 #include <iostream>
@@ -238,7 +266,9 @@ int main() {
 }
 ```
 
-### Elixir
+### Elixir SDK
+
+[![Elixir Tests](https://github.com/authdog/sdk/actions/workflows/elixir-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/elixir-test.yml)
 
 ```elixir
 # Initialize the client
@@ -255,7 +285,9 @@ case Authdog.Client.get_user_info(client, "your-access-token") do
 end
 ```
 
-### Java
+### Java SDK
+
+[![Java SDK Tests](https://github.com/authdog/sdk/actions/workflows/java-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/java-test.yml)
 
 ```java
 import com.authdog.AuthdogClient;
@@ -274,7 +306,9 @@ try (AuthdogClient client = new AuthdogClient("https://api.authdog.com")) {
 }
 ```
 
-### Scala
+### Scala SDK
+
+[![Scala Tests](https://github.com/authdog/sdk/actions/workflows/scala-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/scala-test.yml)
 
 ```scala
 import com.authdog.AuthdogClient
@@ -297,7 +331,9 @@ try {
 }
 ```
 
-### Common Lisp
+### Common Lisp SDK
+
+[![Common Lisp Tests](https://github.com/authdog/sdk/actions/workflows/commonlisp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/commonlisp-test.yml)
 
 ```lisp
 (ql:quickload :authdog)
@@ -316,7 +352,9 @@ try {
     (format t "API error: ~A~%" (authdog-error-message e))))
 ```
 
-### Clojure
+### Clojure SDK
+
+[![Clojure Tests](https://github.com/authdog/sdk/actions/workflows/clojure-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/clojure-test.yml)
 
 ```clojure
 (require '[authdog.core :as authdog]
@@ -338,7 +376,9 @@ try {
       (println "API error:" (.getMessage e)))))
 ```
 
-### Swift
+### Swift SDK
+
+[![Swift Tests](https://github.com/authdog/sdk/actions/workflows/swift-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/swift-test.yml)
 
 ```swift
 import AuthdogSwiftSDK
@@ -369,7 +409,9 @@ client.getUserInfo(accessToken: "your-access-token") { result in
 }
 ```
 
-### Zig
+### Zig SDK
+
+[![Zig Tests](https://github.com/authdog/sdk/actions/workflows/zig-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/zig-test.yml)
 
 ```zig
 const authdog = @import("authdog");
@@ -395,6 +437,15 @@ const user_info = client.getUserInfo("your-access-token") catch |err| switch (er
 
 std.debug.print("User: {s}\n", .{user_info.user.display_name});
 ```
+
+### Additional SDKs
+
+[![F# SDK](https://github.com/authdog/sdk/actions/workflows/fsharp.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/fsharp.yml)
+[![OCaml SDK](https://github.com/authdog/sdk/actions/workflows/ocaml.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/ocaml.yml)
+[![PowerShell SDK](https://github.com/authdog/sdk/actions/workflows/powershell.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/powershell.yml)
+[![Dart SDK](https://github.com/authdog/sdk/actions/workflows/dart.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/dart.yml)
+
+These SDKs are also available with full documentation in their respective directories.
 
 ## Features
 
