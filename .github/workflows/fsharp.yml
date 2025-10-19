@@ -3,10 +3,10 @@ name: F# SDK
 on:
   push:
     paths:
-      - 'sdk/fsharp/**'
+      - 'fsharp/**'
   pull_request:
     paths:
-      - 'sdk/fsharp/**'
+      - 'fsharp/**'
 
 jobs:
   test:
@@ -19,11 +19,11 @@ jobs:
           dotnet-version: '8.0.x'
       - name: Restore
         run: |
-          dotnet restore sdk/fsharp/Authdog.Sdk.FSharp.fsproj
-          dotnet restore sdk/fsharp/tests/Authdog.Sdk.FSharp.Tests.fsproj
+          dotnet restore fsharp/Authdog.Sdk.FSharp.fsproj
+          dotnet restore fsharp/tests/Authdog.Sdk.FSharp.Tests.fsproj
       - name: Build
         run: |
-          dotnet build --no-restore -c Release sdk/fsharp/Authdog.Sdk.FSharp.fsproj
-          dotnet build --no-restore -c Release sdk/fsharp/tests/Authdog.Sdk.FSharp.Tests.fsproj
+          dotnet build --no-restore -c Release fsharp/Authdog.Sdk.FSharp.fsproj
+          dotnet build --no-restore -c Release fsharp/tests/Authdog.Sdk.FSharp.Tests.fsproj
       - name: Test
-        run: dotnet test --no-build -c Release sdk/fsharp/tests/Authdog.Sdk.FSharp.Tests.fsproj --logger trx
+        run: dotnet test --no-build -c Release fsharp/tests/Authdog.Sdk.FSharp.Tests.fsproj --logger trx

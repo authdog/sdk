@@ -1,12 +1,13 @@
 name: PowerShell SDK
 
 on:
-  push:
-    paths:
-      - 'sdk/powershell/**'
-  pull_request:
-    paths:
-      - 'sdk/powershell/**'
+  workflow_dispatch:
+  # push:
+  #   paths:
+  #     - 'sdk/powershell/**'
+  # pull_request:
+  #   paths:
+  #     - 'sdk/powershell/**'
 
 jobs:
   test:

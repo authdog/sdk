@@ -1,12 +1,13 @@
 name: OCaml SDK
 
 on:
-  push:
-    paths:
-      - 'sdk/ocaml/**'
-  pull_request:
-    paths:
-      - 'sdk/ocaml/**'
+  workflow_dispatch:
+  # push:
+  #   paths:
+  #     - 'ocaml/**'
+  # pull_request:
+  #   paths:
+  #     - 'ocaml/**'
 
 jobs:
   test:
@@ -18,12 +19,12 @@ jobs:
         with:
           ocaml-compiler: 5.1.x
       - name: Install deps
-        working-directory: sdk/ocaml
+        working-directory: ocaml
         run: |
           opam install -y dune cohttp-lwt-unix yojson alcotest
       - name: Build
-        working-directory: sdk/ocaml
+        working-directory: ocaml
         run: dune build
       - name: Test
-        working-directory: sdk/ocaml
+        working-directory: ocaml
         run: dune runtest

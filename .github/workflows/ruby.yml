@@ -1,19 +1,20 @@
 name: Ruby SDK
 
 on:
-  push:
-    paths:
-      - 'sdk/ruby/**'
-  pull_request:
-    paths:
-      - 'sdk/ruby/**'
+  workflow_dispatch:
+  # push:
+  #   paths:
+  #     - 'ruby/**'
+  # pull_request:
+  #   paths:
+  #     - 'ruby/**'
 
 jobs:
   test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: sdk/ruby
+        working-directory: ruby
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
