@@ -112,6 +112,13 @@ authdog_client_t* authdog_client_create(const authdog_config_t *config) {
         return NULL;
     }
     
+    // Initialize curl globally (only once)
+    static int curl_initialized = 0;
+    if (!curl_initialized) {
+        curl_global_init(CURL_GLOBAL_DEFAULT);
+        curl_initialized = 1;
+    }
+    
     authdog_client_t *client = malloc(sizeof(authdog_client_t));
     if (!client) {
         return NULL;
@@ -159,6 +166,11 @@ void authdog_client_destroy(authdog_client_t *client) {
     }
     
     free(client);
+}
+
+// Cleanup function for global curl resources
+void authdog_cleanup(void) {
+    curl_global_cleanup();
 }
 
 authdog_error_t authdog_get_user_info(authdog_client_t *client, authdog_user_info_t **user_info) {

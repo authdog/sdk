@@ -72,6 +72,11 @@ void authdog_user_info_free(authdog_user_info_t *user_info);
  */
 const char* authdog_error_message(authdog_error_t error);
 
+/**
+ * Cleanup global resources (call at program end)
+ */
+void authdog_cleanup(void);
+
 #ifdef __cplusplus
 }
 #endif

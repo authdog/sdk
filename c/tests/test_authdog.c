@@ -9,9 +9,16 @@
 #define TEST_ACCESS_TOKEN "test_token"
 #define TEST_API_KEY "test_api_key"
 
-// Mock test data
-static const char* mock_user_info_json = 
-    "{\"id\":\"123\",\"email\":\"test@example.com\",\"name\":\"Test User\",\"photo_url\":\"https://example.com/photo.jpg\"}";
+// Helper function to duplicate strings
+static char* test_strdup(const char* s) {
+    if (!s) return NULL;
+    size_t len = strlen(s) + 1;
+    char* copy = malloc(len);
+    if (copy) {
+        strcpy(copy, s);
+    }
+    return copy;
+}
 
 // Test helper functions
 static void test_client_creation() {
@@ -106,10 +113,10 @@ static void test_user_info_free() {
     printf("Testing user info free...\n");
     
     authdog_user_info_t *user_info = malloc(sizeof(authdog_user_info_t));
-    user_info->id = strdup("123");
-    user_info->email = strdup("test@example.com");
-    user_info->name = strdup("Test User");
-    user_info->photo_url = strdup("https://example.com/photo.jpg");
+    user_info->id = test_strdup("123");
+    user_info->email = test_strdup("test@example.com");
+    user_info->name = test_strdup("Test User");
+    user_info->photo_url = test_strdup("https://example.com/photo.jpg");
     
     authdog_user_info_free(user_info);
     
