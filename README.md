@@ -54,7 +54,7 @@ Official SDKs for Authdog authentication and user management platform.
 ### Scripting & Other
 - [PowerShell SDK](./powershell/) - PowerShell SDK for Authdog
 - [Dart SDK](./dart/) - Dart SDK for Authdog
-- [R SDK](./r/) - R SDK for Authdog
+<!-- - [R SDK](./r/) - R SDK for Authdog -->
 
 ## Quick Start Examples
 
@@ -440,7 +440,7 @@ const user_info = client.getUserInfo("your-access-token") catch |err| switch (er
 std.debug.print("User: {s}\n", .{user_info.user.display_name});
 ```
 
-### R SDK
+<!-- ### R SDK
 
 [![R SDK Tests](https://github.com/authdog/sdk/actions/workflows/r-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/r-test.yml)
 
@@ -457,7 +457,7 @@ print(paste("User:", user_info$user$display_name))
 # With optional API key
 client <- AuthdogClient$new("https://api.authdog.com", "your-api-key")
 user_info <- client$get_user_info("your-access-token")
-```
+``` -->
 
 ### Additional SDKs
 
@@ -542,7 +542,7 @@ Each SDK has its own development setup. See the individual README files:
 - [Clojure SDK Development](./clojure/README.md#development)
 - [Swift SDK Development](./swift/README.md#development)
 - [Zig SDK Development](./zig/README.md#development)
-- [R SDK Development](./r/README.md#development)
+<!-- - [R SDK Development](./r/README.md#development) -->
 
 ## Contributing
 
