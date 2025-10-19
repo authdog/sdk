@@ -1,0 +1,145 @@
+name: R SDK Tests
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'r/**'
+  #     - '.github/workflows/r-test.yml'
+  # pull_request:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'r/**'
+  #     - '.github/workflows/r-test.yml'
+
+env:
+  R_VERSION: "4.3"
+
+jobs:
+  test:
+    name: Test R SDK
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        r-version: ["4.3", "4.2"]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up R ${{ matrix.r-version }}
+      uses: r-lib/actions/setup-r@v2
+      with:
+        r-version: ${{ matrix.r-version }}
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+
+    - name: Install R dependencies
+      run: |
+        cd r
+        Rscript -e "install.packages(c('devtools', 'testthat', 'covr', 'lintr', 'httr', 'jsonlite', 'R6'), repos = 'https://cloud.r-project.org')"
+
+    - name: Install package dependencies
+      run: |
+        cd r
+        Rscript -e "devtools::install_deps(dependencies = TRUE)"
+
+    - name: Check package
+      run: |
+        cd r
+        Rscript -e "devtools::check()"
+
+    - name: Run tests
+      run: |
+        cd r
+        Rscript -e "devtools::test()"
+
+    - name: Run tests with coverage
+      run: |
+        cd r
+        Rscript -e "covr::package_coverage()"
+
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: r-coverage-${{ matrix.r-version }}
+        path: r/covr/
+
+  lint:
+    name: Lint R SDK
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up R
+      uses: r-lib/actions/setup-r@v2
+      with:
+        r-version: ${{ env.R_VERSION }}
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+
+    - name: Install R dependencies
+      run: |
+        cd r
+        Rscript -e "install.packages(c('devtools', 'lintr', 'httr', 'jsonlite', 'R6'), repos = 'https://cloud.r-project.org')"
+
+    - name: Install package dependencies
+      run: |
+        cd r
+        Rscript -e "devtools::install_deps(dependencies = TRUE)"
+
+    - name: Run lintr
+      run: |
+        cd r
+        Rscript -e "lintr::lint_package()"
+
+  build:
+    name: Build R Package
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up R
+      uses: r-lib/actions/setup-r@v2
+      with:
+        r-version: ${{ env.R_VERSION }}
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+
+    - name: Install R dependencies
+      run: |
+        cd r
+        Rscript -e "install.packages(c('devtools', 'httr', 'jsonlite', 'R6'), repos = 'https://cloud.r-project.org')"
+
+    - name: Install package dependencies
+      run: |
+        cd r
+        Rscript -e "devtools::install_deps(dependencies = TRUE)"
+
+    - name: Build package
+      run: |
+        cd r
+        Rscript -e "devtools::build()"
+
+    # - name: Upload build artifacts
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: r-package
+    #     path: r/*.tar.gz

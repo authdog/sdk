@@ -1,0 +1,22 @@
+Package: authdog
+Type: Package
+Title: R SDK for Authdog Authentication and User Management
+Version: 0.1.0
+Authors@R: person("Authdog", email = "support@authdog.com", role = c("aut", "cre"))
+Description: R SDK for Authdog authentication and user management platform.
+    Provides functions to interact with Authdog API endpoints for user
+    information retrieval and authentication management.
+License: MIT + file LICENSE
+URL: https://github.com/authdog/sdk
+BugReports: https://github.com/authdog/sdk/issues
+Depends: R (>= 3.6.0)
+Imports:
+    httr (>= 1.4.0),
+    jsonlite (>= 1.7.0),
+    R6 (>= 2.5.0)
+Suggests:
+    testthat (>= 3.0.0),
+    covr (>= 3.5.0),
+    lintr (>= 2.0.0)
+Encoding: UTF-8
+RoxygenNote: 7.2.3

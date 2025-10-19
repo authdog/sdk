@@ -24,6 +24,7 @@ Official SDKs for Authdog authentication and user management platform.
 [![PowerShell SDK](https://github.com/authdog/sdk/actions/workflows/powershell.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/powershell.yml)
 [![Dart SDK](https://github.com/authdog/sdk/actions/workflows/dart.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/dart.yml)
 [![C SDK](https://github.com/authdog/sdk/actions/workflows/c-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/c-test.yml)
+[![R SDK Tests](https://github.com/authdog/sdk/actions/workflows/r-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/r-test.yml)
 
 ## Available SDKs
 
@@ -53,6 +54,7 @@ Official SDKs for Authdog authentication and user management platform.
 ### Scripting & Other
 - [PowerShell SDK](./powershell/) - PowerShell SDK for Authdog
 - [Dart SDK](./dart/) - Dart SDK for Authdog
+- [R SDK](./r/) - R SDK for Authdog
 
 ## Quick Start Examples
 
@@ -438,6 +440,25 @@ const user_info = client.getUserInfo("your-access-token") catch |err| switch (er
 std.debug.print("User: {s}\n", .{user_info.user.display_name});
 ```
 
+### R SDK
+
+[![R SDK Tests](https://github.com/authdog/sdk/actions/workflows/r-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/r-test.yml)
+
+```r
+library(authdog)
+
+# Initialize the client
+client <- AuthdogClient$new("https://api.authdog.com")
+
+# Get user information
+user_info <- client$get_user_info("your-access-token")
+print(paste("User:", user_info$user$display_name))
+
+# With optional API key
+client <- AuthdogClient$new("https://api.authdog.com", "your-api-key")
+user_info <- client$get_user_info("your-access-token")
+```
+
 ### Additional SDKs
 
 [![F# SDK](https://github.com/authdog/sdk/actions/workflows/fsharp.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/fsharp.yml)
@@ -454,7 +475,7 @@ These SDKs are also available with full documentation in their respective direct
 - **Type Safety**: Full type support across all languages (TypeScript, Go, Kotlin, Rust)
 - **Error Handling**: Structured error handling with specific exception types
 - **Modern APIs**: Built with modern HTTP clients and async/await support
-- **Cross-Platform**: Available for Python, Node.js, Go, Kotlin, Rust, PHP, C#, C++, Elixir, Java, Scala, Common Lisp, Clojure, Swift, and Zig
+- **Cross-Platform**: Available for Python, Node.js, Go, Kotlin, Rust, PHP, C#, C++, Elixir, Java, Scala, Common Lisp, Clojure, Swift, Zig, and R
 
 ## API Endpoints
 
@@ -521,6 +542,7 @@ Each SDK has its own development setup. See the individual README files:
 - [Clojure SDK Development](./clojure/README.md#development)
 - [Swift SDK Development](./swift/README.md#development)
 - [Zig SDK Development](./zig/README.md#development)
+- [R SDK Development](./r/README.md#development)
 
 ## Contributing
 
