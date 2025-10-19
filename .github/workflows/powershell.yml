@@ -22,5 +22,11 @@ jobs:
           if (-not (Get-Module -ListAvailable -Name Pester)) {
             Install-Module -Name Pester -Force -Scope CurrentUser -SkipPublisherCheck
           }
-          # Run tests with proper configuration
-          Invoke-Pester -Path ./Tests -CI -OutputFormat NUnitXml -OutputFile test-results.xml
+          # Create Pester configuration for v5+
+          $Configuration = New-PesterConfiguration
+          $Configuration.Run.Path = './Tests'
+          $Configuration.Output.Verbosity = 'Detailed'
+          $Configuration.Output.OutputFormat = 'NUnitXml'
+          $Configuration.Output.OutputPath = 'test-results.xml'
+          # Run tests with the configuration
+          Invoke-Pester -Configuration $Configuration
