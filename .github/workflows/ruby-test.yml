@@ -23,5 +23,4 @@ jobs:
           bundler-cache: true
         env:
           BUNDLE_GEMFILE: ruby/Gemfile
-      - run: bundle install --path vendor/bundle
       - run: bundle exec rspec --format documentation
