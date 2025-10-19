@@ -14,10 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup PowerShell
-        uses: PowerShell/PowerShell@v1
-        with:
-          version: '7.4.x'
       - name: Run Pester tests
         shell: pwsh
         run: |
