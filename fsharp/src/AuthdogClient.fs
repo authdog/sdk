@@ -51,7 +51,7 @@ type AuthdogClient (config: AuthdogClientConfig) =
             use! resp = httpClient.SendAsync(req)
             let! body = resp.Content.ReadAsStringAsync()
             if resp.StatusCode = System.Net.HttpStatusCode.Unauthorized then
-                return! Task.FromException<string>(AuthenticationException("Unauthorized - invalid or expired token"))
+                raise (AuthenticationException("Unauthorized - invalid or expired token"))
             elif int resp.StatusCode = 500 then
                 try
                     use doc = JsonDocument.Parse(body)
@@ -61,15 +61,15 @@ type AuthdogClient (config: AuthdogClientConfig) =
                     if root.TryGetProperty("error", &errEl) then
                         let err = errEl.GetString()
                         match err with
-                        | "GraphQL query failed" -> return! Task.FromException<string>(ApiException("GraphQL query failed"))
-                        | "Failed to fetch user info" -> return! Task.FromException<string>(ApiException("Failed to fetch user info"))
+                        | "GraphQL query failed" -> raise (ApiException("GraphQL query failed"))
+                        | "Failed to fetch user info" -> raise (ApiException("Failed to fetch user info"))
                         | _ -> ()
                 with _ -> ()
             if not resp.IsSuccessStatusCode then
-                return! Task.FromException<string>(ApiException(sprintf "HTTP error %d: %s" (int resp.StatusCode) body))
+                raise (ApiException(sprintf "HTTP error %d: %s" (int resp.StatusCode) body))
             return body
         with
-        | :? AuthenticationException as e -> return! Task.FromException<string>(e)
-        | :? ApiException as e -> return! Task.FromException<string>(e)
-        | e -> return! Task.FromException<string>(ApiException("Request failed: " + e.Message))
+        | :? AuthenticationException as e -> raise e
+        | :? ApiException as e -> raise e
+        | e -> raise (ApiException("Request failed: " + e.Message))
     }
