@@ -1,7 +1,8 @@
 Describe 'Get-AuthdogUserInfo' {
     BeforeAll {
         $modulePath = Join-Path $PSScriptRoot '..' 'Authdog.psd1'
-        Import-Module $modulePath -Force
+        $resolved = Resolve-Path -Path $modulePath -ErrorAction Stop
+        Import-Module -Name $resolved -Force -ErrorAction Stop
     }
     It 'returns data on success' {
         Mock -CommandName Invoke-RestMethod -ModuleName Authdog -MockWith { @{ user = @{ id = '123' } } }
