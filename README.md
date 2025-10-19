@@ -22,6 +22,7 @@ Official SDKs for Authdog authentication and user management platform.
 [![OCaml SDK](https://github.com/authdog/sdk/actions/workflows/ocaml.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/ocaml.yml)
 [![PowerShell SDK](https://github.com/authdog/sdk/actions/workflows/powershell.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/powershell.yml)
 [![Dart SDK](https://github.com/authdog/sdk/actions/workflows/dart.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/dart.yml)
+[![C SDK](https://github.com/authdog/sdk/actions/workflows/c-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/c-test.yml)
 
 ## Available SDKs
 
