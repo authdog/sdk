@@ -39,7 +39,7 @@ function Get-AuthdogUserInfo {
                     if ($errObj.error -eq 'Failed to fetch user info') { throw 'Failed to fetch user info' }
                 }
             } catch {}
-            throw "HTTP error $statusCode: $body"
+            throw "HTTP error ${statusCode}: $body"
         }
         throw "Request failed: $($ex.Message)"
     } catch {
