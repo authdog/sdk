@@ -1,0 +1,43 @@
+name: C SDK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'c/**'
+      - '.github/workflows/c-test.yml'
+  pull_request:
+    paths:
+      - 'c/**'
+      - '.github/workflows/c-test.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev cmake build-essential pkg-config
+      
+      - name: Build and test
+        working-directory: c
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make
+          make test
+      
+      - name: Build example
+        working-directory: c
+        run: |
+          cd build
+          make example
+      
+      - name: Run example (dry run)
+        working-directory: c
+        run: |
+          cd build
+          ./example || true  # Allow failure since we don't have real API keys
