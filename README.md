@@ -20,6 +20,7 @@ Official SDKs for Authdog authentication and user management platform.
 [![F# SDK](https://github.com/authdog/sdk/actions/workflows/fsharp.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/fsharp.yml)
 [![Rust SDK Tests](https://github.com/authdog/sdk/actions/workflows/rust-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/rust-test.yml)
 [![OCaml SDK](https://github.com/authdog/sdk/actions/workflows/ocaml.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/ocaml.yml)
+[![PowerShell SDK](https://github.com/authdog/sdk/actions/workflows/powershell.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/powershell.yml)
 
 ## Available SDKs
 
