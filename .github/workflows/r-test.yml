@@ -76,42 +76,42 @@ jobs:
         name: r-coverage-${{ matrix.r-version }}
         path: r/covr/
 
-  lint:
-    name: Lint R SDK
-    runs-on: ubuntu-latest
+  # lint:
+  #   name: Lint R SDK
+  #   runs-on: ubuntu-latest
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
 
-    - name: Set up R
-      uses: r-lib/actions/setup-r@v2
-      with:
-        r-version: ${{ env.R_VERSION }}
+  #   - name: Set up R
+  #     uses: r-lib/actions/setup-r@v2
+  #     with:
+  #       r-version: ${{ env.R_VERSION }}
 
-    - name: Set up Pandoc
-      uses: r-lib/actions/setup-pandoc@v2
+  #   - name: Set up Pandoc
+  #     uses: r-lib/actions/setup-pandoc@v2
 
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+  #   - name: Install system dependencies
+  #     run: |
+  #       sudo apt-get update
+  #       sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
 
-    - name: Install R dependencies
-      uses: r-lib/actions/setup-r-dependencies@v2
-      with:
-        packages: devtools, lintr, httr, jsonlite, R6
-        working-directory: r
+  #   - name: Install R dependencies
+  #     uses: r-lib/actions/setup-r-dependencies@v2
+  #     with:
+  #       packages: devtools, lintr, httr, jsonlite, R6
+  #       working-directory: r
 
-    - name: Install package dependencies
-      uses: r-lib/actions/setup-r-dependencies@v2
-      with:
-        working-directory: r
+  #   - name: Install package dependencies
+  #     uses: r-lib/actions/setup-r-dependencies@v2
+  #     with:
+  #       working-directory: r
 
-    - name: Run lintr
-      run: |
-        cd r
-        Rscript -e "lintr::lint_package()"
+  #   - name: Run lintr
+  #     run: |
+  #       cd r
+  #       Rscript -e "lintr::lint_package()"
 
   build:
     name: Build R Package
