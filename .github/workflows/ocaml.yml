@@ -31,10 +31,11 @@ jobs:
       - name: Install deps
         working-directory: ocaml
         run: |
+          opam update
           opam install -y dune cohttp-lwt-unix yojson alcotest
       - name: Build
         working-directory: ocaml
-        run: dune build
+        run: opam exec -- dune build
       - name: Test
         working-directory: ocaml
-        run: dune runtest
+        run: opam exec -- dune runtest

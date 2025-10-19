@@ -14,11 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ruby
+        working-directory: sdk/ruby
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
           bundler-cache: true
+        env:
+          BUNDLE_GEMFILE: sdk/ruby/Gemfile
+      - run: bundle install --path vendor/bundle
       - run: bundle exec rspec --format documentation
