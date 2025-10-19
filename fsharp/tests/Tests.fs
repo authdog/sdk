@@ -11,7 +11,7 @@ open Authdog
 let toTask (t: Task<'T>) : Task =
     (t.ContinueWith(fun (_: Task<'T>) -> ()) :> Task)
 
- type MockHandler(handler: HttpRequestMessage -> HttpResponseMessage) =
+type MockHandler(handler: HttpRequestMessage -> HttpResponseMessage) =
     inherit HttpMessageHandler()
     override _.SendAsync(request: HttpRequestMessage, cancellationToken: CancellationToken) =
         Task.FromResult(handler request)
