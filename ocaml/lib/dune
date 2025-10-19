@@ -1,0 +1,4 @@
+(library
+ (name authdog)
+ (public_name authdog)
+ (libraries cohttp-lwt-unix yojson lwt))

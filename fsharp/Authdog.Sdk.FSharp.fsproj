@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>Authdog.Sdk.FSharp</AssemblyName>
+    <RootNamespace>Authdog</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="src/Exceptions.fs" />
+    <Compile Include="src/AuthdogClient.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+</Project>

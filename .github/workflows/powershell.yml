@@ -1,0 +1,25 @@
+name: PowerShell SDK
+
+on:
+  push:
+    paths:
+      - 'sdk/powershell/**'
+  pull_request:
+    paths:
+      - 'sdk/powershell/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PowerShell
+        uses: PowerShell/PowerShell@v1
+        with:
+          version: '7.4.x'
+      - name: Run Pester tests
+        shell: pwsh
+        run: |
+          Set-Location sdk/powershell
+          Install-Module -Name Pester -Force -Scope CurrentUser -SkipPublisherCheck
+          Invoke-Pester -Path ./Tests -CI
