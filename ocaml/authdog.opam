@@ -1,0 +1,20 @@
+opam-version: "2.0"
+version: "0.1.0"
+maintainer: ""
+authors: ["authdog maintainers"]
+license: "MIT"
+homepage: "https://example.com"
+bug-reports: "https://example.com/issues"
+depends: [
+  "ocaml" {>= "5.1"}
+  "dune" {>= "3.10"}
+  "cohttp-lwt-unix"
+  "yojson"
+  "lwt"
+]
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+]
+
+synopsis: "Authdog OCaml SDK"
+description: "OCaml client library for Authdog APIs."
