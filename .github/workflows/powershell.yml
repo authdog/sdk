@@ -26,7 +26,8 @@ jobs:
           $Configuration = New-PesterConfiguration
           $Configuration.Run.Path = './Tests'
           $Configuration.Output.Verbosity = 'Detailed'
-          $Configuration.Output.OutputFormat = 'NUnitXml'
-          $Configuration.Output.OutputPath = 'test-results.xml'
+          $Configuration.TestResult.Enabled = $true
+          $Configuration.TestResult.OutputFormat = 'NUnitXml'
+          $Configuration.TestResult.OutputPath = 'test-results.xml'
           # Run tests with the configuration
           Invoke-Pester -Configuration $Configuration
