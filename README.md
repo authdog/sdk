@@ -18,6 +18,7 @@ Official SDKs for Authdog authentication and user management platform.
 [![Swift Tests](https://github.com/authdog/sdk/actions/workflows/swift-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/swift-test.yml)
 [![Zig Tests](https://github.com/authdog/sdk/actions/workflows/zig-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/zig-test.yml)
 [![F# SDK](https://github.com/authdog/sdk/actions/workflows/fsharp.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/fsharp.yml)
+[![Ruby SDK](https://github.com/authdog/sdk/actions/workflows/ruby.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/ruby.yml)
 
 ## Available SDKs
 
