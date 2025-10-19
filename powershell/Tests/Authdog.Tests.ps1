@@ -28,13 +28,15 @@ Describe 'Get-AuthdogUserInfo' {
     }
     
     It 'returns data on success' {
-        Mock -CommandName Invoke-RestMethod -MockWith { @{ user = @{ id = '123' } } }
+        Mock -CommandName Invoke-RestMethod -ModuleName Authdog -MockWith { 
+            return @{ user = @{ id = '123' } } 
+        }
         $resp = Get-AuthdogUserInfo -BaseUrl 'https://api.authdog.com' -AccessToken 't'
         $resp.user.id | Should -Be '123'
     }
 
     It 'throws on 401' {
-        Mock -CommandName Invoke-RestMethod -MockWith { 
+        Mock -CommandName Invoke-RestMethod -ModuleName Authdog -MockWith { 
             $ex = New-Object System.Net.WebException
             $ex.Response = New-Object System.Net.HttpWebResponse
             throw $ex
