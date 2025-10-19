@@ -1,8 +1,25 @@
 Describe 'Get-AuthdogUserInfo' {
     BeforeAll {
-        # Import the module from the parent directory
-        $modulePath = Join-Path $PSScriptRoot '..' 'Authdog.psm1'
-        Import-Module -Name $modulePath -Force -ErrorAction Stop
+        # Import the module from the parent directory using the manifest
+        $modulePath = Join-Path $PSScriptRoot '..' 'Authdog.psd1'
+        Write-Host "Importing module from: $modulePath"
+        
+        try {
+            Import-Module -Name $modulePath -Force -ErrorAction Stop
+            Write-Host "Module imported successfully"
+            
+            # Verify the function is available
+            $cmd = Get-Command Get-AuthdogUserInfo -ErrorAction SilentlyContinue
+            if ($cmd) {
+                Write-Host "Function Get-AuthdogUserInfo found: $($cmd.CommandType)"
+            } else {
+                Write-Host "Function Get-AuthdogUserInfo NOT found"
+                throw "Function Get-AuthdogUserInfo not available after module import"
+            }
+        } catch {
+            Write-Host "Error importing module: $($_.Exception.Message)"
+            throw
+        }
     }
     
     AfterAll {

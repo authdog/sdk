@@ -8,5 +8,7 @@
     PowerShellVersion = '5.1'
     CompatiblePSEditions = @('Core','Desktop')
     FunctionsToExport = @('Get-AuthdogUserInfo')
+    CmdletsToExport = @()
+    VariablesToExport = @()
     PrivateData       = @{}
 }
