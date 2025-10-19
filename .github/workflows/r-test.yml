@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        r-version: ["4.3", "4.2"]
+        r-version: ["4.3"]
 
     steps:
     - name: Checkout code
@@ -35,20 +35,24 @@ jobs:
       with:
         r-version: ${{ matrix.r-version }}
 
+    - name: Set up Pandoc
+      uses: r-lib/actions/setup-pandoc@v2
+
     - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
 
     - name: Install R dependencies
-      run: |
-        cd r
-        Rscript -e "install.packages(c('devtools', 'testthat', 'covr', 'lintr', 'httr', 'jsonlite', 'R6'), repos = 'https://cloud.r-project.org')"
+      uses: r-lib/actions/setup-r-dependencies@v2
+      with:
+        packages: devtools, testthat, covr, lintr, httr, jsonlite, R6
+        working-directory: r
 
     - name: Install package dependencies
-      run: |
-        cd r
-        Rscript -e "devtools::install_deps(dependencies = TRUE)"
+      uses: r-lib/actions/setup-r-dependencies@v2
+      with:
+        working-directory: r
 
     - name: Check package
       run: |
@@ -85,20 +89,24 @@ jobs:
       with:
         r-version: ${{ env.R_VERSION }}
 
+    - name: Set up Pandoc
+      uses: r-lib/actions/setup-pandoc@v2
+
     - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
 
     - name: Install R dependencies
-      run: |
-        cd r
-        Rscript -e "install.packages(c('devtools', 'lintr', 'httr', 'jsonlite', 'R6'), repos = 'https://cloud.r-project.org')"
+      uses: r-lib/actions/setup-r-dependencies@v2
+      with:
+        packages: devtools, lintr, httr, jsonlite, R6
+        working-directory: r
 
     - name: Install package dependencies
-      run: |
-        cd r
-        Rscript -e "devtools::install_deps(dependencies = TRUE)"
+      uses: r-lib/actions/setup-r-dependencies@v2
+      with:
+        working-directory: r
 
     - name: Run lintr
       run: |
@@ -118,20 +126,24 @@ jobs:
       with:
         r-version: ${{ env.R_VERSION }}
 
+    - name: Set up Pandoc
+      uses: r-lib/actions/setup-pandoc@v2
+
     - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
 
     - name: Install R dependencies
-      run: |
-        cd r
-        Rscript -e "install.packages(c('devtools', 'httr', 'jsonlite', 'R6'), repos = 'https://cloud.r-project.org')"
+      uses: r-lib/actions/setup-r-dependencies@v2
+      with:
+        packages: devtools, httr, jsonlite, R6
+        working-directory: r
 
     - name: Install package dependencies
-      run: |
-        cd r
-        Rscript -e "devtools::install_deps(dependencies = TRUE)"
+      uses: r-lib/actions/setup-r-dependencies@v2
+      with:
+        working-directory: r
 
     - name: Build package
       run: |
