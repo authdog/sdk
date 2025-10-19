@@ -1,6 +1,7 @@
 name: F# SDK
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'fsharp/**'

@@ -1,6 +1,7 @@
 name: Dart SDK
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'dart/**'
