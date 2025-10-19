@@ -12,12 +12,22 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      OPAMYES: 'true'
+      OPAMCONFIRMLEVEL: 'unsafe-yes'
+      OPAMNO_COLOR: 'true'
+      OPAMROOTISOK: '1'
+      DUNE_CACHE: 'enabled'
+      DUNE_CACHE_STORAGE_MODE: 'copy'
     steps:
       - uses: actions/checkout@v4
       - name: Setup OCaml
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: 5.1.x
+          cache: true
+          cache-prefix: ocaml-sdk
+          dune-cache: true
       - name: Install deps
         working-directory: ocaml
         run: |
