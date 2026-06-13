@@ -1,0 +1,68 @@
+language: 'csharp'
+platform: 'system'
+type: 'library'
+
+fileGroups:
+  sources:
+    - '**/*.cs'
+    - '!Tests/**/*'
+    - '!**/*Test*.cs'
+  tests:
+    - 'Tests/**/*'
+    - '**/*Test*.cs'
+  configs:
+    - '**/*.csproj'
+    - '**/*.sln'
+    - 'Directory.Build.props'
+
+tasks:
+  deps:
+    command: 'dotnet restore Authdog.Sdk.sln'
+    inputs:
+      - '@group(configs)'
+    options:
+      cache: false
+
+  test:
+    command: 'dotnet test Authdog.Sdk.sln --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults'
+    deps:
+      - '~:build'
+    inputs:
+      - '@group(sources)'
+      - '@group(tests)'
+      - '@group(configs)'
+    outputs:
+      - 'TestResults/'
+
+  lint:
+    command: 'dotnet format Authdog.Sdk.sln --verify-no-changes'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+
+  build:
+    command: 'dotnet build Authdog.Sdk.sln --no-restore --configuration Release'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+    outputs:
+      - '**/bin/Release/'
+
+  package:
+    command: 'dotnet pack --no-build --configuration Release --output ./nupkg'
+    deps:
+      - '~:build'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+    outputs:
+      - 'nupkg/'
+
+  security:
+    command: 'security-scan Authdog.Sdk.csproj'
+    inputs:
+      - '@group(configs)'

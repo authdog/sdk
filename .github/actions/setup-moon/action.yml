@@ -1,0 +1,68 @@
+name: 'Setup Moon + Proto'
+description: 'Install moon, proto, and language toolchains for the Authdog SDK monorepo'
+
+inputs:
+  needs-java:
+    description: 'Whether to install Java via setup-java'
+    required: false
+    default: 'false'
+  java-version:
+    description: 'Java version to install'
+    required: false
+    default: '11'
+  needs-dotnet:
+    description: 'Whether to install .NET via setup-dotnet'
+    required: false
+    default: 'false'
+  dotnet-version:
+    description: '.NET version to install'
+    required: false
+    default: '8.0.x'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install proto
+      shell: bash
+      run: |
+        curl -fsSL https://moonrepo.dev/install/proto.sh | bash
+        echo "$HOME/.proto/bin" >> $GITHUB_PATH
+
+    - name: Install moon
+      shell: bash
+      run: |
+        curl -fsSL https://moonrepo.dev/install/moon.sh | bash
+        echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+    - name: Cache proto tools
+      uses: actions/cache@v4
+      with:
+        path: ~/.proto/tools
+        key: ${{ runner.os }}-proto-${{ hashFiles('.prototools') }}
+        restore-keys: |
+          ${{ runner.os }}-proto-
+
+    - name: Install toolchains via proto
+      shell: bash
+      run: proto use
+
+    - name: Cache moon
+      uses: actions/cache@v4
+      with:
+        path: .moon/cache
+        key: ${{ runner.os }}-moon-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-moon-
+
+    - name: Setup Java
+      if: inputs.needs-java == 'true'
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.java-version }}
+        distribution: 'temurin'
+
+    - name: Setup .NET
+      if: inputs.needs-dotnet == 'true'
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}

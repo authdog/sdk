@@ -1,0 +1,52 @@
+language: 'javascript'
+platform: 'node'
+type: 'library'
+
+fileGroups:
+  sources:
+    - 'src/**/*'
+  tests:
+    - 'tests/**/*'
+    - '**/*.test.*'
+    - '**/*.spec.*'
+  configs:
+    - 'package.json'
+    - 'bun.lockb'
+    - 'tsconfig.json'
+
+tasks:
+  deps:
+    command: 'bun install --frozen-lockfile'
+    inputs:
+      - '@group(configs)'
+    options:
+      cache: false
+
+  test:
+    command: 'bun run test:coverage'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(tests)'
+      - '@group(configs)'
+    outputs:
+      - 'coverage/'
+
+  lint:
+    command: 'bun run lint'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+
+  build:
+    command: 'bun run build'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+    outputs:
+      - 'dist/'

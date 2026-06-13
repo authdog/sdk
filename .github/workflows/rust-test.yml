@@ -7,11 +7,17 @@ on:
     paths:
       - 'rust/**'
       - '.github/workflows/rust-test.yml'
+      - '.moon/workspace.yml'
+      - '.moon/toolchain.yml'
+      - '.prototools'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'rust/**'
       - '.github/workflows/rust-test.yml'
+      - '.moon/workspace.yml'
+      - '.moon/toolchain.yml'
+      - '.prototools'
 
 env:
   CARGO_TERM_COLOR: always
@@ -20,11 +26,44 @@ jobs:
   test:
     name: Test Rust SDK
     runs-on: ubuntu-latest
-    
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Moon + Proto
+      uses: ./.github/actions/setup-moon
+
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-stable-${{ hashFiles('rust/Cargo.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-stable-
+
+    - name: Check formatting
+      run: moon run rust:fmt
+
+    - name: Run clippy
+      run: moon run rust:lint
+
+    - name: Run tests
+      run: moon run rust:test
+
+    - name: Build documentation
+      run: moon run rust:doc
+
+  test-compat:
+    name: Test Rust SDK (${{ matrix.rust-version }})
+    runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
-        rust-version: ["stable", "beta", "nightly"]
+        rust-version: ["beta", "nightly"]
 
     steps:
     - name: Checkout code
@@ -38,7 +77,6 @@ jobs:
 
     - name: Regenerate Cargo.lock for compatibility
       run: |
-        # Remove existing lock file to regenerate with current toolchain
         rm -f Cargo.lock
         cargo generate-lockfile
       working-directory: rust
@@ -52,14 +90,6 @@ jobs:
         key: ${{ runner.os }}-cargo-${{ matrix.rust-version }}-${{ hashFiles('rust/Cargo.toml') }}
         restore-keys: |
           ${{ runner.os }}-cargo-${{ matrix.rust-version }}-
-
-    - name: Cache cargo build
-      uses: actions/cache@v4
-      with:
-        path: rust/target
-        key: ${{ runner.os }}-cargo-build-${{ matrix.rust-version }}-${{ hashFiles('rust/Cargo.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-build-${{ matrix.rust-version }}-
 
     - name: Check formatting
       run: |
@@ -76,60 +106,33 @@ jobs:
         cd rust
         cargo test --verbose
 
-    - name: Build documentation
-      run: |
-        cd rust
-        cargo doc --no-deps --document-private-items
-
-    - name: Upload build logs
-      uses: actions/upload-artifact@v4
-      if: failure()
-      with:
-        name: build-logs-rust-${{ matrix.rust-version }}
-        path: rust/target/
-
-    - name: Upload documentation
-      uses: actions/upload-artifact@v4
-      if: success()
-      with:
-        name: docs-rust-${{ matrix.rust-version }}
-        path: rust/target/doc/
-
   security:
     name: Security Audit
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: stable
-        components: rustfmt, clippy
+    - name: Setup Moon + Proto
+      uses: ./.github/actions/setup-moon
 
     - name: Install cargo-audit
       run: cargo install cargo-audit
 
     - name: Run security audit
-      run: |
-        cd rust
-        cargo audit
+      run: moon run rust:security
 
   coverage:
     name: Code Coverage
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: stable
-        components: rustfmt, clippy
+    - name: Setup Moon + Proto
+      uses: ./.github/actions/setup-moon
 
     - name: Install cargo-tarpaulin
       run: cargo install cargo-tarpaulin

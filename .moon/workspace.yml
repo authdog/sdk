@@ -1,0 +1,18 @@
+projects:
+  python: 'python'
+  node: 'node'
+  go: 'go'
+  rust: 'rust'
+  java: 'java'
+  csharp: 'csharp'
+
+vcs:
+  manager: 'git'
+  provider: 'github'
+  defaultBranch: 'main'
+
+runner:
+  cacheLifetime: '7 days'
+  logRunningCommand: true
+
+telemetry: false

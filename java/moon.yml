@@ -1,0 +1,67 @@
+language: 'java'
+platform: 'system'
+type: 'library'
+
+fileGroups:
+  sources:
+    - 'src/main/**/*'
+  tests:
+    - 'src/test/**/*'
+  configs:
+    - 'pom.xml'
+
+tasks:
+  deps:
+    command: 'mvn dependency:resolve'
+    inputs:
+      - '@group(configs)'
+    options:
+      cache: false
+
+  test:
+    command: 'mvn test'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(tests)'
+      - '@group(configs)'
+    outputs:
+      - 'target/surefire-reports/'
+
+  lint:
+    command: 'mvn checkstyle:check'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+
+  build:
+    command: 'mvn compile'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+    outputs:
+      - 'target/classes/'
+
+  package:
+    command: 'mvn package -DskipTests'
+    deps:
+      - '~:build'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+    outputs:
+      - 'target/*.jar'
+
+  benchmark:
+    command: 'mvn test -Dtest="**/*Benchmark*"'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(tests)'
+      - '@group(configs)'

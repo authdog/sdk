@@ -1,0 +1,52 @@
+language: 'rust'
+platform: 'rust'
+type: 'library'
+
+fileGroups:
+  sources:
+    - 'src/**/*'
+  tests:
+    - 'tests/**/*'
+  configs:
+    - 'Cargo.toml'
+    - 'Cargo.lock'
+
+tasks:
+  test:
+    command: 'cargo test --verbose'
+    inputs:
+      - '@group(sources)'
+      - '@group(tests)'
+      - '@group(configs)'
+
+  lint:
+    command: 'cargo clippy --all-targets --all-features -- -D warnings'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+
+  fmt:
+    command: 'cargo fmt --all -- --check'
+    inputs:
+      - '@group(sources)'
+
+  build:
+    command: 'cargo build --release'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+    outputs:
+      - 'target/release/'
+
+  security:
+    command: 'cargo audit'
+    inputs:
+      - '@group(configs)'
+
+  doc:
+    command: 'cargo doc --no-deps --document-private-items'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+    outputs:
+      - 'target/doc/'

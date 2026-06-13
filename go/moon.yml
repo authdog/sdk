@@ -1,0 +1,64 @@
+language: 'go'
+platform: 'system'
+type: 'library'
+
+fileGroups:
+  sources:
+    - '**/*.go'
+    - '!**/*_test.go'
+  tests:
+    - '**/*_test.go'
+  configs:
+    - 'go.mod'
+    - 'go.sum'
+
+tasks:
+  deps:
+    command: 'go mod download'
+    inputs:
+      - '@group(configs)'
+    options:
+      cache: false
+
+  test:
+    command: 'go test -v -race -coverprofile=coverage.out -covermode=atomic ./...'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(tests)'
+      - '@group(configs)'
+    outputs:
+      - 'coverage.out'
+
+  lint:
+    command: 'go vet ./...'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+
+  fmt:
+    command: 'gofmt -s -l .'
+    inputs:
+      - '@group(sources)'
+
+  build:
+    command: 'go build -v ./...'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+
+  benchmark:
+    command: 'go test -bench=. -benchmem ./...'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(tests)'
+      - '@group(configs)'
+    outputs:
+      - 'benchmark.txt'

@@ -524,7 +524,79 @@ All SDKs provide structured error handling:
 
 ## Development
 
-Each SDK has its own development setup. See the individual README files:
+### Prerequisites
+
+This monorepo uses [moonrepo (moon)](https://moonrepo.dev/) for task orchestration and caching, and [proto](https://moonrepo.dev/proto) for toolchain version management.
+
+**Install proto and moon:**
+
+```bash
+# Install proto (toolchain manager)
+curl -fsSL https://moonrepo.dev/install/proto.sh | bash
+
+# Install moon (task runner)
+curl -fsSL https://moonrepo.dev/install/moon.sh | bash
+
+# Install pinned language toolchains from .prototools
+proto use
+```
+
+Proto manages **Node.js 20.18.0**, **Bun 1.1.38**, **Go 1.21.13**, **Rust 1.82.0**, and **Python 3.11.10**. Java and C# require manual installation (via SDKMAN, setup-java, etc.).
+
+### Running tasks with moon
+
+Moon orchestrates builds, tests, and linting across all 6 core SDKs with intelligent caching — unchanged tasks are skipped on subsequent runs.
+
+```bash
+# Run all checks across all projects
+moon check --all
+
+# Run a specific task for a specific SDK
+moon run python:test
+moon run node:build
+moon run go:lint
+moon run rust:fmt
+moon run java:test
+moon run csharp:build
+
+# Run tests for all SDKs
+moon run :test
+```
+
+### Available tasks per SDK
+
+| Task | Python | Node | Go | Rust | Java | C# |
+|------|--------|------|----|------|------|----|
+| `deps` | pip install | bun install | go mod download | — | mvn dependency:resolve | dotnet restore |
+| `test` | pytest | bun run test:coverage | go test | cargo test | mvn test | dotnet test |
+| `lint` | flake8 | bun run lint | go vet | cargo clippy | mvn checkstyle:check | dotnet format |
+| `build` | python -m build | bun run build | go build | cargo build | mvn compile | dotnet build |
+| `fmt` | — | — | gofmt | cargo fmt | — | — |
+| `security` | — | — | — | cargo audit | — | security-scan |
+| `benchmark` | — | — | go test -bench | — | mvn test (JMH) | — |
+
+### Caching
+
+Moon provides 3 tiers of caching:
+
+1. **Moon task cache** (`.moon/cache/`) — skips entire task re-execution when inputs are unchanged
+2. **Proto tool cache** (`~/.proto/tools/`) — avoids re-downloading language runtimes
+3. **Language dependency caches** (go modules, cargo registry, maven, nuget) — avoids re-downloading packages
+
+### CI
+
+All 6 core SDK workflows use a shared [composite action](./.github/actions/setup-moon/action.yml) that installs proto + moon and restores caches. Multi-version matrix jobs (e.g., Go 1.20, Rust beta/nightly) use native `setup-*` actions directly since proto pins a single version.
+
+### Adding a new SDK to moon
+
+1. Create a `moon.yml` in the SDK directory defining tasks
+2. Add the project to `.moon/workspace.yml`
+3. Update the corresponding GitHub Actions workflow to use the `setup-moon` action
+4. For proto-supported languages, add the version to `.prototools`
+
+### Individual SDK development
+
+Each SDK also has its own README with SDK-specific setup instructions:
 
 - [Python SDK Development](./python/README.md#development)
 - [Node.js SDK Development](./node/README.md#development)

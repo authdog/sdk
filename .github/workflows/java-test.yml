@@ -2,25 +2,28 @@ name: Java SDK Tests
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [ main, develop ]
-  #   paths:
-  #     - 'java/**'
-  #     - '.github/workflows/java-test.yml'
-  # pull_request:
-  #   branches: [ main, develop ]
-  #   paths:
-  #     - 'java/**'
-  #     - '.github/workflows/java-test.yml'
-
-env:
-  JAVA_VERSION: "11"
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'java/**'
+      - '.github/workflows/java-test.yml'
+      - '.moon/workspace.yml'
+      - '.moon/toolchain.yml'
+      - '.prototools'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'java/**'
+      - '.github/workflows/java-test.yml'
+      - '.moon/workspace.yml'
+      - '.moon/toolchain.yml'
+      - '.prototools'
 
 jobs:
   test:
     name: Test Java SDK
     runs-on: ubuntu-latest
-    
+
     strategy:
       fail-fast: false
       matrix:
@@ -30,11 +33,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up JDK ${{ matrix.java-version }}
-      uses: actions/setup-java@v4
+    - name: Setup Moon + Proto
+      uses: ./.github/actions/setup-moon
       with:
+        needs-java: 'true'
         java-version: ${{ matrix.java-version }}
-        distribution: 'temurin'
 
     - name: Cache Maven dependencies
       uses: actions/cache@v4
@@ -44,35 +47,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
 
-    - name: Verify Java installation
-      run: |
-        java -version
-        mvn -version
-
     - name: Install dependencies
-      run: |
-        cd java
-        mvn dependency:resolve
+      run: moon run java:deps
 
-    - name: Compile source code
-      run: |
-        cd java
-        mvn compile
-
-    - name: Compile test code
-      run: |
-        cd java
-        mvn test-compile
-
-    - name: Run tests with coverage
-      run: |
-        cd java
-        mvn test
-
-    - name: Run tests with JUnit 5
-      run: |
-        cd java
-        mvn test -Dtest="**/*Test"
+    - name: Run tests
+      run: moon run java:test
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
@@ -84,16 +63,15 @@ jobs:
   build:
     name: Build Java SDK
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up JDK
-      uses: actions/setup-java@v4
+    - name: Setup Moon + Proto
+      uses: ./.github/actions/setup-moon
       with:
-        java-version: ${{ env.JAVA_VERSION }}
-        distribution: 'temurin'
+        needs-java: 'true'
 
     - name: Cache Maven dependencies
       uses: actions/cache@v4
@@ -104,14 +82,10 @@ jobs:
           ${{ runner.os }}-maven-
 
     - name: Build Java module
-      run: |
-        cd java
-        mvn clean compile
+      run: moon run java:build
 
     - name: Package JAR
-      run: |
-        cd java
-        mvn package -DskipTests
+      run: moon run java:package
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -122,16 +96,15 @@ jobs:
   lint:
     name: Lint Java SDK
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up JDK
-      uses: actions/setup-java@v4
+    - name: Setup Moon + Proto
+      uses: ./.github/actions/setup-moon
       with:
-        java-version: ${{ env.JAVA_VERSION }}
-        distribution: 'temurin'
+        needs-java: 'true'
 
     - name: Cache Maven dependencies
       uses: actions/cache@v4
@@ -142,63 +115,20 @@ jobs:
           ${{ runner.os }}-maven-
 
     - name: Run Checkstyle
-      run: |
-        cd java
-        mvn checkstyle:check
-
-    - name: Run SpotBugs
-      run: |
-        cd java
-        mvn spotbugs:spotbugs
-
-  security:
-    name: Security Audit
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        java-version: ${{ env.JAVA_VERSION }}
-        distribution: 'temurin'
-
-    - name: Cache Maven dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-
-    # OWASP Dependency Check temporarily disabled due to network issues
-    # - name: Run OWASP Dependency Check
-    #   run: |
-    #     cd java
-    #     mvn org.owasp:dependency-check-maven:check
-
-    - name: Upload security report
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: java-security-report
-        path: java/target/dependency-check-report.html
+      run: moon run java:lint
 
   benchmark:
     name: Benchmark Java SDK
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up JDK
-      uses: actions/setup-java@v4
+    - name: Setup Moon + Proto
+      uses: ./.github/actions/setup-moon
       with:
-        java-version: ${{ env.JAVA_VERSION }}
-        distribution: 'temurin'
+        needs-java: 'true'
 
     - name: Cache Maven dependencies
       uses: actions/cache@v4
@@ -209,9 +139,7 @@ jobs:
           ${{ runner.os }}-maven-
 
     - name: Run JMH benchmarks
-      run: |
-        cd java
-        mvn test -Dtest="**/*Benchmark*" || echo "No benchmarks found"
+      run: moon run java:benchmark
 
     - name: Upload benchmark results
       uses: actions/upload-artifact@v4

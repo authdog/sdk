@@ -2,16 +2,22 @@ name: C# SDK Tests
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [ main, develop ]
-  #   paths:
-  #     - 'csharp/**'
-  #     - '.github/workflows/csharp-test.yml'
-  # pull_request:
-  #   branches: [ main, develop ]
-  #   paths:
-  #     - 'csharp/**'
-  #     - '.github/workflows/csharp-test.yml'
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'csharp/**'
+      - '.github/workflows/csharp-test.yml'
+      - '.moon/workspace.yml'
+      - '.moon/toolchain.yml'
+      - '.prototools'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'csharp/**'
+      - '.github/workflows/csharp-test.yml'
+      - '.moon/workspace.yml'
+      - '.moon/toolchain.yml'
+      - '.prototools'
 
 env:
   DOTNET_VERSION: "8.0.x"
@@ -20,68 +26,15 @@ jobs:
   test:
     name: Test C# SDK
     runs-on: ubuntu-latest
-    
-    strategy:
-      fail-fast: false
-      matrix:
-        dotnet-version: ["8.0.x"]
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup .NET ${{ matrix.dotnet-version }}
-      uses: actions/setup-dotnet@v4
+    - name: Setup Moon + Proto
+      uses: ./.github/actions/setup-moon
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}
-
-    - name: Cache NuGet packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-
-    - name: Verify .NET installation
-      run: |
-        dotnet --version
-        dotnet --info
-
-    - name: Restore dependencies
-      run: |
-        cd csharp
-        dotnet restore Authdog.Sdk.sln
-
-    - name: Build solution
-      run: |
-        cd csharp
-        dotnet build Authdog.Sdk.sln --no-restore --configuration Release
-
-    - name: Run tests
-      run: |
-        cd csharp
-        dotnet test Authdog.Sdk.sln --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults
-
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: csharp-test-results-${{ matrix.dotnet-version }}
-        path: csharp/TestResults/
-        if-no-files-found: warn
-
-  build:
-    name: Build C# SDK
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
+        needs-dotnet: 'true'
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Cache NuGet packages
@@ -93,19 +46,48 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Restore dependencies
-      run: |
-        cd csharp
-        dotnet restore Authdog.Sdk.sln
+      run: moon run csharp:deps
 
     - name: Build solution
-      run: |
-        cd csharp
-        dotnet build Authdog.Sdk.sln --no-restore --configuration Release
+      run: moon run csharp:build
 
-    - name: Pack NuGet package
+    - name: Run tests
+      run: moon run csharp:test
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: csharp-test-results
+        path: csharp/TestResults/
+        if-no-files-found: warn
+
+  build:
+    name: Build C# SDK
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Moon + Proto
+      uses: ./.github/actions/setup-moon
+      with:
+        needs-dotnet: 'true'
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build and package
       run: |
-        cd csharp
-        dotnet pack --no-build --configuration Release --output ./nupkg
+        moon run csharp:build
+        moon run csharp:package
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -116,14 +98,15 @@ jobs:
   lint:
     name: Lint C# SDK
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+    - name: Setup Moon + Proto
+      uses: ./.github/actions/setup-moon
       with:
+        needs-dotnet: 'true'
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Cache NuGet packages
@@ -135,130 +118,23 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Restore dependencies
-      run: |
-        cd csharp
-        dotnet restore Authdog.Sdk.sln
-
-    - name: Install dotnet-format
-      run: dotnet tool install -g dotnet-format
+      run: moon run csharp:deps
 
     - name: Run dotnet-format check
-      run: |
-        cd csharp
-        dotnet format Authdog.Sdk.sln --verify-no-changes --verbosity diagnostic
-
-    - name: Install SonarAnalyzer.CSharp
-      run: |
-        cd csharp
-        dotnet add package SonarAnalyzer.CSharp --version 9.25.0.78984
-
-    - name: Run SonarAnalyzer
-      run: |
-        cd csharp
-        dotnet build Authdog.Sdk.sln --configuration Release --verbosity normal
-
-  security:
-    name: Security Audit C# SDK
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-
-    - name: Install .NET 6.0 for security-scan
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '6.0.x'
-
-    - name: Cache NuGet packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-
-    - name: Restore dependencies
-      run: |
-        cd csharp
-        dotnet restore Authdog.Sdk.sln
-
-    - name: Install security-scan
-      run: dotnet tool install --global security-scan
-
-    - name: Run security scan
-      run: |
-        cd csharp
-        security-scan Authdog.Sdk.csproj
-
-    - name: Upload security report
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: csharp-security-report
-        path: csharp/security-report.html
-        if-no-files-found: warn
-
-  benchmark:
-    name: Benchmark C# SDK
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-
-    - name: Cache NuGet packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-
-    - name: Restore dependencies
-      run: |
-        cd csharp
-        dotnet restore Authdog.Sdk.sln
-
-    - name: Build solution
-      run: |
-        cd csharp
-        dotnet build Authdog.Sdk.sln --no-restore --configuration Release
-
-    - name: Run benchmarks
-      run: |
-        cd csharp
-        dotnet test Authdog.Sdk.sln --no-build --configuration Release --filter "*Benchmark*" || echo "No benchmarks found"
-
-    - name: Upload benchmark results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: csharp-benchmark-results
-        path: csharp/BenchmarkDotNet.Artifacts/
-        if-no-files-found: warn
+      run: moon run csharp:lint
 
   coverage:
     name: Code Coverage C# SDK
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+    - name: Setup Moon + Proto
+      uses: ./.github/actions/setup-moon
       with:
+        needs-dotnet: 'true'
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Cache NuGet packages
@@ -269,15 +145,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: Restore dependencies
-      run: |
-        cd csharp
-        dotnet restore Authdog.Sdk.sln
-
     - name: Build solution
       run: |
-        cd csharp
-        dotnet build Authdog.Sdk.sln --no-restore --configuration Release
+        moon run csharp:deps
+        moon run csharp:build
 
     - name: Run tests with coverage
       run: |

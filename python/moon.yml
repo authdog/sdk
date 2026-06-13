@@ -1,0 +1,50 @@
+language: 'python'
+platform: 'system'
+type: 'library'
+
+fileGroups:
+  sources:
+    - 'authdog/**/*'
+  tests:
+    - 'tests/**/*'
+  configs:
+    - 'requirements.txt'
+    - 'setup.py'
+    - 'setup.cfg'
+    - 'pyproject.toml'
+
+tasks:
+  deps:
+    command: 'pip install -r requirements.txt'
+    inputs:
+      - '@group(configs)'
+    options:
+      cache: false
+
+  test:
+    command: 'python -m pytest --cov=authdog --cov-report=xml --cov-report=term-missing'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(tests)'
+      - '@group(configs)'
+    outputs:
+      - 'coverage.xml'
+
+  lint:
+    command: 'flake8 authdog/ --count --select=E9,F63,F7,F82 --show-source --statistics'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+
+  build:
+    command: 'python -m build'
+    deps:
+      - '~:deps'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+    outputs:
+      - 'dist/'
