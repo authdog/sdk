@@ -33,7 +33,7 @@ runs:
       shell: bash
       run: |
         curl -fsSL https://moonrepo.dev/install/moon.sh | bash
-        echo "$HOME/.proto/bin" >> $GITHUB_PATH
+        echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
     - name: Cache proto tools
       uses: actions/cache@v4
