@@ -1,9 +1,17 @@
-[tools]
-node = "20.18.0"
-pnpm = "9.15.0"
-go = "1.21.13"
-rust = "1.82.0"
-python = "3.11.10"
+[tools.node]
+version = "20.18.0"
+
+[tools.pnpm]
+version = "9.15.0"
+
+[tools.go]
+version = "1.21.13"
+
+[tools.rust]
+version = "1.82.0"
+
+[tools.python]
+version = "3.11.10"
 
 [settings]
 auto-install = true
