@@ -11,19 +11,19 @@ fileGroups:
     - '**/*.spec.*'
   configs:
     - 'package.json'
-    - 'bun.lockb'
+    - 'pnpm-lock.yaml'
     - 'tsconfig.json'
 
 tasks:
   deps:
-    command: 'bun install --frozen-lockfile'
+    command: 'pnpm install --frozen-lockfile'
     inputs:
       - '@group(configs)'
     options:
       cache: false
 
   test:
-    command: 'bun run test:coverage'
+    command: 'pnpm run test:coverage'
     deps:
       - '~:deps'
     inputs:
@@ -34,7 +34,7 @@ tasks:
       - 'coverage/'
 
   lint:
-    command: 'bun run lint'
+    command: 'pnpm run lint'
     deps:
       - '~:deps'
     inputs:
@@ -42,7 +42,7 @@ tasks:
       - '@group(configs)'
 
   build:
-    command: 'bun run build'
+    command: 'pnpm run build'
     deps:
       - '~:deps'
     inputs:

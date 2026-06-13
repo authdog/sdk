@@ -541,7 +541,7 @@ curl -fsSL https://moonrepo.dev/install/moon.sh | bash
 proto use
 ```
 
-Proto manages **Node.js 20.18.0**, **Bun 1.1.38**, **Go 1.21.13**, **Rust 1.82.0**, and **Python 3.11.10**. Java and C# require manual installation (via SDKMAN, setup-java, etc.).
+Proto manages **Node.js 20.18.0**, **pnpm 9.15.0**, **Go 1.21.13**, **Rust 1.82.0**, and **Python 3.11.10**. Java and C# require manual installation (via SDKMAN, setup-java, etc.).
 
 ### Running tasks with moon
 
@@ -567,10 +567,10 @@ moon run :test
 
 | Task | Python | Node | Go | Rust | Java | C# |
 |------|--------|------|----|------|------|----|
-| `deps` | pip install | bun install | go mod download | — | mvn dependency:resolve | dotnet restore |
-| `test` | pytest | bun run test:coverage | go test | cargo test | mvn test | dotnet test |
-| `lint` | flake8 | bun run lint | go vet | cargo clippy | mvn checkstyle:check | dotnet format |
-| `build` | python -m build | bun run build | go build | cargo build | mvn compile | dotnet build |
+| `deps` | pip install | pnpm install | go mod download | — | mvn dependency:resolve | dotnet restore |
+| `test` | pytest | pnpm run test:coverage | go test | cargo test | mvn test | dotnet test |
+| `lint` | flake8 | pnpm run lint | go vet | cargo clippy | mvn checkstyle:check | dotnet format |
+| `build` | python -m build | pnpm run build | go build | cargo build | mvn compile | dotnet build |
 | `fmt` | — | — | gofmt | cargo fmt | — | — |
 | `security` | — | — | — | cargo audit | — | security-scan |
 | `benchmark` | — | — | go test -bench | — | mvn test (JMH) | — |
