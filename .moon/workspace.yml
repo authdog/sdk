@@ -7,11 +7,11 @@ projects:
   csharp: 'csharp'
 
 vcs:
-  manager: 'git'
+  client: 'git'
   provider: 'github'
   defaultBranch: 'main'
 
-runner:
+pipeline:
   cacheLifetime: '7 days'
   logRunningCommand: true
 
