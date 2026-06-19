@@ -1,6 +1,4 @@
 language: 'javascript'
-platform: 'node'
-type: 'library'
 
 fileGroups:
   sources:

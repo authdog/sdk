@@ -1,6 +1,4 @@
 language: 'java'
-platform: 'system'
-type: 'library'
 
 fileGroups:
   sources:

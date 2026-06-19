@@ -1,6 +1,4 @@
 language: 'go'
-platform: 'system'
-type: 'library'
 
 fileGroups:
   sources:

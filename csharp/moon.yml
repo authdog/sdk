@@ -1,6 +1,4 @@
 language: 'csharp'
-platform: 'system'
-type: 'library'
 
 fileGroups:
   sources:

@@ -1,6 +1,4 @@
 language: 'rust'
-platform: 'rust'
-type: 'library'
 
 fileGroups:
   sources:
