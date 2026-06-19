@@ -8,7 +8,6 @@ fileGroups:
     - '**/*_test.go'
   configs:
     - 'go.mod'
-    - 'go.sum'
 
 tasks:
   deps:
@@ -19,7 +18,13 @@ tasks:
       cache: false
 
   test:
-    command: 'go test -v -race -coverprofile=coverage.out -covermode=atomic ./...'
+    command: 'go test'
+    args:
+      - '-v'
+      - '-race'
+      - '-coverprofile=coverage.out'
+      - '-covermode=atomic'
+      - './...'
     deps:
       - '~:deps'
     inputs:
@@ -51,7 +56,11 @@ tasks:
       - '@group(configs)'
 
   benchmark:
-    command: 'go test -bench=. -benchmem ./...'
+    command: 'go test'
+    args:
+      - '-bench=.'
+      - '-benchmem'
+      - './...'
     deps:
       - '~:deps'
     inputs:
