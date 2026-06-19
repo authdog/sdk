@@ -8,8 +8,6 @@ fileGroups:
   configs:
     - 'requirements.txt'
     - 'setup.py'
-    - 'setup.cfg'
-    - 'pyproject.toml'
 
 tasks:
   deps:
