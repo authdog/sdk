@@ -4,17 +4,17 @@ on:
   workflow_dispatch:
   # push:
   #   paths:
-  #     - 'ruby/**'
+  #     - 'planned/ruby/**'
   # pull_request:
   #   paths:
-  #     - 'ruby/**'
+  #     - 'planned/ruby/**'
 
 jobs:
   test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ruby
+        working-directory: planned/ruby
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
@@ -22,5 +22,5 @@ jobs:
           ruby-version: '3.3'
           bundler-cache: true
         env:
-          BUNDLE_GEMFILE: ruby/Gemfile
+          BUNDLE_GEMFILE: planned/ruby/Gemfile
       - run: bundle exec rspec --format documentation

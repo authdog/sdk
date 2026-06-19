@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
   # push:
   #   paths:
-  #     - 'ocaml/**'
+  #     - 'planned/ocaml/**'
   # pull_request:
   #   paths:
-  #     - 'ocaml/**'
+  #     - 'planned/ocaml/**'
 
 jobs:
   test:
@@ -29,13 +29,13 @@ jobs:
           cache-prefix: ocaml-sdk
           dune-cache: true
       - name: Install deps
-        working-directory: ocaml
+        working-directory: planned/ocaml
         run: |
           opam update
           opam install -y dune cohttp-lwt-unix yojson alcotest
       - name: Build
-        working-directory: ocaml
+        working-directory: planned/ocaml
         run: opam exec -- dune build
       - name: Test
-        working-directory: ocaml
+        working-directory: planned/ocaml
         run: opam exec -- dune runtest

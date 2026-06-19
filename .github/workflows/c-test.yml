@@ -2,14 +2,14 @@ name: C SDK
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'c/**'
-      - '.github/workflows/c-test.yml'
-  pull_request:
-    paths:
-      - 'c/**'
-      - '.github/workflows/c-test.yml'
+  # push:
+  #   paths:
+  #     - 'planned/c/**'
+  #     - '.github/workflows/c-test.yml'
+  # pull_request:
+  #   paths:
+  #     - 'planned/c/**'
+  #     - '.github/workflows/c-test.yml'
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -22,16 +22,16 @@ jobs:
           sudo apt-get install -y libcurl4-openssl-dev build-essential
       
       - name: Build and test
-        working-directory: c
+        working-directory: planned/c
         run: |
           make test
       
       - name: Build example
-        working-directory: c
+        working-directory: planned/c
         run: |
           make example
       
       - name: Run example (dry run)
-        working-directory: c
+        working-directory: planned/c
         run: |
           ./example || true  # Allow failure since we don't have real API keys

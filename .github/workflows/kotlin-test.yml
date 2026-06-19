@@ -2,16 +2,16 @@ name: Kotlin SDK Tests
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - 'kotlin/**'
-      - '.github/workflows/kotlin-test.yml'
-  pull_request:
-    branches: [ main, develop ]
-    paths:
-      - 'kotlin/**'
-      - '.github/workflows/kotlin-test.yml'
+  # push:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'planned/kotlin/**'
+  #     - '.github/workflows/kotlin-test.yml'
+  # pull_request:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'planned/kotlin/**'
+  #     - '.github/workflows/kotlin-test.yml'
 
 env:
   GRADLE_VERSION: "8.5"
@@ -48,11 +48,11 @@ jobs:
           ${{ runner.os }}-gradle-
 
     - name: Make gradlew executable
-      run: chmod +x ./kotlin/gradlew
+      run: chmod +x ./planned/kotlin/gradlew
 
     - name: Run tests
       run: |
-        cd kotlin
+        cd planned/kotlin
         ./gradlew test --no-daemon
 
     - name: Upload test results
@@ -60,19 +60,19 @@ jobs:
       if: always()
       with:
         name: test-results-java-${{ matrix.java-version }}
-        path: kotlin/build/test-results/
+        path: planned/kotlin/build/test-results/
 
     - name: Upload build logs
       uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: build-logs-java-${{ matrix.java-version }}
-        path: kotlin/build/
+        path: planned/kotlin/build/
 
     - name: Generate test report
       uses: dorny/test-reporter@v1
       if: success() || failure()
       with:
         name: Kotlin SDK Tests (Java ${{ matrix.java-version }})
-        path: kotlin/build/test-results/test/*.xml
+        path: planned/kotlin/build/test-results/test/*.xml
         reporter: java-junit

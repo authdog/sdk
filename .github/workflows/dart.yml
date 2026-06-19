@@ -2,19 +2,19 @@ name: Dart SDK
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'dart/**'
-  pull_request:
-    paths:
-      - 'dart/**'
+  # push:
+  #   paths:
+  #     - 'planned/dart/**'
+  # pull_request:
+  #   paths:
+  #     - 'planned/dart/**'
 
 jobs:
   test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: dart
+        working-directory: planned/dart
     steps:
       - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@v1

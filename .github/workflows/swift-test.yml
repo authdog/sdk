@@ -1,13 +1,14 @@
 name: Swift Tests
 
 on:
-  push:
-    paths:
-      - 'swift/**'
-      - '.github/workflows/swift-test.yml'
-  pull_request:
-    paths:
-      - 'swift/**'
+  workflow_dispatch:
+  # push:
+  #   paths:
+  #     - 'planned/swift/**'
+  #     - '.github/workflows/swift-test.yml'
+  # pull_request:
+  #   paths:
+  #     - 'planned/swift/**'
 
 jobs:
   test:
@@ -19,10 +20,10 @@ jobs:
 
       - name: Build
         run: |
-          cd swift
+          cd planned/swift
           swift build
 
       - name: Run tests
         run: |
-          cd swift
+          cd planned/swift
           swift test

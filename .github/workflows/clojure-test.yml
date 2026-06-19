@@ -1,13 +1,14 @@
 name: Clojure Tests
 
 on:
-  push:
-    paths:
-      - 'clojure/**'
-      - '.github/workflows/clojure-test.yml'
-  pull_request:
-    paths:
-      - 'clojure/**'
+  workflow_dispatch:
+  # push:
+  #   paths:
+  #     - 'planned/clojure/**'
+  #     - '.github/workflows/clojure-test.yml'
+  # pull_request:
+  #   paths:
+  #     - 'planned/clojure/**'
 
 jobs:
   test:
@@ -19,7 +20,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: clojure
+        working-directory: planned/clojure
 
     steps:
       - name: Checkout

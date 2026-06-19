@@ -2,16 +2,16 @@ name: C++ SDK Tests
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - 'cpp/**'
-      - '.github/workflows/cpp-test.yml'
-  pull_request:
-    branches: [ main, develop ]
-    paths:
-      - 'cpp/**'
-      - '.github/workflows/cpp-test.yml'
+  # push:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'planned/cpp/**'
+  #     - '.github/workflows/cpp-test.yml'
+  # pull_request:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'planned/cpp/**'
+  #     - '.github/workflows/cpp-test.yml'
 
 env:
   BUILD_TYPE: Release
@@ -53,7 +53,7 @@ jobs:
 
     - name: Configure CMake
       run: |
-        cd cpp
+        cd planned/cpp
         BUILD_DIR="build-${{ matrix.compiler }}"
         echo "BUILD_DIR=$BUILD_DIR" >> $GITHUB_ENV
         
@@ -75,12 +75,12 @@ jobs:
 
     - name: Build
       run: |
-        cd cpp
+        cd planned/cpp
         cmake --build $BUILD_DIR --config ${{ env.BUILD_TYPE }} --parallel
 
     - name: Run tests
       run: |
-        cd cpp
+        cd planned/cpp
         ctest --test-dir $BUILD_DIR \
           --output-on-failure \
           --timeout ${{ env.TEST_TIMEOUT }}
@@ -90,12 +90,12 @@ jobs:
       if: always()
       with:
         name: test-results-${{ matrix.compiler }}
-        path: cpp/build-${{ matrix.compiler }}/Testing/
+        path: planned/cpp/build-${{ matrix.compiler }}/Testing/
 
     - name: Upload build logs
       uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: build-logs-${{ matrix.compiler }}
-        path: cpp/build-${{ matrix.compiler }}/
+        path: planned/cpp/build-${{ matrix.compiler }}/
 

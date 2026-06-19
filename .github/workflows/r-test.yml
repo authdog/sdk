@@ -59,15 +59,15 @@ jobs:
       uses: r-lib/actions/setup-r-dependencies@v2
       with:
         packages: devtools, testthat, httr, jsonlite, R6
-        working-directory: r
+        working-directory: planned/r
 
     - name: Install package dependencies
       uses: r-lib/actions/setup-r-dependencies@v2
       with:
-        working-directory: r
+        working-directory: planned/r
 
     - name: Run tests
       run: |
-        cd r
+        cd planned/r
         Rscript -e "devtools::test()"
 

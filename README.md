@@ -35,25 +35,26 @@ Official SDKs for Authdog authentication and user management platform.
 - [Java SDK](./java/) - Java SDK for Authdog
 - [C# SDK](./csharp/) - C# SDK for Authdog
 
-### Additional Languages
-- [Kotlin SDK](./kotlin/) - Kotlin SDK for Authdog
-- [PHP SDK](./php/) - PHP SDK for Authdog
-- [C++ SDK](./cpp/) - C++ SDK for Authdog
-- [Elixir SDK](./elixir/) - Elixir SDK for Authdog
-- [Scala SDK](./scala/) - Scala SDK for Authdog
-- [Swift SDK](./swift/) - Swift SDK for Authdog
-- [Zig SDK](./zig/) - Zig SDK for Authdog
+### Planned SDKs
 
-### Functional Languages
-- [Common Lisp SDK](./commonlisp/) - Common Lisp SDK for Authdog
-- [Clojure SDK](./clojure/) - Clojure SDK for Authdog
-- [F# SDK](./fsharp/) - F# SDK for Authdog
-- [OCaml SDK](./ocaml/) - OCaml SDK for Authdog
+These SDKs are in the `planned/` directory and are not yet production-ready.
 
-### Scripting & Other
-- [PowerShell SDK](./powershell/) - PowerShell SDK for Authdog
-- [Dart SDK](./dart/) - Dart SDK for Authdog
-<!-- - [R SDK](./r/) - R SDK for Authdog -->
+- [C SDK](./planned/c/) - C SDK for Authdog
+- [C++ SDK](./planned/cpp/) - C++ SDK for Authdog
+- [Clojure SDK](./planned/clojure/) - Clojure SDK for Authdog
+- [Common Lisp SDK](./planned/commonlisp/) - Common Lisp SDK for Authdog
+- [Dart SDK](./planned/dart/) - Dart SDK for Authdog
+- [Elixir SDK](./planned/elixir/) - Elixir SDK for Authdog
+- [F# SDK](./planned/fsharp/) - F# SDK for Authdog
+- [Kotlin SDK](./planned/kotlin/) - Kotlin SDK for Authdog
+- [OCaml SDK](./planned/ocaml/) - OCaml SDK for Authdog
+- [PHP SDK](./planned/php/) - PHP SDK for Authdog
+- [PowerShell SDK](./planned/powershell/) - PowerShell SDK for Authdog
+- [R SDK](./planned/r/) - R SDK for Authdog
+- [Ruby SDK](./planned/ruby/) - Ruby SDK for Authdog
+- [Scala SDK](./planned/scala/) - Scala SDK for Authdog
+- [Swift SDK](./planned/swift/) - Swift SDK for Authdog
+- [Zig SDK](./planned/zig/) - Zig SDK for Authdog
 
 ## Quick Start Examples
 
@@ -474,7 +475,7 @@ These SDKs are also available with full documentation in their respective direct
 - **Type Safety**: Full type support across all languages (TypeScript, Go, Kotlin, Rust)
 - **Error Handling**: Structured error handling with specific exception types
 - **Modern APIs**: Built with modern HTTP clients and async/await support
-- **Cross-Platform**: Available for Python, Node.js, Go, Kotlin, Rust, PHP, C#, C++, Elixir, Java, Scala, Common Lisp, Clojure, Swift, Zig, and R
+- **Cross-Platform**: Core SDKs for Python, Node.js, Go, Rust, Java, and C#. Additional planned SDKs in `planned/`
 
 ## API Endpoints
 
@@ -601,19 +602,25 @@ Each SDK also has its own README with SDK-specific setup instructions:
 - [Python SDK Development](./python/README.md#development)
 - [Node.js SDK Development](./node/README.md#development)
 - [Go SDK Development](./go/README.md#development)
-- [Kotlin SDK Development](./kotlin/README.md#development)
 - [Rust SDK Development](./rust/README.md#development)
-- [PHP SDK Development](./php/README.md#development)
-- [C# SDK Development](./csharp/README.md#development)
-- [C++ SDK Development](./cpp/README.md#development)
-- [Elixir SDK Development](./elixir/README.md#development)
 - [Java SDK Development](./java/README.md#development)
-- [Scala SDK Development](./scala/README.md#development)
-- [Common Lisp SDK Development](./commonlisp/README.md#development)
-- [Clojure SDK Development](./clojure/README.md#development)
-- [Swift SDK Development](./swift/README.md#development)
-- [Zig SDK Development](./zig/README.md#development)
-<!-- - [R SDK Development](./r/README.md#development) -->
+- [C# SDK Development](./csharp/README.md#development)
+- [C SDK Development](./planned/c/README.md#development)
+- [C++ SDK Development](./planned/cpp/README.md#development)
+- [Clojure SDK Development](./planned/clojure/README.md#development)
+- [Common Lisp SDK Development](./planned/commonlisp/README.md#development)
+- [Dart SDK Development](./planned/dart/README.md#development)
+- [Elixir SDK Development](./planned/elixir/README.md#development)
+- [F# SDK Development](./planned/fsharp/README.md#development)
+- [Kotlin SDK Development](./planned/kotlin/README.md#development)
+- [OCaml SDK Development](./planned/ocaml/README.md#development)
+- [PHP SDK Development](./planned/php/README.md#development)
+- [PowerShell SDK Development](./planned/powershell/README.md#development)
+- [R SDK Development](./planned/r/README.md#development)
+- [Ruby SDK Development](./planned/ruby/README.md#development)
+- [Scala SDK Development](./planned/scala/README.md#development)
+- [Swift SDK Development](./planned/swift/README.md#development)
+- [Zig SDK Development](./planned/zig/README.md#development)
 
 ## Contributing
 

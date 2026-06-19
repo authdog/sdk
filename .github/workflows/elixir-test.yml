@@ -1,13 +1,14 @@
 name: Elixir Tests
 
 on:
-  push:
-    paths:
-      - 'elixir/**'
-      - '.github/workflows/elixir-test.yml'
-  pull_request:
-    paths:
-      - 'elixir/**'
+  workflow_dispatch:
+  # push:
+  #   paths:
+  #     - 'planned/elixir/**'
+  #     - '.github/workflows/elixir-test.yml'
+  # pull_request:
+  #   paths:
+  #     - 'planned/elixir/**'
 
 jobs:
   test:
@@ -20,7 +21,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: elixir
+        working-directory: planned/elixir
 
     steps:
       - name: Checkout
@@ -35,7 +36,7 @@ jobs:
       - name: Restore dependencies cache
         uses: actions/cache@v4
         with:
-          path: elixir/deps
+          path: planned/elixir/deps
           key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
           restore-keys: |
             ${{ runner.os }}-mix-

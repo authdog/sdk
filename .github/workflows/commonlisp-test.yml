@@ -1,13 +1,14 @@
 name: Common Lisp Tests
 
 on:
-  push:
-    paths:
-      - 'commonlisp/**'
-      - '.github/workflows/commonlisp-test.yml'
-  pull_request:
-    paths:
-      - 'commonlisp/**'
+  workflow_dispatch:
+  # push:
+  #   paths:
+  #     - 'planned/commonlisp/**'
+  #     - '.github/workflows/commonlisp-test.yml'
+  # pull_request:
+  #   paths:
+  #     - 'planned/commonlisp/**'
 
 jobs:
   test:
@@ -19,7 +20,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: commonlisp
+        working-directory: planned/commonlisp
 
     steps:
       - name: Checkout

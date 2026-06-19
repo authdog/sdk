@@ -1,13 +1,14 @@
 name: PHP Tests
 
 on:
-  push:
-    paths:
-      - 'php/**'
-      - '.github/workflows/php-test.yml'
-  pull_request:
-    paths:
-      - 'php/**'
+  workflow_dispatch:
+  # push:
+  #   paths:
+  #     - 'planned/php/**'
+  #     - '.github/workflows/php-test.yml'
+  # pull_request:
+  #   paths:
+  #     - 'planned/php/**'
 
 jobs:
   phpunit:
@@ -22,7 +23,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: php
+        working-directory: planned/php
 
     steps:
       - name: Checkout

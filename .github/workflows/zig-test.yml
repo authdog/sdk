@@ -1,16 +1,17 @@
 name: Zig Tests
 
 on:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - 'zig/**'
-      - '.github/workflows/zig.yml'
-  pull_request:
-    branches: [ main, develop ]
-    paths:
-      - 'zig/**'
-      - '.github/workflows/zig.yml'
+  workflow_dispatch:
+  # push:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'planned/zig/**'
+  #     - '.github/workflows/zig-test.yml'
+  # pull_request:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'planned/zig/**'
+  #     - '.github/workflows/zig-test.yml'
 
 jobs:
   test:
@@ -38,7 +39,7 @@ jobs:
     
     - name: Clear Zig cache
       run: |
-        cd zig
+        cd planned/zig
         rm -rf zig-cache .zig-cache || echo "No cache to clear"
         rm -rf ~/.cache/zig || echo "No global cache to clear"
         rm -rf $ZIG_LOCAL_CACHE_DIR || echo "No local cache to clear"
@@ -47,28 +48,28 @@ jobs:
     
     - name: Validate build configuration
       run: |
-        cd zig
+        cd planned/zig
         cat build.zig.zon
         echo "Build configuration validated"
     
     - name: Run tests
       run: |
-        cd zig
+        cd planned/zig
         zig build test
     
     - name: Build library
       run: |
-        cd zig
+        cd planned/zig
         zig build
     
     - name: Build example
       run: |
-        cd zig
+        cd planned/zig
         zig build example
     
     - name: Generate documentation
       run: |
-        cd zig
+        cd planned/zig
         zig build docs
 
   lint:
@@ -86,7 +87,7 @@ jobs:
     
     - name: Clear Zig cache
       run: |
-        cd zig
+        cd planned/zig
         rm -rf zig-cache .zig-cache || echo "No cache to clear"
         rm -rf ~/.cache/zig || echo "No global cache to clear"
     
@@ -97,12 +98,12 @@ jobs:
     
     - name: Check code formatting
       run: |
-        cd zig
+        cd planned/zig
         zig fmt --check src/ || echo "Code formatting issues found"
     
     - name: Analyze code
       run: |
-        cd zig
+        cd planned/zig
         zig build-lib src/lib.zig -fanalyze || echo "Static analysis completed"
 
   security:
@@ -120,11 +121,11 @@ jobs:
     
     - name: Clear Zig cache
       run: |
-        cd zig
+        cd planned/zig
         rm -rf zig-cache .zig-cache || echo "No cache to clear"
         rm -rf ~/.cache/zig || echo "No global cache to clear"
     
     - name: Run security analysis
       run: |
-        cd zig
+        cd planned/zig
         zig build-lib src/lib.zig -fsanitize-c || echo "Security analysis completed"

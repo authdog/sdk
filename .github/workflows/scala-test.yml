@@ -1,13 +1,14 @@
 name: Scala Tests
 
 on:
-  push:
-    paths:
-      - 'scala/**'
-      - '.github/workflows/scala-test.yml'
-  pull_request:
-    paths:
-      - 'scala/**'
+  workflow_dispatch:
+  # push:
+  #   paths:
+  #     - 'planned/scala/**'
+  #     - '.github/workflows/scala-test.yml'
+  # pull_request:
+  #   paths:
+  #     - 'planned/scala/**'
 
 jobs:
   test:
@@ -20,7 +21,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: scala
+        working-directory: planned/scala
 
     steps:
       - name: Checkout
