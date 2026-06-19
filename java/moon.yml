@@ -56,7 +56,7 @@ tasks:
       - 'target/*.jar'
 
   benchmark:
-    command: 'mvn test -Dtest="**/*Benchmark*" -DfailIfNoTests=false'
+    command: 'mvn test -Dtest="**/*Benchmark*" -Dsurefire.failIfNoSpecifiedTests=false'
     deps:
       - '~:deps'
     inputs:
