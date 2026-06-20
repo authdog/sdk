@@ -1,632 +1,89 @@
 # Authdog SDK
 
-Official SDKs for Authdog authentication and user management platform.
+Official SDKs for the Authdog authentication and user management platform.
 
-## SDK Health Status
+## SDK Health
 
-[![Python SDK Tests](https://github.com/authdog/sdk/actions/workflows/python-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/python-test.yml)
-[![Node.js SDK Tests](https://github.com/authdog/sdk/actions/workflows/node-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/node-test.yml)
-[![Go SDK Tests](https://github.com/authdog/sdk/actions/workflows/go-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/go-test.yml)
-[![Java SDK Tests](https://github.com/authdog/sdk/actions/workflows/java-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/java-test.yml)
-[![C# SDK Tests](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml)
-[![C++ SDK Tests](https://github.com/authdog/sdk/actions/workflows/cpp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/cpp-test.yml)
-[![Kotlin SDK Tests](https://github.com/authdog/sdk/actions/workflows/kotlin-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/kotlin-test.yml)
-[![Rust SDK Tests](https://github.com/authdog/sdk/actions/workflows/rust-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/rust-test.yml)
-[![PHP Tests](https://github.com/authdog/sdk/actions/workflows/php-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/php-test.yml)
-[![Elixir Tests](https://github.com/authdog/sdk/actions/workflows/elixir-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/elixir-test.yml)
-[![Scala Tests](https://github.com/authdog/sdk/actions/workflows/scala-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/scala-test.yml)
-[![Clojure Tests](https://github.com/authdog/sdk/actions/workflows/clojure-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/clojure-test.yml)
-[![Common Lisp Tests](https://github.com/authdog/sdk/actions/workflows/commonlisp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/commonlisp-test.yml)
-[![Swift Tests](https://github.com/authdog/sdk/actions/workflows/swift-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/swift-test.yml)
-[![Zig Tests](https://github.com/authdog/sdk/actions/workflows/zig-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/zig-test.yml)
-[![F# SDK](https://github.com/authdog/sdk/actions/workflows/fsharp.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/fsharp.yml)
-[![OCaml SDK](https://github.com/authdog/sdk/actions/workflows/ocaml.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/ocaml.yml)
-[![PowerShell SDK](https://github.com/authdog/sdk/actions/workflows/powershell.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/powershell.yml)
-[![Dart SDK](https://github.com/authdog/sdk/actions/workflows/dart.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/dart.yml)
-[![C SDK](https://github.com/authdog/sdk/actions/workflows/c-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/c-test.yml)
+[![Python](https://github.com/authdog/sdk/actions/workflows/python-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/python-test.yml)
+[![Node.js](https://github.com/authdog/sdk/actions/workflows/node-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/node-test.yml)
+[![Go](https://github.com/authdog/sdk/actions/workflows/go-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/go-test.yml)
+[![Rust](https://github.com/authdog/sdk/actions/workflows/rust-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/rust-test.yml)
+[![Java](https://github.com/authdog/sdk/actions/workflows/java-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/java-test.yml)
+[![C#](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml)
 
-## Available SDKs
+## Core SDKs
 
-### Core SDKs
-- [Python SDK](./python/) - Python SDK for Authdog
-- [Node.js SDK](./node/) - Node.js/TypeScript SDK for Authdog
-- [Go SDK](./go/) - Go SDK for Authdog
-- [Rust SDK](./rust/) - Rust SDK for Authdog
-- [Java SDK](./java/) - Java SDK for Authdog
-- [C# SDK](./csharp/) - C# SDK for Authdog
+| Language | Directory | Docs |
+|----------|-----------|------|
+| Python | [`python/`](./python/) | [README](./python/README.md) |
+| Node.js / TypeScript | [`node/`](./node/) | [README](./node/README.md) |
+| Go | [`go/`](./go/) | [README](./go/README.md) |
+| Rust | [`rust/`](./rust/) | [README](./rust/README.md) |
+| Java | [`java/`](./java/) | [README](./java/README.md) |
+| C# | [`csharp/`](./csharp/) | [README](./csharp/README.md) |
 
-### Planned SDKs
+## Planned SDKs
 
-These SDKs are in the `planned/` directory and are not yet production-ready.
+The following SDKs are under development in the [`planned/`](./planned/) directory:
 
-- [C SDK](./planned/c/) - C SDK for Authdog
-- [C++ SDK](./planned/cpp/) - C++ SDK for Authdog
-- [Clojure SDK](./planned/clojure/) - Clojure SDK for Authdog
-- [Common Lisp SDK](./planned/commonlisp/) - Common Lisp SDK for Authdog
-- [Dart SDK](./planned/dart/) - Dart SDK for Authdog
-- [Elixir SDK](./planned/elixir/) - Elixir SDK for Authdog
-- [F# SDK](./planned/fsharp/) - F# SDK for Authdog
-- [Kotlin SDK](./planned/kotlin/) - Kotlin SDK for Authdog
-- [OCaml SDK](./planned/ocaml/) - OCaml SDK for Authdog
-- [PHP SDK](./planned/php/) - PHP SDK for Authdog
-- [PowerShell SDK](./planned/powershell/) - PowerShell SDK for Authdog
-- [R SDK](./planned/r/) - R SDK for Authdog
-- [Ruby SDK](./planned/ruby/) - Ruby SDK for Authdog
-- [Scala SDK](./planned/scala/) - Scala SDK for Authdog
-- [Swift SDK](./planned/swift/) - Swift SDK for Authdog
-- [Zig SDK](./planned/zig/) - Zig SDK for Authdog
-
-## Quick Start Examples
-
-### Python SDK
-
-[![Python SDK Tests](https://github.com/authdog/sdk/actions/workflows/python-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/python-test.yml)
-
-```python
-from authdog import AuthdogClient
-
-# Initialize the client
-client = AuthdogClient("https://api.authdog.com")
-
-# Get user information
-user_info = client.get_userinfo("your-access-token")
-print(f"User: {user_info['user']['displayName']}")
-
-# Always close the client
-client.close()
-```
-
-### Node.js SDK
-
-[![Node.js SDK Tests](https://github.com/authdog/sdk/actions/workflows/node-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/node-test.yml)
-
-```typescript
-import { AuthdogClient } from '@authdog/node-sdk';
-
-// Initialize the client
-const client = new AuthdogClient({
-  baseUrl: 'https://api.authdog.com'
-});
-
-// Get user information
-const userInfo = await client.getUserInfo('your-access-token');
-console.log(`User: ${userInfo.user.displayName}`);
-```
-
-### Go SDK
-
-[![Go SDK Tests](https://github.com/authdog/sdk/actions/workflows/go-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/go-test.yml)
-
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "log"
-    
-    "github.com/authdog/go-sdk"
-)
-
-func main() {
-    // Initialize the client
-    client := authdog.NewClient(authdog.ClientConfig{
-        BaseURL: "https://api.authdog.com",
-        APIKey:  "your-api-key", // Optional
-    })
-
-    // Get user information
-    ctx := context.Background()
-    userInfo, err := client.GetUserInfo(ctx, "your-access-token")
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    fmt.Printf("User: %s\n", userInfo.User.DisplayName)
-}
-```
-
-### Kotlin SDK
-
-[![Kotlin SDK Tests](https://github.com/authdog/sdk/actions/workflows/kotlin-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/kotlin-test.yml)
-
-```kotlin
-import com.authdog.sdk.*
-import kotlinx.coroutines.runBlocking
-
-fun main() = runBlocking {
-    // Initialize the client
-    val client = AuthdogClient(
-        AuthdogClientConfig(
-            baseUrl = "https://api.authdog.com",
-            apiKey = "your-api-key" // Optional
-        )
-    )
-
-    // Get user information
-    val userInfo = client.getUserInfo("your-access-token")
-    println("User: ${userInfo.user.displayName}")
-}
-```
-
-### Rust SDK
-
-[![Rust SDK Tests](https://github.com/authdog/sdk/actions/workflows/rust-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/rust-test.yml)
-
-```rust
-use authdog::{AuthdogClient, AuthdogClientConfig};
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Initialize the client
-    let config = AuthdogClientConfig {
-        base_url: "https://api.authdog.com".to_string(),
-        api_key: Some("your-api-key".to_string()), // Optional
-        ..Default::default()
-    };
-    
-    let client = AuthdogClient::new(config)?;
-
-    // Get user information
-    let user_info = client.get_user_info("your-access-token").await?;
-    println!("User: {}", user_info.user.display_name);
-
-    Ok(())
-}
-```
-
-### PHP SDK
-
-[![PHP Tests](https://github.com/authdog/sdk/actions/workflows/php-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/php-test.yml)
-
-```php
-<?php
-
-require_once 'vendor/autoload.php';
-
-use Authdog\AuthdogClient;
-use Authdog\Exceptions\AuthenticationException;
-use Authdog\Exceptions\ApiException;
-
-// Initialize the client
-$client = new AuthdogClient('https://api.authdog.com');
-
-try {
-    // Get user information
-    $userInfo = $client->getUserInfo('your-access-token');
-    echo "User: " . $userInfo->user->displayName . "\n";
-} catch (AuthenticationException $e) {
-    echo "Authentication failed: " . $e->getMessage() . "\n";
-} catch (ApiException $e) {
-    echo "API error: " . $e->getMessage() . "\n";
-}
-
-// Always close the client
-$client->close();
-```
-
-### C# SDK
-
-[![C# SDK Tests](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml)
-
-```csharp
-using Authdog;
-using Authdog.Exceptions;
-
-// Initialize the client
-var client = new AuthdogClient("https://api.authdog.com");
-
-try
-{
-    // Get user information
-    var userInfo = await client.GetUserInfoAsync("your-access-token");
-    Console.WriteLine($"User: {userInfo.User.DisplayName}");
-}
-catch (AuthenticationException ex)
-{
-    Console.WriteLine($"Authentication failed: {ex.Message}");
-}
-catch (ApiException ex)
-{
-    Console.WriteLine($"API error: {ex.Message}");
-}
-finally
-{
-    // Always dispose the client
-    client.Dispose();
-}
-```
-
-### C++ SDK
-
-[![C++ SDK Tests](https://github.com/authdog/sdk/actions/workflows/cpp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/cpp-test.yml)
-
-```cpp
-#include <iostream>
-#include "authdog/authdog_client.h"
-#include "authdog/exceptions.h"
-
-int main() {
-    try {
-        // Initialize the client
-        authdog::AuthdogClient client("https://api.authdog.com");
-        
-        // Get user information
-        auto userInfo = client.getUserInfo("your-access-token");
-        std::cout << "User: " << userInfo.user.displayName << std::endl;
-        
-        // Close the client
-        client.close();
-        
-    } catch (const authdog::AuthenticationException& e) {
-        std::cerr << "Authentication failed: " << e.what() << std::endl;
-    } catch (const authdog::ApiException& e) {
-        std::cerr << "API error: " << e.what() << std::endl;
-    }
-    
-    return 0;
-}
-```
-
-### Elixir SDK
-
-[![Elixir Tests](https://github.com/authdog/sdk/actions/workflows/elixir-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/elixir-test.yml)
-
-```elixir
-# Initialize the client
-client = Authdog.Client.new("https://api.authdog.com")
-
-# Get user information
-case Authdog.Client.get_user_info(client, "your-access-token") do
-  {:ok, user_info} ->
-    IO.puts("User: #{user_info.user.display_name}")
-  {:error, :authentication_error, message} ->
-    IO.puts("Authentication failed: #{message}")
-  {:error, :api_error, message} ->
-    IO.puts("API error: #{message}")
-end
-```
-
-### Java SDK
-
-[![Java SDK Tests](https://github.com/authdog/sdk/actions/workflows/java-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/java-test.yml)
-
-```java
-import com.authdog.AuthdogClient;
-import com.authdog.exceptions.AuthenticationException;
-import com.authdog.exceptions.ApiException;
-
-// Initialize the client
-try (AuthdogClient client = new AuthdogClient("https://api.authdog.com")) {
-    // Get user information
-    UserInfoResponse userInfo = client.getUserInfo("your-access-token");
-    System.out.println("User: " + userInfo.getUser().getDisplayName());
-} catch (AuthenticationException e) {
-    System.err.println("Authentication failed: " + e.getMessage());
-} catch (ApiException e) {
-    System.err.println("API error: " + e.getMessage());
-}
-```
-
-### Scala SDK
-
-[![Scala Tests](https://github.com/authdog/sdk/actions/workflows/scala-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/scala-test.yml)
-
-```scala
-import com.authdog.AuthdogClient
-import com.authdog.exceptions.{AuthenticationException, ApiException}
-
-// Initialize the client
-val client = AuthdogClient("https://api.authdog.com")
-
-try {
-  // Get user information
-  val userInfo = client.getUserInfo("your-access-token")
-  println(s"User: ${userInfo.user.displayName}")
-} catch {
-  case e: AuthenticationException => 
-    println(s"Authentication failed: ${e.getMessage}")
-  case e: ApiException => 
-    println(s"API error: ${e.getMessage}")
-} finally {
-  client.close()
-}
-```
-
-### Common Lisp SDK
-
-[![Common Lisp Tests](https://github.com/authdog/sdk/actions/workflows/commonlisp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/commonlisp-test.yml)
-
-```lisp
-(ql:quickload :authdog)
-(use-package :authdog)
-
-;; Initialize the client
-(defvar *client* (make-authdog-client "https://api.authdog.com"))
-
-;; Get user information
-(handler-case
-    (let ((user-info (get-user-info *client* "your-access-token")))
-      (format t "User: ~A~%" (user-display-name (user-info-response-user user-info))))
-  (authentication-error (e)
-    (format t "Authentication failed: ~A~%" (authdog-error-message e)))
-  (api-error (e)
-    (format t "API error: ~A~%" (authdog-error-message e))))
-```
-
-### Clojure SDK
-
-[![Clojure Tests](https://github.com/authdog/sdk/actions/workflows/clojure-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/clojure-test.yml)
-
-```clojure
-(require '[authdog.core :as authdog]
-         '[authdog.exceptions :as ex])
-
-;; Initialize the client
-(def client (authdog/make-client "https://api.authdog.com"))
-
-;; Get user information
-(try
-  (let [user-info (authdog/get-user-info client "your-access-token")]
-    (println "User:" (:display-name (:user user-info))))
-  (catch clojure.lang.ExceptionInfo e
-    (cond
-      (ex/authentication-error? e)
-      (println "Authentication failed:" (.getMessage e))
-      
-      (ex/api-error? e)
-      (println "API error:" (.getMessage e)))))
-```
-
-### Swift SDK
-
-[![Swift Tests](https://github.com/authdog/sdk/actions/workflows/swift-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/swift-test.yml)
-
-```swift
-import AuthdogSwiftSDK
-
-// Initialize the client
-let client = AuthdogClient(baseURL: "https://api.authdog.com")
-
-// Get user information (async/await)
-Task {
-    do {
-        let userInfo = try await client.getUserInfo(accessToken: "your-access-token")
-        print("User: \(userInfo.user.displayName)")
-    } catch AuthdogError.authenticationFailed(let message) {
-        print("Authentication failed: \(message)")
-    } catch AuthdogError.apiError(let message) {
-        print("API error: \(message)")
-    }
-}
-
-// Get user information (completion handler)
-client.getUserInfo(accessToken: "your-access-token") { result in
-    switch result {
-    case .success(let userInfo):
-        print("User: \(userInfo.user.displayName)")
-    case .failure(let error):
-        print("Error: \(error.localizedDescription)")
-    }
-}
-```
-
-### Zig SDK
-
-[![Zig Tests](https://github.com/authdog/sdk/actions/workflows/zig-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/zig-test.yml)
-
-```zig
-const authdog = @import("authdog");
-
-// Initialize the client
-var client = authdog.AuthdogClient.init("https://api.authdog.com", .{});
-
-// Get user information
-const user_info = client.getUserInfo("your-access-token") catch |err| switch (err) {
-    error.AuthenticationFailed => {
-        std.debug.print("Authentication failed\n", .{});
-        return;
-    },
-    error.ApiError => {
-        std.debug.print("API error\n", .{});
-        return;
-    },
-    else => {
-        std.debug.print("Unexpected error: {}\n", .{err});
-        return;
-    },
-};
-
-std.debug.print("User: {s}\n", .{user_info.user.display_name});
-```
-
-<!-- ### R SDK
-
-[![R SDK Tests](https://github.com/authdog/sdk/actions/workflows/r-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/r-test.yml)
-
-```r
-library(authdog)
-
-# Initialize the client
-client <- AuthdogClient$new("https://api.authdog.com")
-
-# Get user information
-user_info <- client$get_user_info("your-access-token")
-print(paste("User:", user_info$user$display_name))
-
-# With optional API key
-client <- AuthdogClient$new("https://api.authdog.com", "your-api-key")
-user_info <- client$get_user_info("your-access-token")
-``` -->
-
-### Additional SDKs
-
-[![F# SDK](https://github.com/authdog/sdk/actions/workflows/fsharp.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/fsharp.yml)
-[![OCaml SDK](https://github.com/authdog/sdk/actions/workflows/ocaml.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/ocaml.yml)
-[![PowerShell SDK](https://github.com/authdog/sdk/actions/workflows/powershell.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/powershell.yml)
-[![Dart SDK](https://github.com/authdog/sdk/actions/workflows/dart.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/dart.yml)
-
-These SDKs are also available with full documentation in their respective directories.
+C, C++, Clojure, Common Lisp, Dart, Elixir, F#, Kotlin, OCaml, PHP, PowerShell, R, Ruby, Scala, Swift, Zig
 
 ## Features
 
-- **User Information**: Get detailed user information including profile data, emails, photos, and verification status
-- **Authentication**: Handle authentication errors and token validation
-- **Type Safety**: Full type support across all languages (TypeScript, Go, Kotlin, Rust)
-- **Error Handling**: Structured error handling with specific exception types
-- **Modern APIs**: Built with modern HTTP clients and async/await support
-- **Cross-Platform**: Core SDKs for Python, Node.js, Go, Rust, Java, and C#. Additional planned SDKs in `planned/`
+- **User Information** -- retrieve profile data, emails, photos, and verification status
+- **Authentication** -- token-based auth with structured error handling
+- **Type Safety** -- full type support in TypeScript, Go, Rust, Java, and C#
+- **Async Support** -- modern async/await APIs where applicable
 
-## API Endpoints
+## API
 
-All SDKs support the following endpoint:
+All SDKs wrap a single endpoint:
 
-### GET /v1/userinfo
-
-Retrieve user information using an access token.
-
-**Authentication**: Bearer token required
-
-**Response Structure**:
-```json
-{
-  "meta": {
-    "code": 200,
-    "message": "Success"
-  },
-  "session": {
-    "remainingSeconds": 56229
-  },
-  "user": {
-    "id": "user-id",
-    "externalId": "external-id",
-    "userName": "username",
-    "displayName": "Display Name",
-    "emails": [{"value": "email@example.com", "type": null}],
-    "photos": [{"value": "https://example.com/photo.jpg", "type": "photo"}],
-    "names": {
-      "familyName": "Last",
-      "givenName": "First"
-    },
-    "verifications": [...],
-    "provider": "google-oauth20",
-    "environmentId": "env-id"
-  }
-}
+```
+GET /v1/userinfo
+Authorization: Bearer <access-token>
 ```
 
-## Error Handling
-
-All SDKs provide structured error handling:
-
-- `AuthenticationError`: Raised when authentication fails (401 responses)
-- `APIError`: Raised when API requests fail
-- Base `AuthdogError`: Common base class for all SDK errors
+See individual SDK READMEs for language-specific usage examples and response types.
 
 ## Development
 
 ### Prerequisites
 
-This monorepo uses [moonrepo (moon)](https://moonrepo.dev/) for task orchestration and caching, and [proto](https://moonrepo.dev/proto) for toolchain version management.
-
-**Install proto and moon:**
+This monorepo uses [moon](https://moonrepo.dev/) for task orchestration and [proto](https://moonrepo.dev/proto) for toolchain management.
 
 ```bash
-# Install proto (toolchain manager)
 curl -fsSL https://moonrepo.dev/install/proto.sh | bash
-
-# Install moon (task runner)
 curl -fsSL https://moonrepo.dev/install/moon.sh | bash
-
-# Install pinned language toolchains from .prototools
 proto use
 ```
 
-Proto manages **Node.js 20.18.0**, **pnpm 9.15.0**, **Go 1.21.13**, **Rust 1.82.0**, and **Python 3.11.10**. Java and C# require manual installation (via SDKMAN, setup-java, etc.).
-
-### Running tasks with moon
-
-Moon orchestrates builds, tests, and linting across all 6 core SDKs with intelligent caching — unchanged tasks are skipped on subsequent runs.
+### Common Commands
 
 ```bash
-# Run all checks across all projects
-moon check --all
-
-# Run a specific task for a specific SDK
-moon run python:test
-moon run node:build
-moon run go:lint
-moon run rust:fmt
-moon run java:test
-moon run csharp:build
-
-# Run tests for all SDKs
-moon run :test
+moon check --all          # Run all checks across all SDKs
+moon run <sdk>:test       # Run tests for a specific SDK
+moon run <sdk>:lint       # Lint a specific SDK
+moon run <sdk>:build      # Build a specific SDK
+moon run :test            # Run tests for all SDKs
 ```
 
-### Available tasks per SDK
+### Task Matrix
 
 | Task | Python | Node | Go | Rust | Java | C# |
 |------|--------|------|----|------|------|----|
-| `deps` | pip install | pnpm install | go mod download | — | mvn dependency:resolve | dotnet restore |
-| `test` | pytest | pnpm run test:coverage | go test | cargo test | mvn test | dotnet test |
-| `lint` | flake8 | pnpm run lint | go vet | cargo clippy | mvn checkstyle:check | dotnet format |
-| `build` | python -m build | pnpm run build | go build | cargo build | mvn compile | dotnet build |
-| `fmt` | — | — | gofmt | cargo fmt | — | — |
-| `security` | — | — | — | cargo audit | — | security-scan |
-| `benchmark` | — | — | go test -bench | — | mvn test (JMH) | — |
-
-### Caching
-
-Moon provides 3 tiers of caching:
-
-1. **Moon task cache** (`.moon/cache/`) — skips entire task re-execution when inputs are unchanged
-2. **Proto tool cache** (`~/.proto/tools/`) — avoids re-downloading language runtimes
-3. **Language dependency caches** (go modules, cargo registry, maven, nuget) — avoids re-downloading packages
-
-### CI
-
-All 6 core SDK workflows use a shared [composite action](./.github/actions/setup-moon/action.yml) that installs proto + moon and restores caches. Multi-version matrix jobs (e.g., Go 1.20, Rust beta/nightly) use native `setup-*` actions directly since proto pins a single version.
-
-### Adding a new SDK to moon
-
-1. Create a `moon.yml` in the SDK directory defining tasks
-2. Add the project to `.moon/workspace.yml`
-3. Update the corresponding GitHub Actions workflow to use the `setup-moon` action
-4. For proto-supported languages, add the version to `.prototools`
-
-### Individual SDK development
-
-Each SDK also has its own README with SDK-specific setup instructions:
-
-- [Python SDK Development](./python/README.md#development)
-- [Node.js SDK Development](./node/README.md#development)
-- [Go SDK Development](./go/README.md#development)
-- [Rust SDK Development](./rust/README.md#development)
-- [Java SDK Development](./java/README.md#development)
-- [C# SDK Development](./csharp/README.md#development)
-- [C SDK Development](./planned/c/README.md#development)
-- [C++ SDK Development](./planned/cpp/README.md#development)
-- [Clojure SDK Development](./planned/clojure/README.md#development)
-- [Common Lisp SDK Development](./planned/commonlisp/README.md#development)
-- [Dart SDK Development](./planned/dart/README.md#development)
-- [Elixir SDK Development](./planned/elixir/README.md#development)
-- [F# SDK Development](./planned/fsharp/README.md#development)
-- [Kotlin SDK Development](./planned/kotlin/README.md#development)
-- [OCaml SDK Development](./planned/ocaml/README.md#development)
-- [PHP SDK Development](./planned/php/README.md#development)
-- [PowerShell SDK Development](./planned/powershell/README.md#development)
-- [R SDK Development](./planned/r/README.md#development)
-- [Ruby SDK Development](./planned/ruby/README.md#development)
-- [Scala SDK Development](./planned/scala/README.md#development)
-- [Swift SDK Development](./planned/swift/README.md#development)
-- [Zig SDK Development](./planned/zig/README.md#development)
+| `deps` | pip install | pnpm install | go mod download | -- | mvn dependency:resolve | dotnet restore |
+| `test` | pytest | vitest | go test | cargo test | mvn test | dotnet test |
+| `lint` | flake8 | eslint | go vet | cargo clippy | checkstyle | dotnet format |
+| `build` | python -m build | pnpm build | go build | cargo build | mvn compile | dotnet build |
+| `fmt` | -- | -- | gofmt | cargo fmt | -- | -- |
+| `security` | -- | -- | -- | cargo audit | -- | security-scan |
+| `benchmark` | -- | -- | go test -bench | -- | JMH | -- |
 
 ## Contributing
 
-Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to contribute to the SDKs.
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
-
+[MIT](./LICENSE)
