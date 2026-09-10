@@ -46,6 +46,19 @@ Authorization: Bearer <access-token>
 
 See individual SDK READMEs for language-specific usage examples and response types.
 
+## Specs
+
+This repo uses [GitHub Spec Kit](https://github.com/github/spec-kit)
+to describe what the SDKs already do and to drive changes.
+
+- Constitution: [`.specify/memory/constitution.md`](./.specify/memory/constitution.md)
+- Baseline (as-is): [`specs/001-userinfo-sdk/`](./specs/001-userinfo-sdk/)
+- Next improvement: [`specs/002-cross-sdk-parity/`](./specs/002-cross-sdk-parity/)
+- How to iterate: [`specs/README.md`](./specs/README.md)
+
+In Cursor: `/speckit-specify` → `/speckit-plan` → `/speckit-tasks` →
+`/speckit-implement` → `/speckit-converge`.
+
 ## Development
 
 ### Prerequisites

@@ -126,12 +126,12 @@ func TestIsAuthdogError(t *testing.T) {
 		{
 			name: "AuthenticationError",
 			err:  &AuthenticationError{Message: "auth failed"},
-			want: false,
+			want: true,
 		},
 		{
 			name: "APIError",
 			err:  &APIError{Message: "api failed"},
-			want: false,
+			want: true,
 		},
 		{
 			name: "standard error",

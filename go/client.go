@@ -58,14 +58,9 @@ func (c *Client) GetUserInfo(ctx context.Context, accessToken string) (*UserInfo
 	req.Header.Set("User-Agent", "authdog-go-sdk/0.1.0")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
 
-	// Add API key if provided
-	if c.apiKey != "" {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
-	}
-
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
+		return nil, &APIError{Message: fmt.Sprintf("request failed: %v", err)}
 	}
 	defer resp.Body.Close()
 

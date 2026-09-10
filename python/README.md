@@ -24,8 +24,8 @@ client = AuthdogClient(
 # Get user information
 try:
     user_info = client.get_userinfo("your-access-token")
-    print(f"User: {user_info['user']['displayName']}")
-    print(f"Email: {user_info['user']['emails'][0]['value']}")
+    print(f"User: {user_info.user.display_name}")
+    print(f"Email: {user_info.user.emails[0].value}")
 except AuthenticationError as e:
     print(f"Authentication failed: {e}")
 except APIError as e:
@@ -42,52 +42,28 @@ from authdog import AuthdogClient
 
 with AuthdogClient("https://api.authdog.com") as client:
     user_info = client.get_userinfo("your-access-token")
-    print(f"User: {user_info['user']['displayName']}")
+    print(f"User: {user_info.user.display_name}")
 ```
 
 ## API Reference
 
 ### AuthdogClient
 
-#### `__init__(base_url: str, api_key: Optional[str] = None)`
+#### `__init__(base_url: str, api_key: Optional[str] = None, timeout: float = 10.0)`
 
 Initialize the Authdog client.
 
 - `base_url`: The base URL of the Authdog API
-- `api_key`: Optional API key for authentication
+- `api_key`: Optional API key stored for future endpoints (userinfo uses the access token)
+- `timeout`: Request timeout in seconds (default 10)
 
-#### `get_userinfo(access_token: str) -> Dict[str, Any]`
+#### `get_userinfo(access_token: str) -> UserInfoResponse`
 
 Get user information using an access token.
 
 - `access_token`: The access token for authentication
-- Returns: Dict containing user information with the following structure:
-  ```python
-  {
-      "meta": {
-          "code": 200,
-          "message": "Success"
-      },
-      "session": {
-          "remainingSeconds": 56229
-      },
-      "user": {
-          "id": "user-id",
-          "externalId": "external-id",
-          "userName": "username",
-          "displayName": "Display Name",
-          "emails": [{"value": "email@example.com", "type": null}],
-          "photos": [{"value": "https://example.com/photo.jpg", "type": "photo"}],
-          "names": {
-              "familyName": "Last",
-              "givenName": "First"
-          },
-          "verifications": [...],
-          "provider": "google-oauth20",
-          "environmentId": "env-id"
-      }
-  }
-  ```
+- Returns: `UserInfoResponse` (`meta`, `session`, `user`) with snake_case attributes
+  (`user.display_name`, `user.emails[0].value`, `session.remaining_seconds`)
 
 ## Exceptions
 

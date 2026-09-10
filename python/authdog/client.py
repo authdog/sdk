@@ -1,26 +1,35 @@
 """Main client for Authdog SDK."""
 
 import httpx
-from typing import Dict, Any, Optional
-from .exceptions import AuthdogError, AuthenticationError, APIError
+from typing import Dict, Optional
+from .exceptions import AuthenticationError, APIError
+from .types import UserInfoResponse
 
 
 class AuthdogClient:
     """Main client for interacting with Authdog API."""
     
-    def __init__(self, base_url: str, api_key: Optional[str] = None):
+    def __init__(
+        self,
+        base_url: str,
+        api_key: Optional[str] = None,
+        timeout: float = 10.0,
+    ):
         """
         Initialize the Authdog client.
         
         Args:
             base_url: The base URL of the Authdog API
-            api_key: Optional API key for authentication
+            api_key: Optional API key stored for future endpoints
+            timeout: Request timeout in seconds (default 10)
         """
         self.base_url = base_url.rstrip('/')
         self.api_key = api_key
+        self.timeout = timeout
         self._client = httpx.Client(
             base_url=self.base_url,
-            headers=self._get_default_headers()
+            headers=self._get_default_headers(),
+            timeout=timeout,
         )
     
     def _get_default_headers(self) -> Dict[str, str]:
@@ -33,7 +42,7 @@ class AuthdogClient:
             headers["Authorization"] = f"Bearer {self.api_key}"
         return headers
     
-    def get_userinfo(self, access_token: str) -> Dict[str, Any]:
+    def get_userinfo(self, access_token: str) -> UserInfoResponse:
         """
         Get user information using an access token.
         
@@ -41,7 +50,7 @@ class AuthdogClient:
             access_token: The access token for authentication
             
         Returns:
-            Dict containing user information
+            UserInfoResponse containing user information
             
         Raises:
             AuthenticationError: If authentication fails
@@ -64,7 +73,7 @@ class AuthdogClient:
                         raise APIError("Failed to fetch user info")
             
             response.raise_for_status()
-            return response.json()
+            return UserInfoResponse.from_dict(response.json())
             
         except httpx.HTTPStatusError as e:
             raise APIError(f"HTTP error {e.response.status_code}: {e.response.text}")

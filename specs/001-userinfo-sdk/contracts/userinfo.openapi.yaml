@@ -1,0 +1,227 @@
+openapi: 3.0.3
+info:
+  title: Authdog User Info
+  description: >
+    Shared HTTP contract wrapped by every official Authdog SDK.
+    Reverse-documented from the 2026-09-10 monorepo audit.
+  version: 0.1.0
+servers:
+  - url: https://api.authdog.com
+    description: Documented default in SDK READMEs
+paths:
+  /v1/userinfo:
+    get:
+      operationId: getUserInfo
+      summary: Return the user associated with the access token
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          description: Bearer access token of the user being queried
+          schema:
+            type: string
+            example: Bearer eyJhbGciOi...
+        - in: header
+          name: Content-Type
+          required: true
+          schema:
+            type: string
+            enum: [application/json]
+        - in: header
+          name: User-Agent
+          required: true
+          description: authdog-<language>-sdk/<version>
+          schema:
+            type: string
+            example: authdog-python-sdk/0.1.0
+      responses:
+        "200":
+          description: User info envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfoResponse"
+              example:
+                meta:
+                  code: 200
+                  message: Success
+                session:
+                  remainingSeconds: 3600
+                user:
+                  id: user-123
+                  externalId: ext-123
+                  userName: testuser
+                  displayName: Test User
+                  nickName: null
+                  profileUrl: null
+                  title: null
+                  userType: null
+                  preferredLanguage: null
+                  locale: en-US
+                  timezone: null
+                  active: true
+                  names:
+                    id: name-123
+                    formatted: Test User
+                    familyName: User
+                    givenName: Test
+                    middleName: null
+                    honorificPrefix: null
+                    honorificSuffix: null
+                  photos: []
+                  phoneNumbers: []
+                  addresses: []
+                  emails:
+                    - id: email-123
+                      value: test@example.com
+                      type: primary
+                  verifications:
+                    - id: verification-123
+                      email: test@example.com
+                      verified: true
+                      createdAt: "2023-01-01T00:00:00Z"
+                      updatedAt: "2023-01-01T00:00:00Z"
+                  provider: authdog
+                  createdAt: "2023-01-01T00:00:00Z"
+                  updatedAt: "2023-01-01T00:00:00Z"
+                  environmentId: env-123
+        "401":
+          description: Invalid or expired access token
+        "500":
+          description: Platform failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                graphql:
+                  value:
+                    error: GraphQL query failed
+                fetchFailed:
+                  value:
+                    error: Failed to fetch user info
+components:
+  schemas:
+    UserInfoResponse:
+      type: object
+      required: [meta, session, user]
+      properties:
+        meta:
+          $ref: "#/components/schemas/Meta"
+        session:
+          $ref: "#/components/schemas/Session"
+        user:
+          $ref: "#/components/schemas/User"
+    Meta:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+    Session:
+      type: object
+      required: [remainingSeconds]
+      properties:
+        remainingSeconds:
+          type: integer
+    User:
+      type: object
+      required:
+        - id
+        - externalId
+        - userName
+        - displayName
+        - locale
+        - active
+        - names
+        - photos
+        - phoneNumbers
+        - addresses
+        - emails
+        - verifications
+        - provider
+        - createdAt
+        - updatedAt
+        - environmentId
+      properties:
+        id: { type: string }
+        externalId: { type: string }
+        userName: { type: string }
+        displayName: { type: string }
+        nickName: { type: string, nullable: true }
+        profileUrl: { type: string, nullable: true }
+        title: { type: string, nullable: true }
+        userType: { type: string, nullable: true }
+        preferredLanguage: { type: string, nullable: true }
+        locale: { type: string }
+        timezone: { type: string, nullable: true }
+        active: { type: boolean }
+        names:
+          $ref: "#/components/schemas/Names"
+        photos:
+          type: array
+          items:
+            $ref: "#/components/schemas/Photo"
+        phoneNumbers:
+          type: array
+          items: {}
+        addresses:
+          type: array
+          items: {}
+        emails:
+          type: array
+          items:
+            $ref: "#/components/schemas/Email"
+        verifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/Verification"
+        provider: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string }
+        environmentId: { type: string }
+    Names:
+      type: object
+      required: [id, familyName, givenName]
+      properties:
+        id: { type: string }
+        formatted: { type: string, nullable: true }
+        familyName: { type: string }
+        givenName: { type: string }
+        middleName: { type: string, nullable: true }
+        honorificPrefix: { type: string, nullable: true }
+        honorificSuffix: { type: string, nullable: true }
+    Photo:
+      type: object
+      required: [id, value, type]
+      properties:
+        id: { type: string }
+        value: { type: string }
+        type: { type: string }
+    Email:
+      type: object
+      required: [id, value]
+      properties:
+        id: { type: string }
+        value: { type: string, format: email }
+        type: { type: string, nullable: true }
+    Verification:
+      type: object
+      required: [id, email, verified, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        email: { type: string }
+        verified: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string }
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          enum:
+            - GraphQL query failed
+            - Failed to fetch user info

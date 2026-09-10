@@ -1,7 +1,7 @@
 use authdog::{AuthdogClient, AuthdogClientConfig};
 use serde_json::json;
 use std::time::Duration;
-use wiremock::matchers::{method, path};
+use wiremock::matchers::{header, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
 #[tokio::test]
@@ -176,6 +176,8 @@ async fn test_get_user_info_with_unauthorized_response() {
     assert!(result.is_err());
     let error = result.unwrap_err();
     assert!(error.to_string().contains("Unauthorized"));
+    assert!(error.is_authentication());
+    assert!(!error.is_api());
 }
 
 #[tokio::test]
@@ -204,6 +206,8 @@ async fn test_get_user_info_with_graphql_error() {
     assert!(result.is_err());
     let error = result.unwrap_err();
     assert!(error.to_string().contains("GraphQL query failed"));
+    assert!(error.is_api());
+    assert!(!error.is_authentication());
 }
 
 #[tokio::test]
@@ -280,4 +284,64 @@ async fn test_get_user_info_with_invalid_json() {
     assert!(result.is_err());
     let error = result.unwrap_err();
     assert!(error.to_string().contains("Failed to parse response"));
+}
+
+#[tokio::test]
+async fn test_get_user_info_prefers_access_token() {
+    let mock_response = json!({
+        "meta": { "code": 200, "message": "Success" },
+        "session": { "remainingSeconds": 3600 },
+        "user": {
+            "id": "user123",
+            "externalId": "ext123",
+            "userName": "testuser",
+            "displayName": "Test User",
+            "nickName": null,
+            "profileUrl": null,
+            "title": null,
+            "userType": null,
+            "preferredLanguage": null,
+            "locale": "en-US",
+            "timezone": null,
+            "active": true,
+            "names": {
+                "id": "name123",
+                "formatted": null,
+                "familyName": "User",
+                "givenName": "Test",
+                "middleName": null,
+                "honorificPrefix": null,
+                "honorificSuffix": null
+            },
+            "photos": [],
+            "phoneNumbers": [],
+            "addresses": [],
+            "emails": [],
+            "verifications": [],
+            "provider": "test",
+            "createdAt": "2023-01-01T00:00:00Z",
+            "updatedAt": "2023-01-01T00:00:00Z",
+            "environmentId": "env123"
+        }
+    });
+
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("GET"))
+        .and(path("/v1/userinfo"))
+        .and(header("Authorization", "Bearer access-token"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(&mock_response))
+        .expect(1)
+        .mount(&mock_server)
+        .await;
+
+    let config = AuthdogClientConfig {
+        base_url: mock_server.uri(),
+        api_key: Some("test-api-key".to_string()),
+        timeout: Some(Duration::from_secs(10)),
+    };
+
+    let client = AuthdogClient::new(config).unwrap();
+    let result = client.get_user_info("access-token").await;
+    assert!(result.is_ok());
 }

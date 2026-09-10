@@ -254,6 +254,9 @@ func TestClient_GetUserInfo_Request_Error(t *testing.T) {
 	if err == nil {
 		t.Fatal("GetUserInfo() error = nil, want request error")
 	}
+	if !IsAPIError(err) {
+		t.Errorf("GetUserInfo() error type = %T, want *APIError", err)
+	}
 	if !strings.Contains(err.Error(), "request failed") {
 		t.Errorf("GetUserInfo() error message = %v, want to contain 'request failed'", err.Error())
 	}
@@ -261,9 +264,8 @@ func TestClient_GetUserInfo_Request_Error(t *testing.T) {
 
 func TestClient_GetUserInfo_With_API_Key(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Verify that API key is used instead of access token
-		if r.Header.Get("Authorization") != "Bearer test-api-key" {
-			t.Errorf("Expected Authorization Bearer test-api-key, got %s", r.Header.Get("Authorization"))
+		if r.Header.Get("Authorization") != "Bearer access-token" {
+			t.Errorf("Expected Authorization Bearer access-token, got %s", r.Header.Get("Authorization"))
 		}
 
 		w.Header().Set("Content-Type", "application/json")

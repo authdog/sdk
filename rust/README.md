@@ -39,10 +39,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
         Err(e) => {
-            if e.to_string().contains("Unauthorized") {
+            if e.is_authentication() {
                 println!("Authentication failed: {}", e);
-            } else {
+            } else if e.is_api() {
                 println!("API error: {}", e);
+            } else {
+                println!("SDK error: {}", e);
             }
         }
     }
@@ -160,12 +162,14 @@ match client.get_user_info(access_token).await {
     Ok(user_info) => {
         // Handle success
     }
+    Err(e) if e.is_authentication() => {
+        // Handle authentication error
+    }
+    Err(e) if e.is_api() => {
+        // Handle API error
+    }
     Err(e) => {
-        if e.to_string().contains("Unauthorized") {
-            // Handle authentication error
-        } else {
-            // Handle API error
-        }
+        // Handle other SDK errors
     }
 }
 ```

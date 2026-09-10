@@ -28,25 +28,22 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
 
 ## Development Setup
 
-This repository contains multiple SDK implementations in different programming languages:
+This repository contains official (core) SDKs and incubating ports.
 
-- **Python SDK** (`/python/`)
-- **Node.js SDK** (`/node/`)
-- **Go SDK** (`/go/`)
-- **Kotlin SDK** (`/kotlin/`)
-- **Rust SDK** (`/rust/`)
-- **PHP SDK** (`/php/`)
-- **C# SDK** (`/csharp/`)
-- **C++ SDK** (`/cpp/`)
-- **Elixir SDK** (`/elixir/`)
-- **Java SDK** (`/java/`)
-- **Scala SDK** (`/scala/`)
-- **Common Lisp SDK** (`/commonlisp/`)
-- **Clojure SDK** (`/clojure/`)
-- **Swift SDK** (`/swift/`)
-- **Zig SDK** (`/zig/`)
+**Core** (moon-orchestrated, CI on push/PR):
 
-Each SDK has its own development setup. Please refer to the individual README files in each language directory for specific setup instructions.
+- **Python** (`python/`)
+- **Node.js / TypeScript** (`node/`)
+- **Go** (`go/`)
+- **Rust** (`rust/`)
+- **Java** (`java/`)
+- **C#** (`csharp/`)
+
+**Planned** (under `planned/` until promoted): C, C++, Clojure, Common Lisp,
+Dart, Elixir, F#, Kotlin, OCaml, PHP, PowerShell, R, Ruby, Scala, Swift, Zig.
+
+Each SDK has its own development setup. See the README in that language
+directory. Specs for current behavior live in `specs/`.
 
 ## Contributing Guidelines
 
@@ -87,14 +84,14 @@ Use descriptive branch names with prefixes:
 - Use type hints for better code clarity
 - Add docstrings for all public methods
 - Use `pytest` for testing
-- Maintain compatibility with Python 3.7+
+- Maintain compatibility with Python 3.8+
 
 ### Node.js SDK
 
 - Use TypeScript for type safety
 - Follow ESLint configuration
-- Use `jest` for testing
-- Maintain compatibility with Node.js 14+
+- Use `vitest` for testing
+- Maintain compatibility with Node.js 16+
 - Export types and interfaces
 
 ### Go SDK
@@ -240,50 +237,23 @@ Use descriptive branch names with prefixes:
 Each language has its own test runner:
 
 ```bash
-# Python
+# Preferred: moon (core SDKs)
+moon run python:test
+moon run node:test
+moon run go:test
+moon run rust:test
+moon run java:test
+moon run csharp:test
+
+# Direct runners (core)
 cd python && python -m pytest
-
-# Node.js
-cd node && npm test
-
-# Go
+cd node && pnpm test
 cd go && go test ./...
-
-# Kotlin
-cd kotlin && ./gradlew test
-
-# Rust
 cd rust && cargo test
-
-# PHP
-cd php && composer test
-
-# C#
+cd java && mvn test
 cd csharp && dotnet test
 
-# C++
-cd cpp && mkdir build && cd build && cmake .. && make && ctest
-
-# Elixir
-cd elixir && mix test
-
-# Java
-cd java && mvn test
-
-# Scala
-cd scala && sbt test
-
-# Common Lisp
-cd commonlisp && asdf:test-system :authdog
-
-# Clojure
-cd clojure && lein test
-
-# Swift
-cd swift && swift test
-
-# Zig
-cd zig && zig build test
+# Planned ports live under planned/<language>
 ```
 
 ## Pull Request Process

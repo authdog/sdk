@@ -61,6 +61,8 @@ fn test_errors_can_be_caught_as_authdog_error() {
 
     assert_eq!(authdog_error1.to_string(), "Auth failed");
     assert_eq!(authdog_error2.to_string(), "API failed");
+    assert!(authdog_error1.is_authentication());
+    assert!(authdog_error2.is_api());
 }
 
 #[test]

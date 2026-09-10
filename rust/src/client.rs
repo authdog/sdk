@@ -51,21 +51,16 @@ impl AuthdogClient {
     ) -> Result<UserInfoResponse, AuthdogError> {
         let url = format!("{}/v1/userinfo", self.config.base_url.trim_end_matches('/'));
 
-        let mut request = self
+        let request = self
             .client
             .get(&url)
             .header("Content-Type", "application/json")
             .header("Authorization", format!("Bearer {}", access_token));
 
-        // Add API key if provided
-        if let Some(api_key) = &self.config.api_key {
-            request = request.header("Authorization", format!("Bearer {}", api_key));
-        }
-
         let response = request
             .send()
             .await
-            .map_err(|e| AuthdogError::new(format!("Request failed: {}", e)))?;
+            .map_err(|e| APIError::new(format!("Request failed: {}", e)))?;
 
         let status = response.status();
         let body = response

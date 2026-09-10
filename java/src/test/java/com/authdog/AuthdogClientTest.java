@@ -189,9 +189,8 @@ class AuthdogClientTest {
         assertNotNull(result);
         assertEquals("123", result.getUser().getId());
 
-        // Verify that API key is used instead of access token (API key overrides access token)
         RecordedRequest request = mockServer.takeRequest();
-        assertEquals("Bearer test-api-key", request.getHeader("Authorization"));
+        assertEquals("Bearer access-token", request.getHeader("Authorization"));
     }
 
     @Test

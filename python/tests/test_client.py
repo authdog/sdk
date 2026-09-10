@@ -15,6 +15,12 @@ class TestAuthdogClient:
         client = AuthdogClient("https://api.authdog.com", "test-api-key")
         assert client.base_url == "https://api.authdog.com"
         assert client.api_key == "test-api-key"
+        assert client.timeout == 10.0
+
+    def test_init_with_custom_timeout(self):
+        """Test client initialization with a custom timeout."""
+        client = AuthdogClient("https://api.authdog.com", timeout=5.0)
+        assert client.timeout == 5.0
 
     def test_init_without_api_key(self):
         """Test client initialization without API key."""
@@ -64,8 +70,8 @@ class TestAuthdogClient:
         client = AuthdogClient("https://api.authdog.com")
         result = client.get_userinfo("test-token")
         
-        assert result["user"]["id"] == "123"
-        assert result["user"]["name"] == "Test User"
+        assert result.user.id == "123"
+        assert result.meta.code == 200
         mock_client.get.assert_called_once_with(
             "/v1/userinfo", 
             headers={"Authorization": "Bearer test-token"}

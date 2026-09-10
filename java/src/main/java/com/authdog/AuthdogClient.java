@@ -93,6 +93,16 @@ public class AuthdogClient implements AutoCloseable {
                 .writeTimeout(timeoutMsParam, TimeUnit.MILLISECONDS)
                 .build();
     }
+
+    /**
+     * Optional API key retained for future endpoints.
+     * Userinfo uses the access token.
+     * @return API key or null
+     */
+    public String getApiKey() {
+        return apiKey;
+    }
+
     /**
      * Get user information using an access token.
      * @param accessTokenParam The access token for authentication
@@ -107,15 +117,8 @@ public class AuthdogClient implements AutoCloseable {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(url)
                 .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "authdog-java-sdk/0.1.0");
-
-        // Use API key if provided, otherwise use access token
-        if (apiKey != null) {
-            requestBuilder.header("Authorization", "Bearer " + apiKey);
-        } else {
-            requestBuilder.header("Authorization",
-                    "Bearer " + accessTokenParam);
-        }
+                .addHeader("User-Agent", "authdog-java-sdk/0.1.0")
+                .header("Authorization", "Bearer " + accessTokenParam);
 
         Request request = requestBuilder.build();
 

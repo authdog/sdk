@@ -56,6 +56,16 @@ namespace Authdog.Sdk.Tests
 
             // Assert
             client.Should().NotBeNull();
+            client.ApiKey.Should().Be("test-api-key");
+            client.Timeout.Should().Be(TimeSpan.FromSeconds(10));
+        }
+
+        [Fact]
+        public void Constructor_WithCustomTimeout_UsesProvidedTimeout()
+        {
+            var client = new AuthdogClient("https://api.authdog.com", null, null, TimeSpan.FromSeconds(5));
+
+            client.Timeout.Should().Be(TimeSpan.FromSeconds(5));
         }
 
         [Fact]

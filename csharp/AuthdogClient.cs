@@ -18,23 +18,32 @@ namespace Authdog
         private bool _disposed = false;
 
         /// <summary>
+        /// Timeout applied to the owned HTTP client. Injected clients keep their own timeout.
+        /// </summary>
+        public TimeSpan Timeout { get; }
+
+        /// <summary>
+        /// Optional API key retained for future endpoints. Userinfo uses the access token.
+        /// </summary>
+        public string? ApiKey => _apiKey;
+
+        /// <summary>
         /// Initialize the Authdog client
         /// </summary>
         /// <param name="baseUrl">The base URL of the Authdog API</param>
-        /// <param name="apiKey">Optional API key for authentication</param>
+        /// <param name="apiKey">Optional API key stored for future endpoints; unused on userinfo</param>
         /// <param name="httpClient">Optional custom HttpClient instance</param>
-        public AuthdogClient(string baseUrl, string? apiKey = null, HttpClient? httpClient = null)
+        /// <param name="timeout">Timeout for an owned HttpClient (default 10 seconds)</param>
+        public AuthdogClient(string baseUrl, string? apiKey = null, HttpClient? httpClient = null, TimeSpan? timeout = null)
         {
             _baseUrl = baseUrl.TrimEnd('/');
             _apiKey = apiKey;
-            _httpClient = httpClient ?? new HttpClient();
+            Timeout = timeout ?? TimeSpan.FromSeconds(10);
+            _httpClient = httpClient ?? new HttpClient { Timeout = Timeout };
 
-            // Set default headers
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "authdog-csharp-sdk/0.1.0");
-
-            if (!string.IsNullOrEmpty(_apiKey))
+            if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
             {
-                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
+                _httpClient.DefaultRequestHeaders.Add("User-Agent", "authdog-csharp-sdk/0.1.0");
             }
         }
 
@@ -51,7 +60,7 @@ namespace Authdog
                 throw new ObjectDisposedException(nameof(AuthdogClient));
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/v1/userinfo");
-            request.Headers.Add("Authorization", $"Bearer {accessToken}");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
             try
             {

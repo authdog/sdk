@@ -39,6 +39,8 @@ func main() {
             log.Printf("Authentication failed: %v", err)
         } else if authdog.IsAPIError(err) {
             log.Printf("API error: %v", err)
+        } else if authdog.IsAuthdogError(err) {
+            log.Printf("Authdog error: %v", err)
         } else {
             log.Printf("Unexpected error: %v", err)
         }

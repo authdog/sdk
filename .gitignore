@@ -1,2 +1,10 @@
 .moon/cache/
 .proto/
+
+# Leftover local build trees — official ports live under planned/
+/c/
+/kotlin/
+
+# Python
+__pycache__/
+

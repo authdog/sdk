@@ -39,6 +39,10 @@ func IsAPIError(err error) bool {
 }
 
 func IsAuthdogError(err error) bool {
-	_, ok := err.(*AuthdogError)
-	return ok
+	switch err.(type) {
+	case *AuthdogError, *AuthenticationError, *APIError:
+		return true
+	default:
+		return false
+	}
 }
