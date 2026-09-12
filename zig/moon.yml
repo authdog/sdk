@@ -1,0 +1,38 @@
+fileGroups:
+  sources:
+    - 'src/**/*'
+    - 'examples/**/*'
+  configs:
+    - 'build.zig'
+    - 'build.zig.zon'
+
+tasks:
+  test:
+    command: 'zig build test'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+
+  lint:
+    command: 'zig fmt --check src/ examples/'
+    inputs:
+      - '@group(sources)'
+
+  fmt:
+    command: 'zig fmt --check src/ examples/'
+    inputs:
+      - '@group(sources)'
+
+  build:
+    command: 'zig build'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+    outputs:
+      - 'zig-out/'
+
+  doc:
+    command: 'zig build docs'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'

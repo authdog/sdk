@@ -5,6 +5,11 @@
 /c/
 /kotlin/
 
+# Zig
+zig-cache/
+.zig-cache/
+zig-out/
+
 # Python
 __pycache__/
 

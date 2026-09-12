@@ -9,7 +9,8 @@ Brownfield Spec Kit artifacts for this monorepo. The constitution is
 | Folder | Status | Purpose |
 |--------|--------|---------|
 | [001-userinfo-sdk](./001-userinfo-sdk/) | Baseline | The product that already ships: `GET /v1/userinfo` across six core SDKs |
-| [002-cross-sdk-parity](./002-cross-sdk-parity/) | Draft | First improvement: auth-header bugs, typed errors, Python models, docs |
+| [002-cross-sdk-parity](./002-cross-sdk-parity/) | Implemented | Auth-header bugs, typed errors, Python models, docs |
+| [003-zig-core-sdk](./003-zig-core-sdk/) | Draft | Promote Zig from `planned/` to a seventh core SDK |
 
 Start here: [001-userinfo-sdk/spec.md](./001-userinfo-sdk/spec.md), then
 the [audit checklist](./001-userinfo-sdk/checklists/baseline-audit.md).

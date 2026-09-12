@@ -5,6 +5,7 @@ projects:
   rust: 'rust'
   java: 'java'
   csharp: 'csharp'
+  zig: 'zig'
 
 vcs:
   client: 'git'

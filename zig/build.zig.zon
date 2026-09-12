@@ -1,0 +1,14 @@
+.{
+    .name = .authdog,
+    .fingerprint = 0x67ef7dd19b0ab10c,
+    .version = "0.1.0",
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{},
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "examples",
+        "README.md",
+    },
+}

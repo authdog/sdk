@@ -1,131 +1,49 @@
-name: Zig Tests
+name: Zig SDK Tests
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [ main, develop ]
-  #   paths:
-  #     - 'planned/zig/**'
-  #     - '.github/workflows/zig-test.yml'
-  # pull_request:
-  #   branches: [ main, develop ]
-  #   paths:
-  #     - 'planned/zig/**'
-  #     - '.github/workflows/zig-test.yml'
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'zig/**'
+      - '.github/workflows/zig-test.yml'
+      - '.moon/workspace.yml'
+      - '.moon/toolchain.yml'
+      - '.prototools'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'zig/**'
+      - '.github/workflows/zig-test.yml'
+      - '.moon/workspace.yml'
+      - '.moon/toolchain.yml'
+      - '.prototools'
 
 jobs:
   test:
     name: Test Zig SDK
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        zig-version: ['0.12.0']
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
-    - name: Install Zig ${{ matrix.zig-version }}
+
+    - name: Install Zig 0.16.0
       uses: mlugg/setup-zig@v2
       with:
-        version: ${{ matrix.zig-version }}
-    
-    - name: Verify Zig installation
-      run: |
-        zig version
-        echo "ZIG_LOCAL_CACHE_DIR: $ZIG_LOCAL_CACHE_DIR"
-        echo "ZIG_GLOBAL_CACHE_DIR: $ZIG_GLOBAL_CACHE_DIR"
-    
-    - name: Clear Zig cache
-      run: |
-        cd planned/zig
-        rm -rf zig-cache .zig-cache || echo "No cache to clear"
-        rm -rf ~/.cache/zig || echo "No global cache to clear"
-        rm -rf $ZIG_LOCAL_CACHE_DIR || echo "No local cache to clear"
-        rm -rf $ZIG_GLOBAL_CACHE_DIR || echo "No global cache to clear"
-        echo "No external dependencies required"
-    
-    - name: Validate build configuration
-      run: |
-        cd planned/zig
-        cat build.zig.zon
-        echo "Build configuration validated"
-    
+        version: '0.16.0'
+
+    - name: Setup Moon + Proto
+      uses: ./.github/actions/setup-moon
+
+    - name: Check formatting
+      run: moon run zig:fmt
+
     - name: Run tests
-      run: |
-        cd planned/zig
-        zig build test
-    
+      run: moon run zig:test
+
     - name: Build library
-      run: |
-        cd planned/zig
-        zig build
-    
-    - name: Build example
-      run: |
-        cd planned/zig
-        zig build example
-    
+      run: moon run zig:build
+
     - name: Generate documentation
-      run: |
-        cd planned/zig
-        zig build docs
-
-  lint:
-    name: Lint Zig Code
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Install Zig 0.12.0
-      uses: mlugg/setup-zig@v2
-      with:
-        version: '0.12.0'
-    
-    - name: Clear Zig cache
-      run: |
-        cd planned/zig
-        rm -rf zig-cache .zig-cache || echo "No cache to clear"
-        rm -rf ~/.cache/zig || echo "No global cache to clear"
-    
-    - name: Install zigfmt
-      run: |
-        # zigfmt is included with Zig 0.12.0+
-        zig fmt --version || echo "zigfmt not available"
-    
-    - name: Check code formatting
-      run: |
-        cd planned/zig
-        zig fmt --check src/ || echo "Code formatting issues found"
-    
-    - name: Analyze code
-      run: |
-        cd planned/zig
-        zig build-lib src/lib.zig -fanalyze || echo "Static analysis completed"
-
-  security:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Install Zig 0.12.0
-      uses: mlugg/setup-zig@v2
-      with:
-        version: '0.12.0'
-    
-    - name: Clear Zig cache
-      run: |
-        cd planned/zig
-        rm -rf zig-cache .zig-cache || echo "No cache to clear"
-        rm -rf ~/.cache/zig || echo "No global cache to clear"
-    
-    - name: Run security analysis
-      run: |
-        cd planned/zig
-        zig build-lib src/lib.zig -fsanitize-c || echo "Security analysis completed"
+      run: moon run zig:doc

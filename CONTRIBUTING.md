@@ -38,9 +38,10 @@ This repository contains official (core) SDKs and incubating ports.
 - **Rust** (`rust/`)
 - **Java** (`java/`)
 - **C#** (`csharp/`)
+- **Zig** (`zig/`)
 
 **Planned** (under `planned/` until promoted): C, C++, Clojure, Common Lisp,
-Dart, Elixir, F#, Kotlin, OCaml, PHP, PowerShell, R, Ruby, Scala, Swift, Zig.
+Dart, Elixir, F#, Kotlin, OCaml, PHP, PowerShell, R, Ruby, Scala, Swift.
 
 Each SDK has its own development setup. See the README in that language
 directory. Specs for current behavior live in `specs/`.
@@ -217,7 +218,7 @@ Use descriptive branch names with prefixes:
 - Use `zig fmt` for formatting
 - Use meaningful variable and function names
 - Write tests using Zig's built-in testing framework
-- Maintain compatibility with Zig 0.11+
+- Maintain compatibility with Zig 0.16+
 - Use `const` for immutable values
 - Use `var` for mutable values
 - Use error unions for error handling
@@ -244,6 +245,7 @@ moon run go:test
 moon run rust:test
 moon run java:test
 moon run csharp:test
+moon run zig:test
 
 # Direct runners (core)
 cd python && python -m pytest
@@ -252,6 +254,7 @@ cd go && go test ./...
 cd rust && cargo test
 cd java && mvn test
 cd csharp && dotnet test
+cd zig && zig build test
 
 # Planned ports live under planned/<language>
 ```

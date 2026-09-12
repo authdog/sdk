@@ -61,8 +61,8 @@ conventions (Go `context`, Python context managers, Java
 `AutoCloseable`, C# `IDisposable`/`async`, Rust `Result` + async).
 The *shape* stays common: a client constructed with `baseUrl` and
 optional `apiKey`/`timeout`, a user-info method that takes an access
-token, a `close`/dispose path, and typed user-info models (Python is
-currently behind and MUST catch up).
+token, a `close`/dispose path, and typed user-info models. Zig uses
+error unions plus `lastErrorMessage` for stable text.
 
 Rationale: feel native, behave identically.
 
@@ -94,8 +94,9 @@ platform inside the client.
 ### Core SDKs
 
 Python (`python/`), Node/TypeScript (`node/`), Go (`go/`), Rust
-(`rust/`), Java (`java/`), and C# (`csharp/`) are **core**. They MUST
-stay moon-orchestrated, CI-green, and at parity with the active specs.
+(`rust/`), Java (`java/`), C# (`csharp/`), and Zig (`zig/`) are
+**core**. They MUST stay moon-orchestrated, CI-green, and at parity
+with the active specs.
 
 ### Planned SDKs
 
@@ -157,4 +158,4 @@ without an explicit exception.
 Runtime guidance for agents lives in `.specify/` templates and
 `specs/`. Do not fork a second set of principles in chat.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-10 | **Last Amended**: 2026-09-10
+**Version**: 1.1.0 | **Ratified**: 2026-09-10 | **Last Amended**: 2026-09-12

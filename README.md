@@ -2,37 +2,29 @@
 
 Official SDKs for the Authdog authentication and user management platform.
 
-## SDK Health
-
-[![Python](https://github.com/authdog/sdk/actions/workflows/python-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/python-test.yml)
-[![Node.js](https://github.com/authdog/sdk/actions/workflows/node-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/node-test.yml)
-[![Go](https://github.com/authdog/sdk/actions/workflows/go-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/go-test.yml)
-[![Rust](https://github.com/authdog/sdk/actions/workflows/rust-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/rust-test.yml)
-[![Java](https://github.com/authdog/sdk/actions/workflows/java-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/java-test.yml)
-[![C#](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml)
-
 ## Core SDKs
 
-| Language | Directory | Docs |
-|----------|-----------|------|
-| Python | [`python/`](./python/) | [README](./python/README.md) |
-| Node.js / TypeScript | [`node/`](./node/) | [README](./node/README.md) |
-| Go | [`go/`](./go/) | [README](./go/README.md) |
-| Rust | [`rust/`](./rust/) | [README](./rust/README.md) |
-| Java | [`java/`](./java/) | [README](./java/README.md) |
-| C# | [`csharp/`](./csharp/) | [README](./csharp/README.md) |
+| Package | Version | Description | CI |
+|---------|---------|-------------|-----|
+| [`authdog`](./python/) | [![PyPI](https://img.shields.io/badge/pypi-v0.1.0-orange)](./python/) | Python SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/python-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/python-test.yml) |
+| [`@authdog/node-sdk`](./node/) | [![npm](https://img.shields.io/badge/npm-v0.1.0-orange)](./node/) | Node.js / TypeScript SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/node-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/node-test.yml) |
+| [`github.com/authdog/go-sdk`](./go/) | [![Go](https://img.shields.io/badge/go-v0.1.0-00ADD8)](./go/) | Go SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/go-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/go-test.yml) |
+| [`authdog`](./rust/) | [![crates.io](https://img.shields.io/badge/crates.io-v0.1.0-orange)](./rust/) | Rust SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/rust-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/rust-test.yml) |
+| [`com.authdog:authdog-java-sdk`](./java/) | [![Maven](https://img.shields.io/badge/maven-v0.1.0-orange)](./java/) | Java SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/java-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/java-test.yml) |
+| [`Authdog.Sdk`](./csharp/) | [![NuGet](https://img.shields.io/badge/nuget-v0.1.0-orange)](./csharp/) | C# / .NET SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml) |
+| [`authdog`](./zig/) | [![Zig](https://img.shields.io/badge/zig-v0.1.0-f7a41d)](./zig/) | Zig SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/zig-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/zig-test.yml) |
 
 ## Planned SDKs
 
 The following SDKs are under development in the [`planned/`](./planned/) directory:
 
-C, C++, Clojure, Common Lisp, Dart, Elixir, F#, Kotlin, OCaml, PHP, PowerShell, R, Ruby, Scala, Swift, Zig
+C, C++, Clojure, Common Lisp, Dart, Elixir, F#, Kotlin, OCaml, PHP, PowerShell, R, Ruby, Scala, Swift
 
 ## Features
 
 - **User Information** -- retrieve profile data, emails, photos, and verification status
 - **Authentication** -- token-based auth with structured error handling
-- **Type Safety** -- full type support in TypeScript, Go, Rust, Java, and C#
+- **Type Safety** -- full type support in TypeScript, Go, Rust, Java, C#, and Zig
 - **Async Support** -- modern async/await APIs where applicable
 
 ## API
@@ -83,15 +75,15 @@ moon run :test            # Run tests for all SDKs
 
 ### Task Matrix
 
-| Task | Python | Node | Go | Rust | Java | C# |
-|------|--------|------|----|------|------|----|
-| `deps` | pip install | pnpm install | go mod download | -- | mvn dependency:resolve | dotnet restore |
-| `test` | pytest | vitest | go test | cargo test | mvn test | dotnet test |
-| `lint` | flake8 | eslint | go vet | cargo clippy | checkstyle | dotnet format |
-| `build` | python -m build | pnpm build | go build | cargo build | mvn compile | dotnet build |
-| `fmt` | -- | -- | gofmt | cargo fmt | -- | -- |
-| `security` | -- | -- | -- | cargo audit | -- | security-scan |
-| `benchmark` | -- | -- | go test -bench | -- | JMH | -- |
+| Task | Python | Node | Go | Rust | Java | C# | Zig |
+|------|--------|------|----|------|------|----|-----|
+| `deps` | pip install | pnpm install | go mod download | -- | mvn dependency:resolve | dotnet restore | -- |
+| `test` | pytest | vitest | go test | cargo test | mvn test | dotnet test | zig build test |
+| `lint` | flake8 | eslint | go vet | cargo clippy | checkstyle | dotnet format | zig fmt --check |
+| `build` | python -m build | pnpm build | go build | cargo build | mvn compile | dotnet build | zig build |
+| `fmt` | -- | -- | gofmt | cargo fmt | -- | -- | zig fmt --check |
+| `security` | -- | -- | -- | cargo audit | -- | security-scan | -- |
+| `benchmark` | -- | -- | go test -bench | -- | JMH | -- | -- |
 
 ## Contributing
 
