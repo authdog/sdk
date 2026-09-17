@@ -23,20 +23,29 @@ C, C++, Clojure, Common Lisp, Dart, Elixir, F#, Kotlin, OCaml, PHP, PowerShell, 
 ## Features
 
 - **User Information** -- retrieve profile data, emails, photos, and verification status
+- **Management API** -- organizations, tenants, projects, environments, directory users and groups
 - **Authentication** -- token-based auth with structured error handling
 - **Type Safety** -- full type support in TypeScript, Go, Rust, Java, C#, and Zig
 - **Async Support** -- modern async/await APIs where applicable
 
 ## API
 
-All SDKs wrap a single endpoint:
+Official SDKs wrap the public Authdog HTTP API at
+[`https://api.authdog.com`](https://api.authdog.com).
+
+Constructor `apiKey` is the management Bearer credential. Get-user-info
+still sends the access-token argument only:
 
 ```
 GET /v1/userinfo
 Authorization: Bearer <access-token>
 ```
 
-See individual SDK READMEs for language-specific usage examples and response types.
+Wave 1 also includes health, organizations, tenants, projects,
+environment lifecycle, and directory users/groups. The full catalog
+and later waves live in [`specs/004-api-parity/`](./specs/004-api-parity/).
+
+See individual SDK READMEs for language-specific usage.
 
 ## Specs
 
@@ -45,7 +54,8 @@ to describe what the SDKs already do and to drive changes.
 
 - Constitution: [`.specify/memory/constitution.md`](./.specify/memory/constitution.md)
 - Baseline (as-is): [`specs/001-userinfo-sdk/`](./specs/001-userinfo-sdk/)
-- Next improvement: [`specs/002-cross-sdk-parity/`](./specs/002-cross-sdk-parity/)
+- Cross-SDK hardening: [`specs/002-cross-sdk-parity/`](./specs/002-cross-sdk-parity/)
+- Platform API parity (Wave 1 shipped): [`specs/004-api-parity/`](./specs/004-api-parity/)
 - How to iterate: [`specs/README.md`](./specs/README.md)
 
 In Cursor: `/speckit-specify` → `/speckit-plan` → `/speckit-tasks` →

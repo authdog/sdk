@@ -249,6 +249,356 @@ pub fn parseUserInfo(allocator: std.mem.Allocator, json_str: []const u8) !UserIn
     };
 }
 
+pub const Probe = struct {
+    ok: bool = false,
+};
+
+pub const Organization = struct {
+    id: []const u8,
+    name: []const u8,
+    description: ?[]const u8,
+    billing_email: ?[]const u8,
+    logo_uri: ?[]const u8,
+    active: bool,
+    created_at: []const u8,
+    updated_at: []const u8,
+};
+
+pub const OrganizationsList = struct {
+    organizations: []const Organization,
+    total: i64,
+    arena: *std.heap.ArenaAllocator,
+
+    pub fn deinit(self: OrganizationsList) void {
+        const child = self.arena.child_allocator;
+        self.arena.deinit();
+        child.destroy(self.arena);
+    }
+};
+
+pub const Tenant = struct {
+    id: []const u8,
+    name: []const u8,
+    description: ?[]const u8,
+    company: ?[]const u8,
+    active: bool,
+    created_at: []const u8,
+    updated_at: []const u8,
+    organization_ids: []const []const u8,
+};
+
+pub const TenantsList = struct {
+    tenants: []const Tenant,
+    total: i64,
+    arena: *std.heap.ArenaAllocator,
+
+    pub fn deinit(self: TenantsList) void {
+        const child = self.arena.child_allocator;
+        self.arena.deinit();
+        child.destroy(self.arena);
+    }
+};
+
+pub const EnvUserEmail = struct {
+    id: []const u8,
+    value: []const u8,
+    email_type: ?[]const u8,
+};
+
+pub const EnvUser = struct {
+    id: []const u8,
+    environment_id: ?[]const u8,
+    external_id: ?[]const u8,
+    user_name: ?[]const u8,
+    display_name: ?[]const u8,
+    nick_name: ?[]const u8,
+    profile_url: ?[]const u8,
+    active: ?bool,
+    change_pw: ?bool,
+    provider: ?[]const u8,
+    emails: []const EnvUserEmail,
+    last_login: ?[]const u8,
+    created_at: ?[]const u8,
+    updated_at: ?[]const u8,
+};
+
+pub const EnvUsersResponse = struct {
+    users: []const EnvUser,
+    arena: *std.heap.ArenaAllocator,
+
+    pub fn deinit(self: EnvUsersResponse) void {
+        const child = self.arena.child_allocator;
+        self.arena.deinit();
+        child.destroy(self.arena);
+    }
+};
+
+pub const EnvGroup = struct {
+    id: []const u8,
+    environment_id: []const u8,
+    name: []const u8,
+    slug: []const u8,
+    description: ?[]const u8,
+    member_count: i64,
+    joined_at: ?[]const u8,
+    created_at: []const u8,
+    updated_at: []const u8,
+};
+
+pub const EnvGroupsResponse = struct {
+    groups: []const EnvGroup,
+    arena: *std.heap.ArenaAllocator,
+
+    pub fn deinit(self: EnvGroupsResponse) void {
+        const child = self.arena.child_allocator;
+        self.arena.deinit();
+        child.destroy(self.arena);
+    }
+};
+
+const WireOrganization = struct {
+    id: []const u8 = "",
+    name: []const u8 = "",
+    description: ?[]const u8 = null,
+    billingEmail: ?[]const u8 = null,
+    logoUri: ?[]const u8 = null,
+    active: bool = false,
+    createdAt: []const u8 = "",
+    updatedAt: []const u8 = "",
+};
+
+const WireOrganizationsList = struct {
+    organizations: []const WireOrganization = &.{},
+    total: i64 = 0,
+};
+
+const WireTenant = struct {
+    id: []const u8 = "",
+    name: []const u8 = "",
+    description: ?[]const u8 = null,
+    company: ?[]const u8 = null,
+    active: bool = false,
+    createdAt: []const u8 = "",
+    updatedAt: []const u8 = "",
+    organizationIds: []const []const u8 = &.{},
+};
+
+const WireTenantsList = struct {
+    tenants: []const WireTenant = &.{},
+    total: i64 = 0,
+};
+
+const WireEnvUserEmail = struct {
+    id: []const u8 = "",
+    value: []const u8 = "",
+    type: ?[]const u8 = null,
+};
+
+const WireEnvUser = struct {
+    id: []const u8 = "",
+    environmentId: ?[]const u8 = null,
+    externalId: ?[]const u8 = null,
+    userName: ?[]const u8 = null,
+    displayName: ?[]const u8 = null,
+    nickName: ?[]const u8 = null,
+    profileUrl: ?[]const u8 = null,
+    active: ?bool = null,
+    changePw: ?bool = null,
+    provider: ?[]const u8 = null,
+    emails: []const WireEnvUserEmail = &.{},
+    lastLogin: ?[]const u8 = null,
+    createdAt: ?[]const u8 = null,
+    updatedAt: ?[]const u8 = null,
+};
+
+const WireEnvUsersResponse = struct {
+    users: []const WireEnvUser = &.{},
+};
+
+const WireEnvGroup = struct {
+    id: []const u8 = "",
+    environmentId: []const u8 = "",
+    name: []const u8 = "",
+    slug: []const u8 = "",
+    description: ?[]const u8 = null,
+    memberCount: i64 = 0,
+    joinedAt: ?[]const u8 = null,
+    createdAt: []const u8 = "",
+    updatedAt: []const u8 = "",
+};
+
+const WireEnvGroupsResponse = struct {
+    groups: []const WireEnvGroup = &.{},
+};
+
+const WireErrorField = struct {
+    @"error": ?[]const u8 = null,
+};
+
+fn organizationFromWire(src: WireOrganization) Organization {
+    return .{
+        .id = src.id,
+        .name = src.name,
+        .description = src.description,
+        .billing_email = src.billingEmail,
+        .logo_uri = src.logoUri,
+        .active = src.active,
+        .created_at = src.createdAt,
+        .updated_at = src.updatedAt,
+    };
+}
+
+fn tenantFromWire(src: WireTenant) Tenant {
+    return .{
+        .id = src.id,
+        .name = src.name,
+        .description = src.description,
+        .company = src.company,
+        .active = src.active,
+        .created_at = src.createdAt,
+        .updated_at = src.updatedAt,
+        .organization_ids = src.organizationIds,
+    };
+}
+
+fn envUserFromWire(allocator: std.mem.Allocator, src: WireEnvUser) !EnvUser {
+    const emails = try allocator.alloc(EnvUserEmail, src.emails.len);
+    for (src.emails, emails) |item, *dst| {
+        dst.* = .{
+            .id = item.id,
+            .value = item.value,
+            .email_type = item.type,
+        };
+    }
+    return .{
+        .id = src.id,
+        .environment_id = src.environmentId,
+        .external_id = src.externalId,
+        .user_name = src.userName,
+        .display_name = src.displayName,
+        .nick_name = src.nickName,
+        .profile_url = src.profileUrl,
+        .active = src.active,
+        .change_pw = src.changePw,
+        .provider = src.provider,
+        .emails = emails,
+        .last_login = src.lastLogin,
+        .created_at = src.createdAt,
+        .updated_at = src.updatedAt,
+    };
+}
+
+fn envGroupFromWire(src: WireEnvGroup) EnvGroup {
+    return .{
+        .id = src.id,
+        .environment_id = src.environmentId,
+        .name = src.name,
+        .slug = src.slug,
+        .description = src.description,
+        .member_count = src.memberCount,
+        .joined_at = src.joinedAt,
+        .created_at = src.createdAt,
+        .updated_at = src.updatedAt,
+    };
+}
+
+fn parseMapped(
+    comptime Wire: type,
+    comptime Result: type,
+    allocator: std.mem.Allocator,
+    json_str: []const u8,
+    comptime mapFn: fn (*std.heap.ArenaAllocator, Wire) anyerror!Result,
+) !Result {
+    const parsed = std.json.parseFromSlice(Wire, allocator, json_str, .{
+        .ignore_unknown_fields = true,
+        .allocate = .alloc_always,
+    }) catch return error.ParseError;
+    errdefer parsed.deinit();
+    return mapFn(parsed.arena, parsed.value);
+}
+
+pub fn parseProbe(allocator: std.mem.Allocator, json_str: []const u8) !Probe {
+    const parsed = std.json.parseFromSlice(struct { ok: bool = false }, allocator, json_str, .{
+        .ignore_unknown_fields = true,
+    }) catch return error.ParseError;
+    defer parsed.deinit();
+    return .{ .ok = parsed.value.ok };
+}
+
+pub fn parseOrganizationsList(allocator: std.mem.Allocator, json_str: []const u8) !OrganizationsList {
+    return parseMapped(WireOrganizationsList, OrganizationsList, allocator, json_str, struct {
+        fn map(arena: *std.heap.ArenaAllocator, wire: WireOrganizationsList) !OrganizationsList {
+            const orgs = try arena.allocator().alloc(Organization, wire.organizations.len);
+            for (wire.organizations, orgs) |src, *dst| {
+                dst.* = organizationFromWire(src);
+            }
+            return .{
+                .organizations = orgs,
+                .total = wire.total,
+                .arena = arena,
+            };
+        }
+    }.map);
+}
+
+pub fn parseTenantsList(allocator: std.mem.Allocator, json_str: []const u8) !TenantsList {
+    return parseMapped(WireTenantsList, TenantsList, allocator, json_str, struct {
+        fn map(arena: *std.heap.ArenaAllocator, wire: WireTenantsList) !TenantsList {
+            const tenants = try arena.allocator().alloc(Tenant, wire.tenants.len);
+            for (wire.tenants, tenants) |src, *dst| {
+                dst.* = tenantFromWire(src);
+            }
+            return .{
+                .tenants = tenants,
+                .total = wire.total,
+                .arena = arena,
+            };
+        }
+    }.map);
+}
+
+pub fn parseEnvUsersResponse(allocator: std.mem.Allocator, json_str: []const u8) !EnvUsersResponse {
+    return parseMapped(WireEnvUsersResponse, EnvUsersResponse, allocator, json_str, struct {
+        fn map(arena: *std.heap.ArenaAllocator, wire: WireEnvUsersResponse) !EnvUsersResponse {
+            const users = try arena.allocator().alloc(EnvUser, wire.users.len);
+            for (wire.users, users) |src, *dst| {
+                dst.* = try envUserFromWire(arena.allocator(), src);
+            }
+            return .{
+                .users = users,
+                .arena = arena,
+            };
+        }
+    }.map);
+}
+
+pub fn parseEnvGroupsResponse(allocator: std.mem.Allocator, json_str: []const u8) !EnvGroupsResponse {
+    return parseMapped(WireEnvGroupsResponse, EnvGroupsResponse, allocator, json_str, struct {
+        fn map(arena: *std.heap.ArenaAllocator, wire: WireEnvGroupsResponse) !EnvGroupsResponse {
+            const groups = try arena.allocator().alloc(EnvGroup, wire.groups.len);
+            for (wire.groups, groups) |src, *dst| {
+                dst.* = envGroupFromWire(src);
+            }
+            return .{
+                .groups = groups,
+                .arena = arena,
+            };
+        }
+    }.map);
+}
+
+/// Copies a JSON object `error` string when present.
+pub fn jsonErrorField(allocator: std.mem.Allocator, json_str: []const u8) ?[]u8 {
+    const parsed = std.json.parseFromSlice(WireErrorField, allocator, json_str, .{
+        .ignore_unknown_fields = true,
+        .allocate = .alloc_always,
+    }) catch return null;
+    defer parsed.deinit();
+    const message = parsed.value.@"error" orelse return null;
+    if (message.len == 0) return null;
+    return allocator.dupe(u8, message) catch null;
+}
+
 test "parse user info sample payload" {
     const json =
         \\{
@@ -309,4 +659,46 @@ test "parse user info sample payload" {
 
 test "invalid json is a parse error" {
     try std.testing.expectError(error.ParseError, parseUserInfo(std.testing.allocator, "not-json"));
+}
+
+test "parse probe and empty management lists" {
+    const probe = try parseProbe(std.testing.allocator, "{\"ok\":true}");
+    try std.testing.expect(probe.ok);
+
+    const orgs = try parseOrganizationsList(std.testing.allocator, "{}");
+    defer orgs.deinit();
+    try std.testing.expectEqual(@as(usize, 0), orgs.organizations.len);
+    try std.testing.expectEqual(@as(i64, 0), orgs.total);
+
+    const tenants = try parseTenantsList(std.testing.allocator, "{\"tenants\":[],\"total\":0}");
+    defer tenants.deinit();
+    try std.testing.expectEqual(@as(usize, 0), tenants.tenants.len);
+
+    const users = try parseEnvUsersResponse(std.testing.allocator, "{\"users\":[]}");
+    defer users.deinit();
+    try std.testing.expectEqual(@as(usize, 0), users.users.len);
+
+    const groups = try parseEnvGroupsResponse(std.testing.allocator, "{\"groups\":[]}");
+    defer groups.deinit();
+    try std.testing.expectEqual(@as(usize, 0), groups.groups.len);
+}
+
+test "parse env user list item maps camelCase" {
+    const json =
+        \\{
+        \\  "users": [
+        \\    {
+        \\      "id": "usr_1",
+        \\      "displayName": "Ada",
+        \\      "emails": [{ "value": "ada@example.com" }]
+        \\    }
+        \\  ]
+        \\}
+    ;
+    const listed = try parseEnvUsersResponse(std.testing.allocator, json);
+    defer listed.deinit();
+    try std.testing.expectEqual(@as(usize, 1), listed.users.len);
+    try std.testing.expectEqualStrings("usr_1", listed.users[0].id);
+    try std.testing.expectEqualStrings("Ada", listed.users[0].display_name.?);
+    try std.testing.expectEqualStrings("ada@example.com", listed.users[0].emails[0].value);
 }

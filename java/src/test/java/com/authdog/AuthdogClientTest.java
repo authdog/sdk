@@ -2,6 +2,7 @@ package com.authdog;
 
 import com.authdog.exceptions.AuthenticationException;
 import com.authdog.exceptions.ApiException;
+import com.authdog.types.Probe;
 import com.authdog.types.UserInfoResponse;
 import com.authdog.types.Meta;
 import com.authdog.types.User;
@@ -256,5 +257,40 @@ class AuthdogClientTest {
                   exception.getMessage().contains("timeout") ||
                   exception.getMessage().contains("SocketTimeoutException") ||
                   exception.getMessage().contains("Read timed out"));
+    }
+
+    @Test
+    void testHealthSuccess() throws Exception {
+        mockServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"ok\":true}"));
+
+        client = new AuthdogClient(mockServer.url("/").toString());
+        Probe probe = client.health();
+
+        assertNotNull(probe);
+        assertTrue(probe.isOk());
+
+        RecordedRequest request = mockServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals("/v1/health", request.getPath());
+        assertEquals("application/json", request.getHeader("Content-Type"));
+        assertEquals("authdog-java-sdk/0.1.0", request.getHeader("User-Agent"));
+        assertNull(request.getHeader("Authorization"));
+    }
+
+    @Test
+    void testHealthSendsApiKey() throws Exception {
+        mockServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"ok\":true}"));
+
+        client = new AuthdogClient(mockServer.url("/").toString(), "key-1");
+        assertTrue(client.health().isOk());
+
+        RecordedRequest request = mockServer.takeRequest();
+        assertEquals("Bearer key-1", request.getHeader("Authorization"));
     }
 }

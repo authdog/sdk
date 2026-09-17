@@ -175,3 +175,318 @@ class UserInfoResponse:
             session=Session.from_dict(data.get("session")),
             user=User.from_dict(data.get("user")),
         )
+
+
+def _bool(data: Dict[str, Any], key: str, default: bool = False) -> bool:
+    value = data.get(key, default)
+    return default if value is None else bool(value)
+
+
+def _opt_bool(data: Dict[str, Any], key: str) -> Optional[bool]:
+    value = data.get(key)
+    return None if value is None else bool(value)
+
+
+def _int(data: Dict[str, Any], key: str, default: int = 0) -> int:
+    value = data.get(key, default)
+    try:
+        return default if value is None else int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _opt_float(data: Dict[str, Any], key: str) -> Optional[float]:
+    value = data.get(key)
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+@dataclass
+class Probe:
+    ok: bool = False
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "Probe":
+        data = data or {}
+        return cls(ok=_bool(data, "ok"))
+
+
+@dataclass
+class Organization:
+    id: str = ""
+    name: str = ""
+    description: Optional[str] = None
+    billing_email: Optional[str] = None
+    logo_uri: Optional[str] = None
+    active: bool = False
+    created_at: str = ""
+    updated_at: str = ""
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "Organization":
+        data = data or {}
+        return cls(
+            id=_str(data, "id"),
+            name=_str(data, "name"),
+            description=_opt_str(data, "description"),
+            billing_email=_opt_str(data, "billingEmail"),
+            logo_uri=_opt_str(data, "logoUri"),
+            active=_bool(data, "active"),
+            created_at=_str(data, "createdAt"),
+            updated_at=_str(data, "updatedAt"),
+        )
+
+
+@dataclass
+class OrganizationsList:
+    organizations: List[Organization] = field(default_factory=list)
+    total: int = 0
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "OrganizationsList":
+        data = data or {}
+        return cls(
+            organizations=[
+                Organization.from_dict(item) for item in data.get("organizations") or []
+            ],
+            total=_int(data, "total"),
+        )
+
+
+@dataclass
+class OrganizationResponse:
+    organization: Organization = field(default_factory=Organization)
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "OrganizationResponse":
+        data = data or {}
+        return cls(organization=Organization.from_dict(data.get("organization")))
+
+
+@dataclass
+class SuccessIdResponse:
+    success: bool = False
+    id: str = ""
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "SuccessIdResponse":
+        data = data or {}
+        return cls(success=_bool(data, "success"), id=_str(data, "id"))
+
+
+@dataclass
+class Tenant:
+    id: str = ""
+    name: str = ""
+    description: Optional[str] = None
+    company: Optional[str] = None
+    active: bool = False
+    created_at: str = ""
+    updated_at: str = ""
+    organization_ids: List[str] = field(default_factory=list)
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "Tenant":
+        data = data or {}
+        return cls(
+            id=_str(data, "id"),
+            name=_str(data, "name"),
+            description=_opt_str(data, "description"),
+            company=_opt_str(data, "company"),
+            active=_bool(data, "active"),
+            created_at=_str(data, "createdAt"),
+            updated_at=_str(data, "updatedAt"),
+            organization_ids=[str(item) for item in data.get("organizationIds") or []],
+        )
+
+
+@dataclass
+class TenantsList:
+    tenants: List[Tenant] = field(default_factory=list)
+    total: int = 0
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "TenantsList":
+        data = data or {}
+        return cls(
+            tenants=[Tenant.from_dict(item) for item in data.get("tenants") or []],
+            total=_int(data, "total"),
+        )
+
+
+@dataclass
+class TenantResponse:
+    tenant: Tenant = field(default_factory=Tenant)
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "TenantResponse":
+        data = data or {}
+        return cls(tenant=Tenant.from_dict(data.get("tenant")))
+
+
+@dataclass
+class EnvUserEmail:
+    id: str = ""
+    value: str = ""
+    type: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "EnvUserEmail":
+        data = data or {}
+        return cls(id=_str(data, "id"), value=_str(data, "value"), type=_opt_str(data, "type"))
+
+
+@dataclass
+class EnvUser:
+    id: str = ""
+    environment_id: Optional[str] = None
+    external_id: Optional[str] = None
+    user_name: Optional[str] = None
+    display_name: Optional[str] = None
+    nick_name: Optional[str] = None
+    profile_url: Optional[str] = None
+    active: Optional[bool] = None
+    change_pw: Optional[bool] = None
+    provider: Optional[str] = None
+    emails: List[EnvUserEmail] = field(default_factory=list)
+    last_login: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "EnvUser":
+        data = data or {}
+        return cls(
+            id=_str(data, "id"),
+            environment_id=_opt_str(data, "environmentId"),
+            external_id=_opt_str(data, "externalId"),
+            user_name=_opt_str(data, "userName"),
+            display_name=_opt_str(data, "displayName"),
+            nick_name=_opt_str(data, "nickName"),
+            profile_url=_opt_str(data, "profileUrl"),
+            active=_opt_bool(data, "active"),
+            change_pw=_opt_bool(data, "changePw"),
+            provider=_opt_str(data, "provider"),
+            emails=[EnvUserEmail.from_dict(item) for item in data.get("emails") or []],
+            last_login=_opt_str(data, "lastLogin"),
+            created_at=_opt_str(data, "createdAt"),
+            updated_at=_opt_str(data, "updatedAt"),
+        )
+
+
+@dataclass
+class EnvUsersResponse:
+    users: List[EnvUser] = field(default_factory=list)
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "EnvUsersResponse":
+        data = data or {}
+        return cls(users=[EnvUser.from_dict(item) for item in data.get("users") or []])
+
+
+@dataclass
+class EnvUserResponse:
+    user: EnvUser = field(default_factory=EnvUser)
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "EnvUserResponse":
+        data = data or {}
+        return cls(user=EnvUser.from_dict(data.get("user")))
+
+
+@dataclass
+class EnvGroup:
+    id: str = ""
+    environment_id: str = ""
+    name: str = ""
+    slug: str = ""
+    description: Optional[str] = None
+    member_count: int = 0
+    joined_at: Optional[str] = None
+    created_at: str = ""
+    updated_at: str = ""
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "EnvGroup":
+        data = data or {}
+        return cls(
+            id=_str(data, "id"),
+            environment_id=_str(data, "environmentId"),
+            name=_str(data, "name"),
+            slug=_str(data, "slug"),
+            description=_opt_str(data, "description"),
+            member_count=_int(data, "memberCount"),
+            joined_at=_opt_str(data, "joinedAt"),
+            created_at=_str(data, "createdAt"),
+            updated_at=_str(data, "updatedAt"),
+        )
+
+
+@dataclass
+class EnvGroupsResponse:
+    groups: List[EnvGroup] = field(default_factory=list)
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "EnvGroupsResponse":
+        data = data or {}
+        return cls(groups=[EnvGroup.from_dict(item) for item in data.get("groups") or []])
+
+
+@dataclass
+class Environment:
+    id: str = ""
+    name: str = ""
+    description: Optional[str] = None
+    weight: Optional[float] = None
+    is_live: Optional[bool] = None
+    is_default: Optional[bool] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "Environment":
+        data = data or {}
+        return cls(
+            id=_str(data, "id"),
+            name=_str(data, "name"),
+            description=_opt_str(data, "description"),
+            weight=_opt_float(data, "weight"),
+            is_live=_opt_bool(data, "isLive"),
+            is_default=_opt_bool(data, "isDefault"),
+            created_at=_opt_str(data, "createdAt"),
+            updated_at=_opt_str(data, "updatedAt"),
+        )
+
+
+@dataclass
+class Project:
+    id: str = ""
+    name: str = ""
+    description: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "Project":
+        data = data or {}
+        return cls(
+            id=_str(data, "id"),
+            name=_str(data, "name"),
+            description=_opt_str(data, "description"),
+        )
+
+
+@dataclass
+class JsonMap:
+    """Forward-compatible envelope for less common Wave 1 responses."""
+
+    data: Dict[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def from_dict(cls, data: Optional[Dict[str, Any]]) -> "JsonMap":
+        return cls(data=data or {})
+
+    def get(self, key: str, default: Any = None) -> Any:
+        return self.data.get(key, default)

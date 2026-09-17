@@ -89,7 +89,11 @@ Creates a new Authdog client.
 
 **Config Options:**
 - `BaseURL` (string): The base URL of the Authdog API
-- `APIKey` (string): Optional API key for authentication
+- `APIKey` (string): Optional management Bearer credential (userinfo still uses the access token)
+
+`Health`, `Organizations`, `Tenants`, `Projects`, `Environments`,
+`Users`, and `Groups` wrap Wave 1 of the public API. See
+`specs/004-api-parity/`.
 - `Timeout` (time.Duration): Request timeout (default: 10 seconds)
 - `HTTPClient` (*http.Client): Optional custom HTTP client
 

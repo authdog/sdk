@@ -67,11 +67,27 @@ impl From<AuthenticationError> for AuthdogError {
 #[derive(Debug)]
 pub struct APIError {
     message: String,
+    status_code: Option<u16>,
 }
 
 impl APIError {
     pub fn new(message: String) -> Self {
-        Self { message }
+        Self {
+            message,
+            status_code: None,
+        }
+    }
+
+    pub fn with_status(status_code: u16, error_text: impl Into<String>) -> Self {
+        let error_text = error_text.into();
+        Self {
+            message: format!("HTTP error {}: {}", status_code, error_text),
+            status_code: Some(status_code),
+        }
+    }
+
+    pub fn status_code(&self) -> Option<u16> {
+        self.status_code
     }
 }
 

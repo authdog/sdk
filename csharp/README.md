@@ -105,8 +105,12 @@ public AuthdogClient(string baseUrl, string? apiKey = null, HttpClient? httpClie
 ```
 
 - `baseUrl`: The base URL of the Authdog API
-- `apiKey`: Optional API key for authentication
+- `apiKey`: Optional management Bearer credential (userinfo still uses the access token)
 - `httpClient`: Optional custom HttpClient instance
+
+`Health`/`HealthAsync` plus `Organizations`, `Tenants`, `Projects`,
+`Environments`, `Users`, and `Groups` wrap Wave 1 of the public API.
+See `specs/004-api-parity/`.
 
 #### Methods
 

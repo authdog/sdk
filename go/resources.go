@@ -1,0 +1,321 @@
+package authdog
+
+import (
+	"context"
+	"net/http"
+	"net/url"
+	"strconv"
+)
+
+func queryIf(key, value string) url.Values {
+	q := url.Values{}
+	if value != "" {
+		q.Set(key, value)
+	}
+	return q
+}
+
+func optionalIntQuery(q url.Values, key string, value *int) {
+	if value != nil {
+		q.Set(key, strconv.Itoa(*value))
+	}
+}
+
+// UsersListOptions are optional query parameters for Users.List.
+type UsersListOptions struct {
+	Offset      *int
+	Limit       *int
+	SearchQuery string
+}
+
+// UsersSearchOptions are optional query parameters for Users.Search.
+type UsersSearchOptions struct {
+	Q      string
+	Offset *int
+	Limit  *int
+}
+
+// OrganizationsService is the organizations management namespace.
+type OrganizationsService struct {
+	client *Client
+}
+
+func (s *OrganizationsService) List(ctx context.Context) (*OrganizationsList, error) {
+	var out OrganizationsList
+	if err := s.client.requestJSON(ctx, http.MethodGet, "/v1/organizations", nil, nil, &out); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (s *OrganizationsService) Create(ctx context.Context, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/organizations", body, nil)
+}
+
+func (s *OrganizationsService) Get(ctx context.Context, organizationID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/organizations/"+organizationID, nil, nil)
+}
+
+func (s *OrganizationsService) Update(ctx context.Context, organizationID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPatch, "/v1/organizations/"+organizationID, body, nil)
+}
+
+func (s *OrganizationsService) Delete(ctx context.Context, organizationID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, "/v1/organizations/"+organizationID, nil, nil)
+}
+
+func (s *OrganizationsService) AcceptInvitation(ctx context.Context, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/organizations/invitations/accept", body, nil)
+}
+
+func (s *OrganizationsService) Join(ctx context.Context, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/organizations/join", body, nil)
+}
+
+func (s *OrganizationsService) ListInvitations(ctx context.Context, organizationID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/organizations/"+organizationID+"/invitations", nil, nil)
+}
+
+func (s *OrganizationsService) CreateInvitation(ctx context.Context, organizationID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/organizations/"+organizationID+"/invitations", body, nil)
+}
+
+func (s *OrganizationsService) CancelInvitation(ctx context.Context, organizationID, invitationID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/organizations/"+organizationID+"/invitations/"+invitationID+"/cancel", nil, nil)
+}
+
+func (s *OrganizationsService) SendInvite(ctx context.Context, organizationID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/organizations/"+organizationID+"/invites", body, nil)
+}
+
+func (s *OrganizationsService) ListMembers(ctx context.Context, organizationID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/organizations/"+organizationID+"/members", nil, nil)
+}
+
+func (s *OrganizationsService) RemoveMember(ctx context.Context, organizationID, memberID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, "/v1/organizations/"+organizationID+"/members/"+memberID, nil, nil)
+}
+
+func (s *OrganizationsService) SetMemberActive(ctx context.Context, organizationID, memberID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPatch, "/v1/organizations/"+organizationID+"/members/"+memberID+"/active", body, nil)
+}
+
+func (s *OrganizationsService) LinkTenant(ctx context.Context, organizationID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/organizations/"+organizationID+"/tenants", body, nil)
+}
+
+func (s *OrganizationsService) UnlinkTenant(ctx context.Context, organizationID, tenantID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, "/v1/organizations/"+organizationID+"/tenants/"+tenantID, nil, nil)
+}
+
+// TenantsService is the tenants management namespace.
+type TenantsService struct {
+	client *Client
+}
+
+func (s *TenantsService) List(ctx context.Context, organizationID string) (*TenantsList, error) {
+	var out TenantsList
+	if err := s.client.requestJSON(ctx, http.MethodGet, "/v1/tenants", nil, queryIf("organization_id", organizationID), &out); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (s *TenantsService) Create(ctx context.Context, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/tenants", body, nil)
+}
+
+func (s *TenantsService) Join(ctx context.Context, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/tenants/join", body, nil)
+}
+
+func (s *TenantsService) Get(ctx context.Context, tenantID, organizationID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/tenants/"+tenantID, nil, queryIf("organization_id", organizationID))
+}
+
+func (s *TenantsService) Update(ctx context.Context, tenantID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPatch, "/v1/tenants/"+tenantID, body, nil)
+}
+
+func (s *TenantsService) Delete(ctx context.Context, tenantID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, "/v1/tenants/"+tenantID, nil, nil)
+}
+
+func (s *TenantsService) ListDomains(ctx context.Context, tenantID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/tenants/"+tenantID+"/domains", nil, nil)
+}
+
+func (s *TenantsService) CreateDomain(ctx context.Context, tenantID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/tenants/"+tenantID+"/domains", body, nil)
+}
+
+func (s *TenantsService) DeleteDomain(ctx context.Context, tenantID, domainID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, "/v1/tenants/"+tenantID+"/domains/"+domainID, nil, nil)
+}
+
+func (s *TenantsService) RetryDomain(ctx context.Context, tenantID, domainID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/tenants/"+tenantID+"/domains/"+domainID+"/retry", nil, nil)
+}
+
+func (s *TenantsService) SendInvite(ctx context.Context, tenantID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/tenants/"+tenantID+"/invites", body, nil)
+}
+
+func (s *TenantsService) ListProjects(ctx context.Context, tenantID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/tenants/"+tenantID+"/projects", nil, nil)
+}
+
+func (s *TenantsService) ListSeats(ctx context.Context, tenantID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/tenants/"+tenantID+"/seats", nil, nil)
+}
+
+func (s *TenantsService) UpdateSeat(ctx context.Context, tenantID, seatID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPatch, "/v1/tenants/"+tenantID+"/seats/"+seatID, body, nil)
+}
+
+func (s *TenantsService) DeleteSeat(ctx context.Context, tenantID, seatID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, "/v1/tenants/"+tenantID+"/seats/"+seatID, nil, nil)
+}
+
+// ProjectsService is the projects (applications) namespace.
+type ProjectsService struct {
+	client *Client
+}
+
+func (s *ProjectsService) Save(ctx context.Context, tenantID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/tenants/"+tenantID+"/applications", body, nil)
+}
+
+func (s *ProjectsService) Get(ctx context.Context, tenantID, applicationID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/tenants/"+tenantID+"/applications/"+applicationID, nil, nil)
+}
+
+func (s *ProjectsService) Delete(ctx context.Context, tenantID, applicationID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, "/v1/tenants/"+tenantID+"/applications/"+applicationID, nil, nil)
+}
+
+func (s *ProjectsService) SetDefaultEnvironment(ctx context.Context, tenantID, applicationID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPut, "/v1/tenants/"+tenantID+"/applications/"+applicationID+"/default-environment", body, nil)
+}
+
+// EnvironmentsService is the environment lifecycle namespace.
+type EnvironmentsService struct {
+	client *Client
+}
+
+func (s *EnvironmentsService) List(ctx context.Context, tenantID, applicationID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/tenants/"+tenantID+"/applications/"+applicationID+"/environments", nil, nil)
+}
+
+func (s *EnvironmentsService) Create(ctx context.Context, tenantID, applicationID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/tenants/"+tenantID+"/applications/"+applicationID+"/environments", body, nil)
+}
+
+func (s *EnvironmentsService) Update(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPatch, "/v1/tenants/"+tenantID+"/environments/"+environmentID, body, nil)
+}
+
+func (s *EnvironmentsService) Delete(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, "/v1/tenants/"+tenantID+"/environments/"+environmentID, nil, nil)
+}
+
+// UsersService is the directory users namespace.
+type UsersService struct {
+	client *Client
+}
+
+func (s *UsersService) List(ctx context.Context, tenantID, environmentID string, opts *UsersListOptions) (*EnvUsersResponse, error) {
+	q := url.Values{}
+	if opts != nil {
+		optionalIntQuery(q, "offset", opts.Offset)
+		optionalIntQuery(q, "limit", opts.Limit)
+		if opts.SearchQuery != "" {
+			q.Set("searchQuery", opts.SearchQuery)
+		}
+	}
+	var out EnvUsersResponse
+	path := "/v1/tenants/" + tenantID + "/environments/" + environmentID + "/users"
+	if err := s.client.requestJSON(ctx, http.MethodGet, path, nil, q, &out); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (s *UsersService) Create(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/tenants/"+tenantID+"/environments/"+environmentID+"/users", body, nil)
+}
+
+func (s *UsersService) Search(ctx context.Context, tenantID, environmentID string, opts *UsersSearchOptions) (*EnvUsersResponse, error) {
+	q := url.Values{}
+	if opts != nil {
+		if opts.Q != "" {
+			q.Set("q", opts.Q)
+		}
+		optionalIntQuery(q, "offset", opts.Offset)
+		optionalIntQuery(q, "limit", opts.Limit)
+	}
+	var out EnvUsersResponse
+	path := "/v1/tenants/" + tenantID + "/environments/" + environmentID + "/users/search"
+	if err := s.client.requestJSON(ctx, http.MethodGet, path, nil, q, &out); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (s *UsersService) Count(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/tenants/"+tenantID+"/environments/"+environmentID+"/users/count", nil, nil)
+}
+
+func (s *UsersService) Get(ctx context.Context, tenantID, environmentID, userID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/tenants/"+tenantID+"/environments/"+environmentID+"/users/"+userID, nil, nil)
+}
+
+func (s *UsersService) Update(ctx context.Context, tenantID, environmentID, userID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPut, "/v1/tenants/"+tenantID+"/environments/"+environmentID+"/users/"+userID, body, nil)
+}
+
+func (s *UsersService) Delete(ctx context.Context, tenantID, environmentID, userID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, "/v1/tenants/"+tenantID+"/environments/"+environmentID+"/users/"+userID, nil, nil)
+}
+
+func (s *UsersService) SetActive(ctx context.Context, tenantID, environmentID, userID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPatch, "/v1/tenants/"+tenantID+"/environments/"+environmentID+"/users/"+userID+"/active", body, nil)
+}
+
+func (s *UsersService) ListGroups(ctx context.Context, tenantID, environmentID, userID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/tenants/"+tenantID+"/environments/"+environmentID+"/users/"+userID+"/groups", nil, nil)
+}
+
+// GroupsService is the directory groups namespace.
+type GroupsService struct {
+	client *Client
+}
+
+func (s *GroupsService) Create(ctx context.Context, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/groups", body, nil)
+}
+
+func (s *GroupsService) List(ctx context.Context, tenantID, environmentID string) (*EnvGroupsResponse, error) {
+	var out EnvGroupsResponse
+	path := "/v1/tenants/" + tenantID + "/environments/" + environmentID + "/groups"
+	if err := s.client.requestJSON(ctx, http.MethodGet, path, nil, nil, &out); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (s *GroupsService) Delete(ctx context.Context, tenantID, environmentID, groupID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, "/v1/tenants/"+tenantID+"/environments/"+environmentID+"/groups/"+groupID, nil, nil)
+}
+
+func (s *GroupsService) ListMembers(ctx context.Context, tenantID, environmentID, groupID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/tenants/"+tenantID+"/environments/"+environmentID+"/groups/"+groupID+"/members", nil, nil)
+}
+
+func (s *GroupsService) AddMember(ctx context.Context, tenantID, environmentID, groupID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/tenants/"+tenantID+"/environments/"+environmentID+"/groups/"+groupID+"/members", body, nil)
+}
+
+func (s *GroupsService) RemoveMember(ctx context.Context, tenantID, environmentID, groupID, userID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, "/v1/tenants/"+tenantID+"/environments/"+environmentID+"/groups/"+groupID+"/members/"+userID, nil, nil)
+}

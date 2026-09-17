@@ -13,4 +13,7 @@ class AuthenticationError(AuthdogError):
 
 class APIError(AuthdogError):
     """Raised when API requests fail."""
-    pass
+
+    def __init__(self, message: str, status_code=None):
+        super().__init__(message)
+        self.status_code = status_code

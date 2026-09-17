@@ -22,8 +22,11 @@ export class AuthenticationError extends AuthdogError {
  * Raised when API requests fail
  */
 export class APIError extends AuthdogError {
-  constructor(message: string) {
+  statusCode?: number;
+
+  constructor(message: string, statusCode?: number) {
     super(message);
     this.name = 'APIError';
+    this.statusCode = statusCode;
   }
 }

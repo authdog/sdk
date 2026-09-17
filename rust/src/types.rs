@@ -112,3 +112,136 @@ pub struct Verification {
 pub struct ErrorResponse {
     pub error: String,
 }
+
+/// Liveness probe from `GET /v1/health`
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[serde(default)]
+pub struct Probe {
+    pub ok: bool,
+}
+
+/// Organization entity
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Organization {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub billing_email: Option<String>,
+    pub logo_uri: Option<String>,
+    pub active: bool,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+/// List envelope for organizations
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[serde(default)]
+pub struct OrganizationsList {
+    pub organizations: Vec<Organization>,
+    pub total: i64,
+}
+
+/// Tenant entity
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Tenant {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub company: Option<String>,
+    pub active: bool,
+    pub created_at: String,
+    pub updated_at: String,
+    pub organization_ids: Vec<String>,
+}
+
+/// List envelope for tenants
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[serde(default)]
+pub struct TenantsList {
+    pub tenants: Vec<Tenant>,
+    pub total: i64,
+}
+
+/// Email on a directory user
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[serde(default)]
+pub struct EnvUserEmail {
+    pub id: String,
+    pub value: String,
+    #[serde(rename = "type")]
+    pub email_type: Option<String>,
+}
+
+/// Directory user (distinct from user-info `User`)
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[serde(default, rename_all = "camelCase")]
+pub struct EnvUser {
+    pub id: String,
+    pub environment_id: Option<String>,
+    pub external_id: Option<String>,
+    pub user_name: Option<String>,
+    pub display_name: Option<String>,
+    pub nick_name: Option<String>,
+    pub profile_url: Option<String>,
+    pub active: Option<bool>,
+    pub change_pw: Option<bool>,
+    pub provider: Option<String>,
+    pub emails: Vec<EnvUserEmail>,
+    pub last_login: Option<String>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
+}
+
+/// List envelope for directory users
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[serde(default)]
+pub struct EnvUsersResponse {
+    pub users: Vec<EnvUser>,
+}
+
+/// Directory group
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[serde(default, rename_all = "camelCase")]
+pub struct EnvGroup {
+    pub id: String,
+    pub environment_id: String,
+    pub name: String,
+    pub slug: String,
+    pub description: Option<String>,
+    pub member_count: i64,
+    pub joined_at: Option<String>,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+/// List envelope for directory groups
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[serde(default)]
+pub struct EnvGroupsResponse {
+    pub groups: Vec<EnvGroup>,
+}
+
+/// Environment entity
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Environment {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub weight: Option<f64>,
+    pub is_live: Option<bool>,
+    pub is_default: Option<bool>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
+}
+
+/// Project (application) entity
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[serde(default)]
+pub struct Project {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+}

@@ -54,8 +54,25 @@ with AuthdogClient("https://api.authdog.com") as client:
 Initialize the Authdog client.
 
 - `base_url`: The base URL of the Authdog API
-- `api_key`: Optional API key stored for future endpoints (userinfo uses the access token)
+- `api_key`: Optional management Bearer credential (userinfo still uses the access token)
 - `timeout`: Request timeout in seconds (default 10)
+
+#### `health() -> Probe`
+
+`GET /v1/health`. Public; works without an API key.
+
+#### Management namespaces
+
+`organizations`, `tenants`, `projects`, `environments`, `users`, and
+`groups` wrap Wave 1 of the public API. Example:
+
+```python
+with AuthdogClient("https://api.authdog.com", api_key="ad_...") as client:
+    orgs = client.organizations.list()
+    users = client.users.list("ten_123", "env_456")
+```
+
+See `specs/004-api-parity/` for the full catalog.
 
 #### `get_userinfo(access_token: str) -> UserInfoResponse`
 

@@ -20,7 +20,8 @@ func (e *AuthenticationError) Error() string {
 
 // APIError represents API request failures
 type APIError struct {
-	Message string
+	Message    string
+	StatusCode int
 }
 
 func (e *APIError) Error() string {

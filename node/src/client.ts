@@ -1,6 +1,14 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { AuthenticationError, APIError } from './exceptions';
-import { UserInfoResponse } from './types';
+import {
+  EnvironmentsResource,
+  GroupsResource,
+  OrganizationsResource,
+  ProjectsResource,
+  TenantsResource,
+  UsersResource,
+} from './resources';
+import { Probe, UserInfoResponse } from './types';
 
 export interface AuthdogClientConfig {
   baseUrl: string;
@@ -11,6 +19,12 @@ export interface AuthdogClientConfig {
 export class AuthdogClient {
   private client: AxiosInstance;
   private config: AuthdogClientConfig;
+  readonly organizations: OrganizationsResource;
+  readonly tenants: TenantsResource;
+  readonly projects: ProjectsResource;
+  readonly environments: EnvironmentsResource;
+  readonly users: UsersResource;
+  readonly groups: GroupsResource;
 
   constructor(config: AuthdogClientConfig) {
     this.config = config;
@@ -23,6 +37,42 @@ export class AuthdogClient {
         ...(config.apiKey && { 'Authorization': `Bearer ${config.apiKey}` }),
       },
     });
+    this.organizations = new OrganizationsResource(this);
+    this.tenants = new TenantsResource(this);
+    this.projects = new ProjectsResource(this);
+    this.environments = new EnvironmentsResource(this);
+    this.users = new UsersResource(this);
+    this.groups = new GroupsResource(this);
+  }
+
+  async request<T = Record<string, unknown>>(
+    method: string,
+    path: string,
+    options: Pick<AxiosRequestConfig, 'data' | 'params' | 'headers'> = {}
+  ): Promise<T> {
+    try {
+      const response = await this.client.request<T>({
+        method,
+        url: path,
+        ...options,
+      });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new AuthenticationError('Unauthorized - invalid or expired token');
+        }
+        const status = error.response?.status;
+        const payload = error.response?.data as { error?: string } | undefined;
+        const detail = payload?.error || error.response?.data || error.message;
+        throw new APIError(`HTTP error ${status}: ${detail}`, status);
+      }
+      throw new APIError(`Request failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async health(): Promise<Probe> {
+    return this.request<Probe>('GET', '/v1/health');
   }
 
   /**

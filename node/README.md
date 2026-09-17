@@ -74,10 +74,24 @@ new AuthdogClient(config: AuthdogClientConfig)
 
 **Config Options:**
 - `baseUrl` (string): The base URL of the Authdog API
-- `apiKey` (string, optional): API key for authentication
+- `apiKey` (string, optional): Management Bearer credential (userinfo still uses the access token)
 - `timeout` (number, optional): Request timeout in milliseconds (default: 10000)
 
 #### Methods
+
+##### `health(): Promise<Probe>`
+
+`GET /v1/health`. Public; works without an API key.
+
+##### Management namespaces
+
+`organizations`, `tenants`, `projects`, `environments`, `users`, and
+`groups` wrap Wave 1 of the public API (`specs/004-api-parity/`).
+
+```typescript
+const orgs = await client.organizations.list();
+const users = await client.users.list('ten_123', 'env_456');
+```
 
 ##### `getUserInfo(accessToken: string): Promise<UserInfoResponse>`
 

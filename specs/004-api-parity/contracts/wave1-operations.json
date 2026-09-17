@@ -1,0 +1,1430 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Authdog API \u2014 Wave 1 (SDK parity)",
+    "version": "1.0.0",
+    "description": "Subset of the public catalog required by specs/004-api-parity Wave 1."
+  },
+  "servers": [
+    {
+      "url": "https://api.authdog.com",
+      "description": "Public Authdog API"
+    }
+  ],
+  "paths": {
+    "/v1/groups": {
+      "post": {
+        "operationId": "envGroupCreate",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "Create a group",
+        "parameters": [],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "operationId": "healthCheck",
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health check",
+        "parameters": [],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "500"
+        ]
+      }
+    },
+    "/v1/organizations": {
+      "get": {
+        "operationId": "organizationsList",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "List organizations",
+        "parameters": [],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      },
+      "post": {
+        "operationId": "organizationCreate",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Create organization",
+        "parameters": [],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/organizations/invitations/accept": {
+      "post": {
+        "operationId": "organizationInvitationAccept",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Accept an organization invitation",
+        "parameters": [],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/organizations/join": {
+      "post": {
+        "operationId": "joinOrganizationWithCode",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Join organization",
+        "parameters": [],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/organizations/{id}": {
+      "get": {
+        "operationId": "organizationGet",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Get organization",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "401",
+          "404",
+          "500"
+        ]
+      },
+      "patch": {
+        "operationId": "organizationUpdate",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Update organization",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      },
+      "delete": {
+        "operationId": "organizationDelete",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Delete organization",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/organizations/{id}/invitations": {
+      "get": {
+        "operationId": "organizationInvitations",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "List organization invitations",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      },
+      "post": {
+        "operationId": "organizationInvitationCreate",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Create an organization invitation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/organizations/{id}/invitations/{invitationId}/cancel": {
+      "post": {
+        "operationId": "organizationInvitationCancel",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Cancel an organization invitation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "invitationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/organizations/{id}/invites": {
+      "post": {
+        "operationId": "sendOrganizationInvite",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Send organization invite",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/organizations/{id}/members": {
+      "get": {
+        "operationId": "organizationMembers",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "List organization members",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/organizations/{id}/members/{memberId}": {
+      "delete": {
+        "operationId": "organizationMemberRemove",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Remove an organization member",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/organizations/{id}/members/{memberId}/active": {
+      "patch": {
+        "operationId": "organizationMemberSetActive",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Enable or disable an organization member",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/organizations/{id}/tenants": {
+      "post": {
+        "operationId": "organizationTenantLink",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Link a tenant to the organization",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/organizations/{id}/tenants/{tenantId}": {
+      "delete": {
+        "operationId": "organizationTenantUnlink",
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Unlink a tenant from the organization",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants": {
+      "get": {
+        "operationId": "tenantsList",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "List tenants",
+        "parameters": [
+          {
+            "name": "organization_id",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      },
+      "post": {
+        "operationId": "tenantCreate",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "Create tenant",
+        "parameters": [],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/join": {
+      "post": {
+        "operationId": "tenantJoinWithCode",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "Join a tenant with an invitation code",
+        "parameters": [],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{id}": {
+      "get": {
+        "operationId": "tenantGet",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "Get tenant",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "organization_id",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "401",
+          "404",
+          "500"
+        ]
+      },
+      "patch": {
+        "operationId": "tenantUpdate",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "Update tenant",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      },
+      "delete": {
+        "operationId": "tenantDelete",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "Delete tenant",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{id}/domains": {
+      "get": {
+        "operationId": "tenantDomains",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "List tenant domains",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      },
+      "post": {
+        "operationId": "tenantDomainCreate",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "Create tenant domain",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{id}/domains/{domainId}": {
+      "delete": {
+        "operationId": "tenantDomainDelete",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "Delete tenant domain",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "domainId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{id}/domains/{domainId}/retry": {
+      "post": {
+        "operationId": "tenantDomainRetryVerification",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "Retry tenant domain verification",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "domainId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{id}/invites": {
+      "post": {
+        "operationId": "tenantInviteSend",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "Invite a user to the tenant",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{id}/projects": {
+      "get": {
+        "operationId": "tenantProjects",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "List tenant projects",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{id}/seats": {
+      "get": {
+        "operationId": "tenantSeatsList",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "List tenant seats",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{id}/seats/{seatId}": {
+      "patch": {
+        "operationId": "tenantSeatUpdate",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "Update a tenant seat",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "seatId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      },
+      "delete": {
+        "operationId": "tenantSeatDelete",
+        "tags": [
+          "Tenants"
+        ],
+        "summary": "Delete a tenant seat",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "seatId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/applications": {
+      "post": {
+        "operationId": "applicationSave",
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Create or update a project (application)",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/applications/{applicationId}": {
+      "get": {
+        "operationId": "projectDetails",
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Get a project (application) with its environments",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      },
+      "delete": {
+        "operationId": "applicationDelete",
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Delete a project (application)",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/applications/{applicationId}/default-environment": {
+      "put": {
+        "operationId": "applicationSetDefaultEnvironment",
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Set a project's default environment",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/applications/{applicationId}/environments": {
+      "get": {
+        "operationId": "applicationEnvironmentsList",
+        "tags": [
+          "Environments"
+        ],
+        "summary": "List environments for a project",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      },
+      "post": {
+        "operationId": "environmentCreate",
+        "tags": [
+          "Environments"
+        ],
+        "summary": "Create environment",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/environments/{environmentId}": {
+      "patch": {
+        "operationId": "environmentUpdate",
+        "tags": [
+          "Environments"
+        ],
+        "summary": "Update environment",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      },
+      "delete": {
+        "operationId": "environmentDelete",
+        "tags": [
+          "Environments"
+        ],
+        "summary": "Delete environment",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/environments/{environmentId}/groups": {
+      "get": {
+        "operationId": "envGroupsList",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "List groups",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/environments/{environmentId}/groups/{groupId}": {
+      "delete": {
+        "operationId": "envGroupDelete",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "Delete a group",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/environments/{environmentId}/groups/{groupId}/members": {
+      "get": {
+        "operationId": "groupMembersList",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "List members of a group",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      },
+      "post": {
+        "operationId": "groupMemberAdd",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "Add a user to a group",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/environments/{environmentId}/groups/{groupId}/members/{userId}": {
+      "delete": {
+        "operationId": "groupMemberRemove",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "Remove a user from a group",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/environments/{environmentId}/users": {
+      "get": {
+        "operationId": "envUsersList",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "List users in an environment",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "searchQuery",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      },
+      "post": {
+        "operationId": "envUserCreate",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "Create a user",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/environments/{environmentId}/users/count": {
+      "get": {
+        "operationId": "envUsersCount",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "Count users in an environment",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/environments/{environmentId}/users/search": {
+      "get": {
+        "operationId": "envUsersSearch",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "Search users in an environment",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/environments/{environmentId}/users/{userId}": {
+      "get": {
+        "operationId": "envUserGet",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "Get a user",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      },
+      "put": {
+        "operationId": "envUserUpdate",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "Update a user's profile",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      },
+      "delete": {
+        "operationId": "envUserDelete",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "Delete a user from the environment",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/environments/{environmentId}/users/{userId}/active": {
+      "patch": {
+        "operationId": "envUserSetActive",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "Enable or disable a user",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": true,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/tenants/{tenantId}/environments/{environmentId}/users/{userId}/groups": {
+      "get": {
+        "operationId": "userGroupsList",
+        "tags": [
+          "Directory"
+        ],
+        "summary": "List groups a user belongs to",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "400",
+          "401",
+          "500"
+        ]
+      }
+    },
+    "/v1/userinfo": {
+      "get": {
+        "operationId": "getUserInfo",
+        "tags": [
+          "User info"
+        ],
+        "summary": "User info",
+        "parameters": [],
+        "requestBody": false,
+        "responses": [
+          "200",
+          "401",
+          "404",
+          "500",
+          "502"
+        ]
+      }
+    }
+  }
+}

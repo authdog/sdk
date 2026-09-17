@@ -100,8 +100,12 @@ Creates a new Authdog client.
 
 **Config Options:**
 - `base_url` (String): The base URL of the Authdog API
-- `api_key` (Option<String>): Optional API key for authentication
+- `api_key` (Option<String>): Optional management Bearer credential (userinfo still uses the access token)
 - `timeout` (Option<Duration>): Request timeout (default: 10 seconds)
+
+`health()`, `organizations()`, `tenants()`, `projects()`, `environments()`,
+`users()`, and `groups()` wrap Wave 1 of the public API. See
+`specs/004-api-parity/`.
 
 #### Methods
 

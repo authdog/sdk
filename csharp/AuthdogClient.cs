@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Authdog.Exceptions;
 using Authdog.Types;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Authdog
 {
@@ -23,15 +27,27 @@ namespace Authdog
         public TimeSpan Timeout { get; }
 
         /// <summary>
-        /// Optional API key retained for future endpoints. Userinfo uses the access token.
+        /// Optional management Bearer credential. Userinfo still uses the access-token argument.
         /// </summary>
         public string? ApiKey => _apiKey;
+
+        public OrganizationsResource Organizations { get; }
+
+        public TenantsResource Tenants { get; }
+
+        public ProjectsResource Projects { get; }
+
+        public EnvironmentsResource Environments { get; }
+
+        public UsersResource Users { get; }
+
+        public GroupsResource Groups { get; }
 
         /// <summary>
         /// Initialize the Authdog client
         /// </summary>
         /// <param name="baseUrl">The base URL of the Authdog API</param>
-        /// <param name="apiKey">Optional API key stored for future endpoints; unused on userinfo</param>
+        /// <param name="apiKey">Optional management Bearer credential; unused on userinfo</param>
         /// <param name="httpClient">Optional custom HttpClient instance</param>
         /// <param name="timeout">Timeout for an owned HttpClient (default 10 seconds)</param>
         public AuthdogClient(string baseUrl, string? apiKey = null, HttpClient? httpClient = null, TimeSpan? timeout = null)
@@ -45,6 +61,173 @@ namespace Authdog
             {
                 _httpClient.DefaultRequestHeaders.Add("User-Agent", "authdog-csharp-sdk/0.1.0");
             }
+
+            Organizations = new OrganizationsResource(this);
+            Tenants = new TenantsResource(this);
+            Projects = new ProjectsResource(this);
+            Environments = new EnvironmentsResource(this);
+            Users = new UsersResource(this);
+            Groups = new GroupsResource(this);
+        }
+
+        /// <summary>
+        /// Build a query map, dropping null values.
+        /// </summary>
+        internal static IDictionary<string, string?>? Params(params (string Key, object? Value)[] pairs)
+        {
+            var query = new Dictionary<string, string?>();
+            foreach (var (key, value) in pairs)
+            {
+                if (value is null)
+                {
+                    continue;
+                }
+
+                query[key] = Convert.ToString(value, CultureInfo.InvariantCulture);
+            }
+
+            return query.Count == 0 ? null : query;
+        }
+
+        /// <summary>
+        /// Send a JSON management request. Constructor apiKey is sent as Bearer unless
+        /// <paramref name="accessToken"/> is provided. Does not set DefaultRequestHeaders.
+        /// </summary>
+        public async Task<T> RequestAsync<T>(
+            HttpMethod method,
+            string path,
+            object? body = null,
+            IDictionary<string, string?>? query = null,
+            string? accessToken = null)
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(AuthdogClient));
+
+            var request = new HttpRequestMessage(method, BuildRequestUri(path, query));
+            var token = accessToken ?? _apiKey;
+            if (token != null)
+            {
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
+
+            if (body != null)
+            {
+                var json = JsonConvert.SerializeObject(body);
+                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            }
+
+            try
+            {
+                var response = await _httpClient.SendAsync(request);
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    throw new AuthenticationException("Unauthorized - invalid or expired token");
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorText = content;
+                    try
+                    {
+                        var payload = JsonConvert.DeserializeObject<JObject>(content);
+                        var error = payload?["error"];
+                        if (error != null && error.Type != JTokenType.Null)
+                        {
+                            errorText = error.Type == JTokenType.String ? error.ToString() : error.ToString();
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                    }
+
+                    throw new ApiException($"HTTP error {(int)response.StatusCode}: {errorText}", (int)response.StatusCode);
+                }
+
+                if (string.IsNullOrWhiteSpace(content))
+                {
+                    if (typeof(T) == typeof(JObject))
+                    {
+                        return (T)(object)new JObject();
+                    }
+
+                    return JsonConvert.DeserializeObject<T>("{}")
+                        ?? throw new ApiException("Failed to parse response: invalid JSON");
+                }
+
+                try
+                {
+                    return JsonConvert.DeserializeObject<T>(content)
+                        ?? throw new ApiException("Failed to parse response: invalid JSON");
+                }
+                catch (JsonException ex)
+                {
+                    throw new ApiException("Failed to parse response: invalid JSON", ex);
+                }
+            }
+            catch (AuthenticationException)
+            {
+                throw;
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ApiException($"Request failed: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Synchronous version of RequestAsync
+        /// </summary>
+        public T Request<T>(
+            HttpMethod method,
+            string path,
+            object? body = null,
+            IDictionary<string, string?>? query = null,
+            string? accessToken = null)
+        {
+            return RequestAsync<T>(method, path, body, query, accessToken).GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// Liveness probe. Public; works without a management credential.
+        /// </summary>
+        public Task<Probe> HealthAsync() => RequestAsync<Probe>(HttpMethod.Get, "/v1/health");
+
+        /// <summary>
+        /// Synchronous version of HealthAsync
+        /// </summary>
+        public Probe Health() => HealthAsync().GetAwaiter().GetResult();
+
+        private string BuildRequestUri(string path, IDictionary<string, string?>? query)
+        {
+            if (!path.StartsWith("/"))
+            {
+                path = "/" + path;
+            }
+
+            var url = $"{_baseUrl}{path}";
+            if (query == null || query.Count == 0)
+            {
+                return url;
+            }
+
+            var parts = new List<string>();
+            foreach (var pair in query)
+            {
+                if (pair.Value == null)
+                {
+                    continue;
+                }
+
+                parts.Add($"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value)}");
+            }
+
+            return parts.Count == 0 ? url : $"{url}?{string.Join("&", parts)}";
         }
 
         /// <summary>

@@ -84,3 +84,111 @@ type Verification struct {
 type ErrorResponse struct {
 	Error string `json:"error"`
 }
+
+// Probe is the liveness response from GET /v1/health
+type Probe struct {
+	OK bool `json:"ok"`
+}
+
+// Organization is a management organization entity
+type Organization struct {
+	ID           string  `json:"id"`
+	Name         string  `json:"name"`
+	Description  *string `json:"description"`
+	BillingEmail *string `json:"billingEmail"`
+	LogoURI      *string `json:"logoUri"`
+	Active       bool    `json:"active"`
+	CreatedAt    string  `json:"createdAt"`
+	UpdatedAt    string  `json:"updatedAt"`
+}
+
+// OrganizationsList is the list envelope for organizations
+type OrganizationsList struct {
+	Organizations []Organization `json:"organizations"`
+	Total         int            `json:"total"`
+}
+
+// Tenant is a management tenant entity
+type Tenant struct {
+	ID              string   `json:"id"`
+	Name            string   `json:"name"`
+	Description     *string  `json:"description"`
+	Company         *string  `json:"company"`
+	Active          bool     `json:"active"`
+	CreatedAt       string   `json:"createdAt"`
+	UpdatedAt       string   `json:"updatedAt"`
+	OrganizationIDs []string `json:"organizationIds"`
+}
+
+// TenantsList is the list envelope for tenants
+type TenantsList struct {
+	Tenants []Tenant `json:"tenants"`
+	Total   int      `json:"total"`
+}
+
+// EnvUserEmail is an email on a directory user
+type EnvUserEmail struct {
+	ID    string  `json:"id"`
+	Value string  `json:"value"`
+	Type  *string `json:"type"`
+}
+
+// EnvUser is a directory user (distinct from user-info User)
+type EnvUser struct {
+	ID            string         `json:"id"`
+	EnvironmentID *string        `json:"environmentId"`
+	ExternalID    *string        `json:"externalId"`
+	UserName      *string        `json:"userName"`
+	DisplayName   *string        `json:"displayName"`
+	NickName      *string        `json:"nickName"`
+	ProfileURL    *string        `json:"profileUrl"`
+	Active        *bool          `json:"active"`
+	ChangePW      *bool          `json:"changePw"`
+	Provider      *string        `json:"provider"`
+	Emails        []EnvUserEmail `json:"emails"`
+	LastLogin     *string        `json:"lastLogin"`
+	CreatedAt     *string        `json:"createdAt"`
+	UpdatedAt     *string        `json:"updatedAt"`
+}
+
+// EnvUsersResponse is the list envelope for directory users
+type EnvUsersResponse struct {
+	Users []EnvUser `json:"users"`
+}
+
+// EnvGroup is a directory group
+type EnvGroup struct {
+	ID            string  `json:"id"`
+	EnvironmentID string  `json:"environmentId"`
+	Name          string  `json:"name"`
+	Slug          string  `json:"slug"`
+	Description   *string `json:"description"`
+	MemberCount   int     `json:"memberCount"`
+	JoinedAt      *string `json:"joinedAt"`
+	CreatedAt     string  `json:"createdAt"`
+	UpdatedAt     string  `json:"updatedAt"`
+}
+
+// EnvGroupsResponse is the list envelope for directory groups
+type EnvGroupsResponse struct {
+	Groups []EnvGroup `json:"groups"`
+}
+
+// Environment is a project environment entity
+type Environment struct {
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Description *string  `json:"description"`
+	Weight      *float64 `json:"weight"`
+	IsLive      *bool    `json:"isLive"`
+	IsDefault   *bool    `json:"isDefault"`
+	CreatedAt   *string  `json:"createdAt"`
+	UpdatedAt   *string  `json:"updatedAt"`
+}
+
+// Project is a project (application) entity
+type Project struct {
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Description *string `json:"description"`
+}
