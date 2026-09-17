@@ -95,15 +95,15 @@ Get user information using an access token.
 
 ```bash
 # Install development dependencies
-pip install -e ".[dev]"
+uv sync
 
 # Run tests
-pytest
+uv run pytest
 
 # Format code
-black authdog/
-isort authdog/
+uv run black authdog/
+uv run isort authdog/
 
 # Type checking
-mypy authdog/
+uv run mypy authdog/
 ```

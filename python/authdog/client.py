@@ -68,7 +68,7 @@ class AuthdogClient:
         """Get default headers for API requests."""
         headers = {
             "Content-Type": "application/json",
-            "User-Agent": "authdog-python-sdk/0.1.0",
+            "User-Agent": "authdog-python-sdk/0.1.1",
         }
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"

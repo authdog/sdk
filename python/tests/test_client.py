@@ -39,7 +39,7 @@ class TestAuthdogClient:
         headers = client._get_default_headers()
         
         assert headers["Content-Type"] == "application/json"
-        assert headers["User-Agent"] == "authdog-python-sdk/0.1.0"
+        assert headers["User-Agent"] == "authdog-python-sdk/0.1.1"
         assert headers["Authorization"] == "Bearer test-api-key"
 
     def test_get_default_headers_without_api_key(self):
@@ -48,7 +48,7 @@ class TestAuthdogClient:
         headers = client._get_default_headers()
         
         assert headers["Content-Type"] == "application/json"
-        assert headers["User-Agent"] == "authdog-python-sdk/0.1.0"
+        assert headers["User-Agent"] == "authdog-python-sdk/0.1.1"
         assert "Authorization" not in headers
 
     @patch('httpx.Client')

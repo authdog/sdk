@@ -6,7 +6,7 @@ Official SDKs for the Authdog authentication and user management platform.
 
 | Package | Version | Description | CI |
 |---------|---------|-------------|-----|
-| [`authdog`](./python/) | [![PyPI](https://img.shields.io/badge/pypi-v0.1.0-orange)](./python/) | Python SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/python-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/python-test.yml) |
+| [`authdog`](./python/) | [![PyPI](https://img.shields.io/badge/pypi-v0.1.1-orange)](./python/) | Python SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/python-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/python-test.yml) |
 | [`@authdog/node-sdk`](./node/) | [![npm](https://img.shields.io/badge/npm-v0.1.0-orange)](./node/) | Node.js / TypeScript SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/node-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/node-test.yml) |
 | [`github.com/authdog/go-sdk`](./go/) | [![Go](https://img.shields.io/badge/go-v0.1.0-00ADD8)](./go/) | Go SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/go-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/go-test.yml) |
 | [`authdog`](./rust/) | [![crates.io](https://img.shields.io/badge/crates.io-v0.1.0-orange)](./rust/) | Rust SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/rust-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/rust-test.yml) |
@@ -88,7 +88,7 @@ moon run :test            # Run tests for all SDKs
 
 | Task | Python | Node | Go | Rust | Java | C# | Zig |
 |------|--------|------|----|------|------|----|-----|
-| `deps` | pip install | pnpm install | go mod download | -- | mvn dependency:resolve | dotnet restore | -- |
+| `deps` | uv sync | pnpm install | go mod download | -- | mvn dependency:resolve | dotnet restore | -- |
 | `test` | pytest | vitest | go test | cargo test | mvn test | dotnet test | zig build test |
 | `lint` | flake8 | eslint | go vet | cargo clippy | checkstyle | dotnet format | zig fmt --check |
 | `build` | python -m build | pnpm build | go build | cargo build | mvn compile | dotnet build | zig build |

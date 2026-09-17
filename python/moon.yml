@@ -6,19 +6,19 @@ fileGroups:
   tests:
     - 'tests/**/*'
   configs:
-    - 'requirements.txt'
-    - 'setup.py'
+    - 'pyproject.toml'
+    - 'uv.lock'
 
 tasks:
   deps:
-    command: 'pip install -r requirements.txt'
+    command: 'uv sync --frozen'
     inputs:
       - '@group(configs)'
     options:
       cache: false
 
   test:
-    command: 'python -m pytest --cov=authdog --cov-report=xml --cov-report=term-missing'
+    command: 'uv run python -m pytest --cov=authdog --cov-report=xml --cov-report=term-missing'
     deps:
       - '~:deps'
     inputs:
@@ -29,14 +29,14 @@ tasks:
       - 'coverage.xml'
 
   lint:
-    command: 'python -m flake8 authdog/ --count --select=E9,F63,F7,F82 --show-source --statistics'
+    command: 'uv run python -m flake8 authdog/ --count --select=E9,F63,F7,F82 --show-source --statistics'
     deps:
       - '~:deps'
     inputs:
       - '@group(sources)'
 
   build:
-    command: 'python -m build'
+    command: 'uv run python -m build'
     deps:
       - '~:deps'
     inputs:
