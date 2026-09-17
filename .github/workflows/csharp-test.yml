@@ -7,17 +7,11 @@ on:
     paths:
       - 'csharp/**'
       - '.github/workflows/csharp-test.yml'
-      - '.moon/workspace.yml'
-      - '.moon/toolchain.yml'
-      - '.prototools'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'csharp/**'
       - '.github/workflows/csharp-test.yml'
-      - '.moon/workspace.yml'
-      - '.moon/toolchain.yml'
-      - '.prototools'
 
 env:
   DOTNET_VERSION: "8.0.x"
@@ -64,6 +58,7 @@ jobs:
 
   build:
     name: Build C# SDK
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
     steps:

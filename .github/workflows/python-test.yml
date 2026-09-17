@@ -17,17 +17,11 @@ on:
     paths:
       - 'python/**'
       - '.github/workflows/python-test.yml'
-      - '.moon/workspace.yml'
-      - '.moon/toolchain.yml'
-      - '.prototools'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'python/**'
       - '.github/workflows/python-test.yml'
-      - '.moon/workspace.yml'
-      - '.moon/toolchain.yml'
-      - '.prototools'
 
 jobs:
   test:
@@ -60,6 +54,7 @@ jobs:
   build:
     name: Build Python SDK
     needs: [test]
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
     steps:

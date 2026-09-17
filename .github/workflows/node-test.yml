@@ -7,17 +7,11 @@ on:
     paths:
       - 'node/**'
       - '.github/workflows/node-test.yml'
-      - '.moon/workspace.yml'
-      - '.moon/toolchain.yml'
-      - '.prototools'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'node/**'
       - '.github/workflows/node-test.yml'
-      - '.moon/workspace.yml'
-      - '.moon/toolchain.yml'
-      - '.prototools'
 
 jobs:
   test:

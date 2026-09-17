@@ -7,17 +7,11 @@ on:
     paths:
       - 'rust/**'
       - '.github/workflows/rust-test.yml'
-      - '.moon/workspace.yml'
-      - '.moon/toolchain.yml'
-      - '.prototools'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'rust/**'
       - '.github/workflows/rust-test.yml'
-      - '.moon/workspace.yml'
-      - '.moon/toolchain.yml'
-      - '.prototools'
 
 env:
   CARGO_TERM_COLOR: always

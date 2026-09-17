@@ -7,17 +7,11 @@ on:
     paths:
       - 'zig/**'
       - '.github/workflows/zig-test.yml'
-      - '.moon/workspace.yml'
-      - '.moon/toolchain.yml'
-      - '.prototools'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'zig/**'
       - '.github/workflows/zig-test.yml'
-      - '.moon/workspace.yml'
-      - '.moon/toolchain.yml'
-      - '.prototools'
 
 jobs:
   test:
