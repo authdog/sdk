@@ -92,7 +92,9 @@ Creates a new Authdog client.
 - `APIKey` (string): Optional management Bearer credential (userinfo still uses the access token)
 
 `Health`, `Organizations`, `Tenants`, `Projects`, `Environments`,
-`Users`, and `Groups` wrap Wave 1 of the public API. See
+`Users`, `Groups`, `Rbac`, `Audit`, `Events`, `Webhooks`,
+`NotificationChannels`, `ServiceAccounts`, `PersonalAccessTokens`,
+and `ApiSecrets` wrap Waves 1–2 of the public API. See
 `specs/004-api-parity/`.
 - `Timeout` (time.Duration): Request timeout (default: 10 seconds)
 - `HTTPClient` (*http.Client): Optional custom HTTP client

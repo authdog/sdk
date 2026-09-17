@@ -109,8 +109,10 @@ public AuthdogClient(string baseUrl, string? apiKey = null, HttpClient? httpClie
 - `httpClient`: Optional custom HttpClient instance
 
 `Health`/`HealthAsync` plus `Organizations`, `Tenants`, `Projects`,
-`Environments`, `Users`, and `Groups` wrap Wave 1 of the public API.
-See `specs/004-api-parity/`.
+`Environments`, `Users`, `Groups`, `Rbac`, `Audit`, `Events`,
+`Webhooks`, `NotificationChannels`, `ServiceAccounts`,
+`PersonalAccessTokens`, and `ApiSecrets` wrap Waves 1–2 of the
+public API. See `specs/004-api-parity/`.
 
 #### Methods
 

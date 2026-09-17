@@ -197,3 +197,95 @@ def test_users_list_parses_empty_and_item(mock_client_class):
         mock_client_class, _json_response({"users": []})
     )
     assert client2.users.list("ten_1", "env_1").users == []
+
+
+WAVE2_CASES = [
+    (lambda c: c.organizations.list_keys("org_1"), "GET", "/v1/organizations/org_1/keys", None),
+    (lambda c: c.organizations.create_key("org_1", {"name": "ci"}), "POST", "/v1/organizations/org_1/keys", {"name": "ci"}),
+    (lambda c: c.organizations.revoke_key("org_1", "key_1"), "POST", "/v1/organizations/org_1/keys/key_1/revoke", None),
+    (lambda c: c.organizations.rotate_key("org_1", "key_1"), "POST", "/v1/organizations/org_1/keys/key_1/rotate", None),
+    (lambda c: c.organizations.update_key_tenants("org_1", "key_1", {"tenantIds": ["ten_1"]}), "PUT", "/v1/organizations/org_1/keys/key_1/tenants", {"tenantIds": ["ten_1"]}),
+    (lambda c: c.organizations.list_audit_logs("org_1"), "GET", "/v1/organizations/org_1/audit/logs", None),
+    (lambda c: c.service_accounts.list(), "GET", "/v1/service-accounts", None),
+    (lambda c: c.service_accounts.create({"name": "bot"}), "POST", "/v1/service-accounts", {"name": "bot"}),
+    (lambda c: c.service_accounts.get("sa_1"), "GET", "/v1/service-accounts/sa_1", None),
+    (lambda c: c.service_accounts.delete("sa_1"), "DELETE", "/v1/service-accounts/sa_1", None),
+    (lambda c: c.personal_access_tokens.list(), "GET", "/v1/personal-access-tokens", None),
+    (lambda c: c.personal_access_tokens.create({"name": "cli"}), "POST", "/v1/personal-access-tokens", {"name": "cli"}),
+    (lambda c: c.personal_access_tokens.revoke("pat_1"), "POST", "/v1/personal-access-tokens/pat_1/revoke", None),
+    (lambda c: c.api_secrets.list("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/api-secrets", None),
+    (lambda c: c.api_secrets.create("ten_1", "env_1", {"name": "runtime"}), "POST", "/v1/tenants/ten_1/environments/env_1/api-secrets", {"name": "runtime"}),
+    (lambda c: c.api_secrets.revoke("ten_1", "env_1", "sec_1"), "POST", "/v1/tenants/ten_1/environments/env_1/api-secrets/sec_1/revoke", None),
+    (lambda c: c.audit.list_logs("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/audit/logs", None),
+    (lambda c: c.audit.event_metadata("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/audit/event-metadata", None),
+    (lambda c: c.audit.event_types("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/audit/event-types", None),
+    (lambda c: c.audit.event_types_catalog("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/audit/event-types/catalog", None),
+    (lambda c: c.events.list("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/events", None),
+    (lambda c: c.events.list_types("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/events/types", None),
+    (lambda c: c.events.ingest("ten_1", "env_1", {"events": []}), "POST", "/v1/tenants/ten_1/environments/env_1/events/ingest", {"events": []}),
+    (lambda c: c.webhooks.list("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/webhooks", None),
+    (lambda c: c.webhooks.create("ten_1", "env_1", {"url": "https://ex"}), "POST", "/v1/tenants/ten_1/environments/env_1/webhooks", {"url": "https://ex"}),
+    (lambda c: c.webhooks.update("ten_1", "env_1", "ch_1", {"url": "https://ex"}), "PUT", "/v1/tenants/ten_1/environments/env_1/webhooks/ch_1", {"url": "https://ex"}),
+    (lambda c: c.webhooks.delete("ten_1", "env_1", "ch_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/webhooks/ch_1", None),
+    (lambda c: c.webhooks.rotate_secret("ten_1", "env_1", "ch_1"), "POST", "/v1/tenants/ten_1/environments/env_1/webhooks/ch_1/rotate-secret", None),
+    (lambda c: c.webhooks.list_deliveries("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/webhooks/deliveries", None),
+    (lambda c: c.webhooks.redeliver("ten_1", "env_1", "del_1"), "POST", "/v1/tenants/ten_1/environments/env_1/webhooks/deliveries/del_1/redeliver", None),
+    (lambda c: c.notification_channels.list("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/notification-channels", None),
+    (lambda c: c.notification_channels.create("ten_1", "env_1", {"type": "webhook"}), "POST", "/v1/tenants/ten_1/environments/env_1/notification-channels", {"type": "webhook"}),
+    (lambda c: c.notification_channels.update("ten_1", "env_1", "ch_1", {"name": "n"}), "PUT", "/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1", {"name": "n"}),
+    (lambda c: c.notification_channels.delete("ten_1", "env_1", "ch_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1", None),
+    (lambda c: c.notification_channels.test("ten_1", "env_1", "ch_1"), "POST", "/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1/test", None),
+    (lambda c: c.rbac.list_roles("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/roles", None),
+    (lambda c: c.rbac.create_role("ten_1", "env_1", {"name": "admin"}), "POST", "/v1/tenants/ten_1/environments/env_1/roles", {"name": "admin"}),
+    (lambda c: c.rbac.delete_role("ten_1", "env_1", "role_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/roles/role_1", None),
+    (lambda c: c.rbac.list_role_permissions("ten_1", "env_1", "role_1"), "GET", "/v1/tenants/ten_1/environments/env_1/roles/role_1/permissions", None),
+    (lambda c: c.rbac.set_role_permissions("ten_1", "env_1", "role_1", {"permissionIds": []}), "PUT", "/v1/tenants/ten_1/environments/env_1/roles/role_1/permissions", {"permissionIds": []}),
+    (lambda c: c.rbac.list_permissions("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/permissions", None),
+    (lambda c: c.rbac.create_permission("ten_1", "env_1", {"name": "read"}), "POST", "/v1/tenants/ten_1/environments/env_1/permissions", {"name": "read"}),
+    (lambda c: c.rbac.delete_permission("ten_1", "env_1", "perm_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/permissions/perm_1", None),
+    (lambda c: c.rbac.list_resources("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/resources", None),
+    (lambda c: c.rbac.create_resource("ten_1", "env_1", {"name": "doc"}), "POST", "/v1/tenants/ten_1/environments/env_1/resources", {"name": "doc"}),
+    (lambda c: c.rbac.delete_resource("ten_1", "env_1", "res_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/resources/res_1", None),
+    (lambda c: c.rbac.list_group_roles("ten_1", "env_1", "grp_1"), "GET", "/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles", None),
+    (lambda c: c.rbac.add_group_role("ten_1", "env_1", "grp_1", {"roleId": "role_1"}), "POST", "/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles", {"roleId": "role_1"}),
+    (lambda c: c.rbac.remove_group_role("ten_1", "env_1", "grp_1", "role_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles/role_1", None),
+    (lambda c: c.rbac.list_group_role_mappings("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/group-role-mappings", None),
+    (lambda c: c.rbac.create_group_role_mapping("ten_1", "env_1", {"groupId": "grp_1"}), "POST", "/v1/tenants/ten_1/environments/env_1/group-role-mappings", {"groupId": "grp_1"}),
+    (lambda c: c.rbac.apply_group_role_mappings("ten_1", "env_1"), "POST", "/v1/tenants/ten_1/environments/env_1/group-role-mappings/apply", None),
+    (lambda c: c.rbac.delete_group_role_mapping("ten_1", "env_1", "map_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/group-role-mappings/map_1", None),
+    (lambda c: c.rbac.list_abac_policies("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/abac-policies", None),
+    (lambda c: c.rbac.save_abac_policy("ten_1", "env_1", {"name": "p"}), "POST", "/v1/tenants/ten_1/environments/env_1/abac-policies", {"name": "p"}),
+    (lambda c: c.rbac.validate_abac_policy("ten_1", "env_1", {"rego": "x"}), "POST", "/v1/tenants/ten_1/environments/env_1/abac-policies/validate", {"rego": "x"}),
+    (lambda c: c.rbac.delete_abac_policy("ten_1", "env_1", "pol_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/abac-policies/pol_1", None),
+    (lambda c: c.rbac.my_permissions("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/me/permissions", None),
+]
+
+
+@pytest.mark.parametrize("call,method,path,body", WAVE2_CASES)
+@patch("httpx.Client")
+def test_wave2_method_and_path(mock_client_class, call, method, path, body):
+    client, mock_http = _client_with_request(mock_client_class, _json_response({}))
+    call(client)
+    args, kwargs = mock_http.request.call_args
+    assert args[0] == method
+    assert args[1] == path
+    assert kwargs.get("json") == body
+
+
+@patch("httpx.Client")
+def test_wave2_create_key_exposes_one_time_secret(mock_client_class):
+    client, _ = _client_with_request(
+        mock_client_class,
+        _json_response({"token": "orgk_secret_once", "key": {"id": "key_1"}}),
+    )
+    created = client.organizations.create_key("org_1", {"name": "ci"})
+    assert created.get("token") == "orgk_secret_once"
+
+
+@patch("httpx.Client")
+def test_wave2_audit_forwards_query_params(mock_client_class):
+    client, mock_http = _client_with_request(mock_client_class, _json_response({}))
+    client.events.list("ten_1", "env_1", params={"limit": 50, "after": "cur_1"})
+    args, kwargs = mock_http.request.call_args
+    assert args[1] == "/v1/tenants/ten_1/environments/env_1/events"
+    assert kwargs.get("params") == {"limit": 50, "after": "cur_1"}

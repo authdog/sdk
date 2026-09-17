@@ -36,6 +36,14 @@ pub const ProjectsResource = @import("client.zig").ProjectsResource;
 pub const EnvironmentsResource = @import("client.zig").EnvironmentsResource;
 pub const UsersResource = @import("client.zig").UsersResource;
 pub const GroupsResource = @import("client.zig").GroupsResource;
+pub const RbacResource = @import("client.zig").RbacResource;
+pub const AuditResource = @import("client.zig").AuditResource;
+pub const EventsResource = @import("client.zig").EventsResource;
+pub const WebhooksResource = @import("client.zig").WebhooksResource;
+pub const NotificationChannelsResource = @import("client.zig").NotificationChannelsResource;
+pub const ServiceAccountsResource = @import("client.zig").ServiceAccountsResource;
+pub const PersonalAccessTokensResource = @import("client.zig").PersonalAccessTokensResource;
+pub const ApiSecretsResource = @import("client.zig").ApiSecretsResource;
 
 test {
     std.testing.refAllDecls(@This());

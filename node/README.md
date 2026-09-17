@@ -85,8 +85,11 @@ new AuthdogClient(config: AuthdogClientConfig)
 
 ##### Management namespaces
 
-`organizations`, `tenants`, `projects`, `environments`, `users`, and
-`groups` wrap Wave 1 of the public API (`specs/004-api-parity/`).
+`organizations`, `tenants`, `projects`, `environments`, `users`,
+`groups`, `rbac`, `audit`, `events`, `webhooks`,
+`notificationChannels`, `serviceAccounts`, `personalAccessTokens`,
+and `apiSecrets` wrap Waves 1–2 of the public API
+(`specs/004-api-parity/`).
 
 ```typescript
 const orgs = await client.organizations.list();

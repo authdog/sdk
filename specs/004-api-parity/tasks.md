@@ -186,4 +186,22 @@ T029 zig health
 4. US3 directory/projects/environments
 5. Docs + 0.2.0 + `moon run :test`
 
-Wave 1 is the MVP for this feature. Do not start Wave 2/3 here.
+Wave 1 is the MVP for this feature. Wave 2 follows below.
+
+---
+
+## Phase 7: User Story 4 - Authorize and observe activity + machine credentials (P2)
+
+**Goal**: Wave 2 — 58 operations: RBAC, audit, events, webhooks, notification channels, service accounts, PATs, API secrets, organization keys
+
+**Independent Test**: Table-driven path/method tests; create/rotate responses expose one-time secrets; query params are forwarded
+
+- [x] T070 [US4] Add Wave 2 namespaces and org key/audit methods in `python/authdog/resources.py` and `python/authdog/client.py`
+- [x] T071 [US4] Add Wave 2 path/secret/query tests in `python/tests/test_management.py`
+- [x] T072 [P] [US4] Implement Wave 2 in `node/src/resources.ts` and `node/src/client.ts` with tests in `node/tests/management.test.ts`
+- [x] T073 [P] [US4] Implement Wave 2 in `go/` with tests in `go/management_test.go`
+- [x] T074 [P] [US4] Implement Wave 2 in `rust/` with tests in `rust/tests/management_test.rs`
+- [x] T075 [P] [US4] Implement Wave 2 in `java/` with tests in `java/src/test/java/com/authdog/ManagementTest.java`
+- [x] T076 [P] [US4] Implement Wave 2 in `csharp/` with tests in `csharp/Tests/ManagementTests.cs`
+- [x] T077 [P] [US4] Implement Wave 2 in `zig/` with tests in `zig/src/management_test.zig`
+- [x] T078 [US4] Document Wave 2 namespaces in core READMEs and `specs/README.md`

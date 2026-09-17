@@ -23,7 +23,7 @@ C, C++, Clojure, Common Lisp, Dart, Elixir, F#, Kotlin, OCaml, PHP, PowerShell, 
 ## Features
 
 - **User Information** -- retrieve profile data, emails, photos, and verification status
-- **Management API** -- organizations, tenants, projects, environments, directory users and groups
+- **Management API** -- organizations, tenants, directory, RBAC, audit, events, webhooks, and machine credentials
 - **Authentication** -- token-based auth with structured error handling
 - **Type Safety** -- full type support in TypeScript, Go, Rust, Java, C#, and Zig
 - **Async Support** -- modern async/await APIs where applicable
@@ -41,9 +41,10 @@ GET /v1/userinfo
 Authorization: Bearer <access-token>
 ```
 
-Wave 1 also includes health, organizations, tenants, projects,
-environment lifecycle, and directory users/groups. The full catalog
-and later waves live in [`specs/004-api-parity/`](./specs/004-api-parity/).
+Waves 1–2 include health, organizations, tenants, projects,
+environments, directory users/groups, RBAC, audit, events, webhooks,
+notification channels, and machine credentials. The full catalog and
+Wave 3 live in [`specs/004-api-parity/`](./specs/004-api-parity/).
 
 See individual SDK READMEs for language-specific usage.
 

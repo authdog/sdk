@@ -2,12 +2,20 @@ package com.authdog;
 
 import com.authdog.exceptions.AuthenticationException;
 import com.authdog.exceptions.ApiException;
+import com.authdog.resources.ApiSecretsResource;
+import com.authdog.resources.AuditResource;
 import com.authdog.resources.EnvironmentsResource;
+import com.authdog.resources.EventsResource;
 import com.authdog.resources.GroupsResource;
+import com.authdog.resources.NotificationChannelsResource;
 import com.authdog.resources.OrganizationsResource;
+import com.authdog.resources.PersonalAccessTokensResource;
 import com.authdog.resources.ProjectsResource;
+import com.authdog.resources.RbacResource;
+import com.authdog.resources.ServiceAccountsResource;
 import com.authdog.resources.TenantsResource;
 import com.authdog.resources.UsersResource;
+import com.authdog.resources.WebhooksResource;
 import com.authdog.types.Probe;
 import com.authdog.types.UserInfoResponse;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -116,6 +124,46 @@ public class AuthdogClient implements AutoCloseable {
     private final GroupsResource groups;
 
     /**
+     * RBAC resource.
+     */
+    private final RbacResource rbac;
+
+    /**
+     * Audit resource.
+     */
+    private final AuditResource audit;
+
+    /**
+     * Events resource.
+     */
+    private final EventsResource events;
+
+    /**
+     * Webhooks resource.
+     */
+    private final WebhooksResource webhooks;
+
+    /**
+     * Notification channels resource.
+     */
+    private final NotificationChannelsResource notificationChannels;
+
+    /**
+     * Service accounts resource.
+     */
+    private final ServiceAccountsResource serviceAccounts;
+
+    /**
+     * Personal access tokens resource.
+     */
+    private final PersonalAccessTokensResource personalAccessTokens;
+
+    /**
+     * API secrets resource.
+     */
+    private final ApiSecretsResource apiSecrets;
+
+    /**
      * Initialize the Authdog client.
      * @param baseUrlParam The base URL of the Authdog API
      */
@@ -157,6 +205,16 @@ public class AuthdogClient implements AutoCloseable {
         this.environments = new EnvironmentsResource(this);
         this.users = new UsersResource(this);
         this.groups = new GroupsResource(this);
+        this.rbac = new RbacResource(this);
+        this.audit = new AuditResource(this);
+        this.events = new EventsResource(this);
+        this.webhooks = new WebhooksResource(this);
+        this.notificationChannels =
+                new NotificationChannelsResource(this);
+        this.serviceAccounts = new ServiceAccountsResource(this);
+        this.personalAccessTokens =
+                new PersonalAccessTokensResource(this);
+        this.apiSecrets = new ApiSecretsResource(this);
     }
 
     /**
@@ -214,6 +272,70 @@ public class AuthdogClient implements AutoCloseable {
      */
     public GroupsResource groups() {
         return groups;
+    }
+
+    /**
+     * Environment RBAC helpers.
+     * @return RBAC resource
+     */
+    public RbacResource rbac() {
+        return rbac;
+    }
+
+    /**
+     * Environment audit helpers.
+     * @return audit resource
+     */
+    public AuditResource audit() {
+        return audit;
+    }
+
+    /**
+     * Environment event helpers.
+     * @return events resource
+     */
+    public EventsResource events() {
+        return events;
+    }
+
+    /**
+     * Environment webhook helpers.
+     * @return webhooks resource
+     */
+    public WebhooksResource webhooks() {
+        return webhooks;
+    }
+
+    /**
+     * Environment notification channel helpers.
+     * @return notification channels resource
+     */
+    public NotificationChannelsResource notificationChannels() {
+        return notificationChannels;
+    }
+
+    /**
+     * Service account helpers.
+     * @return service accounts resource
+     */
+    public ServiceAccountsResource serviceAccounts() {
+        return serviceAccounts;
+    }
+
+    /**
+     * Personal access token helpers.
+     * @return personal access tokens resource
+     */
+    public PersonalAccessTokensResource personalAccessTokens() {
+        return personalAccessTokens;
+    }
+
+    /**
+     * Environment API secret helpers.
+     * @return API secrets resource
+     */
+    public ApiSecretsResource apiSecrets() {
+        return apiSecrets;
     }
 
     /**

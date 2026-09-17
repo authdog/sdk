@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
@@ -43,6 +44,22 @@ namespace Authdog
 
         public GroupsResource Groups { get; }
 
+        public RbacResource Rbac { get; }
+
+        public AuditResource Audit { get; }
+
+        public EventsResource Events { get; }
+
+        public WebhooksResource Webhooks { get; }
+
+        public NotificationChannelsResource NotificationChannels { get; }
+
+        public ServiceAccountsResource ServiceAccounts { get; }
+
+        public PersonalAccessTokensResource PersonalAccessTokens { get; }
+
+        public ApiSecretsResource ApiSecrets { get; }
+
         /// <summary>
         /// Initialize the Authdog client
         /// </summary>
@@ -68,7 +85,21 @@ namespace Authdog
             Environments = new EnvironmentsResource(this);
             Users = new UsersResource(this);
             Groups = new GroupsResource(this);
+            Rbac = new RbacResource(this);
+            Audit = new AuditResource(this);
+            Events = new EventsResource(this);
+            Webhooks = new WebhooksResource(this);
+            NotificationChannels = new NotificationChannelsResource(this);
+            ServiceAccounts = new ServiceAccountsResource(this);
+            PersonalAccessTokens = new PersonalAccessTokensResource(this);
+            ApiSecrets = new ApiSecretsResource(this);
         }
+
+        /// <summary>
+        /// Environment-scoped management path prefix.
+        /// </summary>
+        internal static string Env(string tenantId, string environmentId) =>
+            $"/v1/tenants/{tenantId}/environments/{environmentId}";
 
         /// <summary>
         /// Build a query map, dropping null values.
@@ -87,6 +118,69 @@ namespace Authdog
             }
 
             return query.Count == 0 ? null : query;
+        }
+
+        /// <summary>
+        /// Convert a Dictionary or object into query parameters, dropping null values.
+        /// </summary>
+        internal static IDictionary<string, string?>? QueryFrom(object? query)
+        {
+            if (query == null)
+            {
+                return null;
+            }
+
+            if (query is IDictionary<string, string?> typedNullable)
+            {
+                var copy = new Dictionary<string, string?>();
+                foreach (var pair in typedNullable)
+                {
+                    if (pair.Value != null)
+                    {
+                        copy[pair.Key] = pair.Value;
+                    }
+                }
+
+                return copy.Count == 0 ? null : copy;
+            }
+
+            if (query is IDictionary dictionary)
+            {
+                var copy = new Dictionary<string, string?>();
+                foreach (DictionaryEntry entry in dictionary)
+                {
+                    if (entry.Key is null || entry.Value is null)
+                    {
+                        continue;
+                    }
+
+                    var key = Convert.ToString(entry.Key, CultureInfo.InvariantCulture);
+                    if (string.IsNullOrEmpty(key))
+                    {
+                        continue;
+                    }
+
+                    copy[key] = Convert.ToString(entry.Value, CultureInfo.InvariantCulture);
+                }
+
+                return copy.Count == 0 ? null : copy;
+            }
+
+            var obj = query as JObject ?? JObject.FromObject(query);
+            var result = new Dictionary<string, string?>();
+            foreach (var property in obj.Properties())
+            {
+                if (property.Value.Type is JTokenType.Null or JTokenType.Undefined)
+                {
+                    continue;
+                }
+
+                result[property.Name] = property.Value.Type == JTokenType.String
+                    ? property.Value.Value<string>()
+                    : property.Value.ToString(Formatting.None);
+            }
+
+            return result.Count == 0 ? null : result;
         }
 
         /// <summary>

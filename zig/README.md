@@ -66,7 +66,9 @@ pub fn main() !void {
 `GET /v1/userinfo` always sends `Authorization: Bearer <access-token>`. A constructor API key does not replace that header.
 
 `health()` plus `organizations`, `tenants`, `projects`, `environments`,
-`users`, and `groups` wrap Wave 1 of the public API. Management calls
+`users`, `groups`, `rbac`, `audit`, `events`, `webhooks`,
+`notificationChannels`, `serviceAccounts`, `personalAccessTokens`,
+and `apiSecrets` wrap Waves 1–2 of the public API. Management calls
 send the constructor API key when present. See `specs/004-api-parity/`.
 
 ## Errors

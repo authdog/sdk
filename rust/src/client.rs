@@ -6,8 +6,10 @@ use serde_json::{self, Value};
 use std::time::Duration;
 
 pub use crate::resources::{
-    EnvironmentsResource, GroupsResource, OrganizationsResource, ProjectsResource, TenantsResource,
-    UsersResource,
+    ApiSecretsResource, AuditResource, EnvironmentsResource, EventsResource, GroupsResource,
+    NotificationChannelsResource, OrganizationsResource, PersonalAccessTokensResource,
+    ProjectsResource, RbacResource, ServiceAccountsResource, TenantsResource, UsersResource,
+    WebhooksResource,
 };
 
 /// Configuration for the Authdog client
@@ -160,6 +162,38 @@ impl AuthdogClient {
 
     pub fn groups(&self) -> GroupsResource<'_> {
         GroupsResource::new(self)
+    }
+
+    pub fn rbac(&self) -> RbacResource<'_> {
+        RbacResource::new(self)
+    }
+
+    pub fn audit(&self) -> AuditResource<'_> {
+        AuditResource::new(self)
+    }
+
+    pub fn events(&self) -> EventsResource<'_> {
+        EventsResource::new(self)
+    }
+
+    pub fn webhooks(&self) -> WebhooksResource<'_> {
+        WebhooksResource::new(self)
+    }
+
+    pub fn notification_channels(&self) -> NotificationChannelsResource<'_> {
+        NotificationChannelsResource::new(self)
+    }
+
+    pub fn service_accounts(&self) -> ServiceAccountsResource<'_> {
+        ServiceAccountsResource::new(self)
+    }
+
+    pub fn personal_access_tokens(&self) -> PersonalAccessTokensResource<'_> {
+        PersonalAccessTokensResource::new(self)
+    }
+
+    pub fn api_secrets(&self) -> ApiSecretsResource<'_> {
+        ApiSecretsResource::new(self)
     }
 
     /// Get user information using an access token

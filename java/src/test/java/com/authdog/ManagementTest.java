@@ -18,7 +18,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -156,6 +158,52 @@ class ManagementTest {
         assertEquals(path, request.getPath());
         assertJsonBody(body, request.getBody().readUtf8());
         assertEquals("Bearer key-1", request.getHeader("Authorization"));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("wave2Cases")
+    void testWave2MethodAndPath(final String name,
+                                final Consumer<AuthdogClient> call,
+                                final String method,
+                                final String path,
+                                final String body) throws Exception {
+        enqueueJson(200, "{}");
+        client = newClient();
+        call.accept(client);
+
+        RecordedRequest request = mockServer.takeRequest();
+        assertEquals(method, request.getMethod());
+        assertEquals(path, request.getPath());
+        assertJsonBody(body, request.getBody().readUtf8());
+        assertEquals("Bearer key-1", request.getHeader("Authorization"));
+    }
+
+    @Test
+    void testWave2CreateKeyExposesOneTimeSecret() throws Exception {
+        enqueueJson(200,
+                "{\"token\":\"orgk_secret_once\","
+                        + "\"key\":{\"id\":\"key_1\"}}");
+        client = newClient();
+
+        JsonNode created = client.organizations()
+                .createKey("org_1", mapOf("name", "ci"));
+        assertEquals("orgk_secret_once",
+                created.get("token").asText());
+    }
+
+    @Test
+    void testWave2AuditForwardsQueryParams() throws Exception {
+        enqueueJson(200, "{}");
+        client = newClient();
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("limit", "50");
+        params.put("after", "cur_1");
+        client.events().list("ten_1", "env_1", params);
+
+        RecordedRequest request = mockServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals("/v1/tenants/ten_1/environments/env_1/events"
+                + "?limit=50&after=cur_1", request.getPath());
     }
 
     static Stream<Arguments> wave1Cases() {
@@ -409,6 +457,389 @@ class ManagementTest {
                         "DELETE",
                         "/v1/tenants/ten_1/environments/env_1/groups/grp_1"
                                 + "/members/usr_1",
+                        null)
+        );
+    }
+
+    static Stream<Arguments> wave2Cases() {
+        return Stream.of(
+                caseOf("orgs list keys",
+                        c -> c.organizations().listKeys("org_1"),
+                        "GET", "/v1/organizations/org_1/keys", null),
+                caseOf("orgs create key",
+                        c -> c.organizations().createKey("org_1",
+                                mapOf("name", "ci")),
+                        "POST", "/v1/organizations/org_1/keys",
+                        "{\"name\":\"ci\"}"),
+                caseOf("orgs revoke key",
+                        c -> c.organizations().revokeKey("org_1",
+                                "key_1"),
+                        "POST",
+                        "/v1/organizations/org_1/keys/key_1/revoke",
+                        null),
+                caseOf("orgs rotate key",
+                        c -> c.organizations().rotateKey("org_1",
+                                "key_1"),
+                        "POST",
+                        "/v1/organizations/org_1/keys/key_1/rotate",
+                        null),
+                caseOf("orgs update key tenants",
+                        c -> c.organizations().updateKeyTenants(
+                                "org_1", "key_1",
+                                mapOf("tenantIds",
+                                        List.of("ten_1"))),
+                        "PUT",
+                        "/v1/organizations/org_1/keys/key_1/tenants",
+                        "{\"tenantIds\":[\"ten_1\"]}"),
+                caseOf("orgs list audit logs",
+                        c -> c.organizations().listAuditLogs(
+                                "org_1"),
+                        "GET", "/v1/organizations/org_1/audit/logs",
+                        null),
+                caseOf("service accounts list",
+                        c -> c.serviceAccounts().list(),
+                        "GET", "/v1/service-accounts", null),
+                caseOf("service accounts create",
+                        c -> c.serviceAccounts().create(
+                                mapOf("name", "bot")),
+                        "POST", "/v1/service-accounts",
+                        "{\"name\":\"bot\"}"),
+                caseOf("service accounts get",
+                        c -> c.serviceAccounts().get("sa_1"),
+                        "GET", "/v1/service-accounts/sa_1", null),
+                caseOf("service accounts delete",
+                        c -> c.serviceAccounts().delete("sa_1"),
+                        "DELETE", "/v1/service-accounts/sa_1", null),
+                caseOf("pats list",
+                        c -> c.personalAccessTokens().list(),
+                        "GET", "/v1/personal-access-tokens", null),
+                caseOf("pats create",
+                        c -> c.personalAccessTokens().create(
+                                mapOf("name", "cli")),
+                        "POST", "/v1/personal-access-tokens",
+                        "{\"name\":\"cli\"}"),
+                caseOf("pats revoke",
+                        c -> c.personalAccessTokens().revoke(
+                                "pat_1"),
+                        "POST",
+                        "/v1/personal-access-tokens/pat_1/revoke",
+                        null),
+                caseOf("api secrets list",
+                        c -> c.apiSecrets().list("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/api-secrets",
+                        null),
+                caseOf("api secrets create",
+                        c -> c.apiSecrets().create("ten_1", "env_1",
+                                mapOf("name", "runtime")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/api-secrets",
+                        "{\"name\":\"runtime\"}"),
+                caseOf("api secrets revoke",
+                        c -> c.apiSecrets().revoke("ten_1", "env_1",
+                                "sec_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/api-secrets/sec_1/revoke",
+                        null),
+                caseOf("audit list logs",
+                        c -> c.audit().listLogs("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/audit/logs",
+                        null),
+                caseOf("audit event metadata",
+                        c -> c.audit().eventMetadata("ten_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/audit/event-metadata",
+                        null),
+                caseOf("audit event types",
+                        c -> c.audit().eventTypes("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/audit/event-types",
+                        null),
+                caseOf("audit event types catalog",
+                        c -> c.audit().eventTypesCatalog("ten_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/audit/event-types/catalog",
+                        null),
+                caseOf("events list",
+                        c -> c.events().list("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/events",
+                        null),
+                caseOf("events list types",
+                        c -> c.events().listTypes("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/events/types",
+                        null),
+                caseOf("events ingest",
+                        c -> c.events().ingest("ten_1", "env_1",
+                                mapOf("events",
+                                        Collections.emptyList())),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/events/ingest",
+                        "{\"events\":[]}"),
+                caseOf("webhooks list",
+                        c -> c.webhooks().list("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/webhooks",
+                        null),
+                caseOf("webhooks create",
+                        c -> c.webhooks().create("ten_1", "env_1",
+                                mapOf("url", "https://ex")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/webhooks",
+                        "{\"url\":\"https://ex\"}"),
+                caseOf("webhooks update",
+                        c -> c.webhooks().update("ten_1", "env_1",
+                                "ch_1", mapOf("url", "https://ex")),
+                        "PUT",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/webhooks/ch_1",
+                        "{\"url\":\"https://ex\"}"),
+                caseOf("webhooks delete",
+                        c -> c.webhooks().delete("ten_1", "env_1",
+                                "ch_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/webhooks/ch_1",
+                        null),
+                caseOf("webhooks rotate secret",
+                        c -> c.webhooks().rotateSecret("ten_1",
+                                "env_1", "ch_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/webhooks/ch_1/rotate-secret",
+                        null),
+                caseOf("webhooks list deliveries",
+                        c -> c.webhooks().listDeliveries("ten_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/webhooks/deliveries",
+                        null),
+                caseOf("webhooks redeliver",
+                        c -> c.webhooks().redeliver("ten_1", "env_1",
+                                "del_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/webhooks/deliveries/del_1"
+                                + "/redeliver",
+                        null),
+                caseOf("notification channels list",
+                        c -> c.notificationChannels().list("ten_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/notification-channels",
+                        null),
+                caseOf("notification channels create",
+                        c -> c.notificationChannels().create(
+                                "ten_1", "env_1",
+                                mapOf("type", "webhook")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/notification-channels",
+                        "{\"type\":\"webhook\"}"),
+                caseOf("notification channels update",
+                        c -> c.notificationChannels().update(
+                                "ten_1", "env_1", "ch_1",
+                                mapOf("name", "n")),
+                        "PUT",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/notification-channels/ch_1",
+                        "{\"name\":\"n\"}"),
+                caseOf("notification channels delete",
+                        c -> c.notificationChannels().delete(
+                                "ten_1", "env_1", "ch_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/notification-channels/ch_1",
+                        null),
+                caseOf("notification channels test",
+                        c -> c.notificationChannels().test("ten_1",
+                                "env_1", "ch_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/notification-channels/ch_1"
+                                + "/test",
+                        null),
+                caseOf("rbac list roles",
+                        c -> c.rbac().listRoles("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/roles",
+                        null),
+                caseOf("rbac create role",
+                        c -> c.rbac().createRole("ten_1", "env_1",
+                                mapOf("name", "admin")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/roles",
+                        "{\"name\":\"admin\"}"),
+                caseOf("rbac delete role",
+                        c -> c.rbac().deleteRole("ten_1", "env_1",
+                                "role_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/roles/role_1",
+                        null),
+                caseOf("rbac list role permissions",
+                        c -> c.rbac().listRolePermissions("ten_1",
+                                "env_1", "role_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/roles/role_1/permissions",
+                        null),
+                caseOf("rbac set role permissions",
+                        c -> c.rbac().setRolePermissions("ten_1",
+                                "env_1", "role_1",
+                                mapOf("permissionIds",
+                                        Collections.emptyList())),
+                        "PUT",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/roles/role_1/permissions",
+                        "{\"permissionIds\":[]}"),
+                caseOf("rbac list permissions",
+                        c -> c.rbac().listPermissions("ten_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/permissions",
+                        null),
+                caseOf("rbac create permission",
+                        c -> c.rbac().createPermission("ten_1",
+                                "env_1", mapOf("name", "read")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/permissions",
+                        "{\"name\":\"read\"}"),
+                caseOf("rbac delete permission",
+                        c -> c.rbac().deletePermission("ten_1",
+                                "env_1", "perm_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/permissions/perm_1",
+                        null),
+                caseOf("rbac list resources",
+                        c -> c.rbac().listResources("ten_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/resources",
+                        null),
+                caseOf("rbac create resource",
+                        c -> c.rbac().createResource("ten_1",
+                                "env_1", mapOf("name", "doc")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/resources",
+                        "{\"name\":\"doc\"}"),
+                caseOf("rbac delete resource",
+                        c -> c.rbac().deleteResource("ten_1",
+                                "env_1", "res_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/resources/res_1",
+                        null),
+                caseOf("rbac list group roles",
+                        c -> c.rbac().listGroupRoles("ten_1",
+                                "env_1", "grp_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/groups/grp_1/roles",
+                        null),
+                caseOf("rbac add group role",
+                        c -> c.rbac().addGroupRole("ten_1", "env_1",
+                                "grp_1",
+                                mapOf("roleId", "role_1")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/groups/grp_1/roles",
+                        "{\"roleId\":\"role_1\"}"),
+                caseOf("rbac remove group role",
+                        c -> c.rbac().removeGroupRole("ten_1",
+                                "env_1", "grp_1", "role_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/groups/grp_1/roles/role_1",
+                        null),
+                caseOf("rbac list group role mappings",
+                        c -> c.rbac().listGroupRoleMappings("ten_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/group-role-mappings",
+                        null),
+                caseOf("rbac create group role mapping",
+                        c -> c.rbac().createGroupRoleMapping(
+                                "ten_1", "env_1",
+                                mapOf("groupId", "grp_1")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/group-role-mappings",
+                        "{\"groupId\":\"grp_1\"}"),
+                caseOf("rbac apply group role mappings",
+                        c -> c.rbac().applyGroupRoleMappings(
+                                "ten_1", "env_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/group-role-mappings/apply",
+                        null),
+                caseOf("rbac delete group role mapping",
+                        c -> c.rbac().deleteGroupRoleMapping(
+                                "ten_1", "env_1", "map_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/group-role-mappings/map_1",
+                        null),
+                caseOf("rbac list abac policies",
+                        c -> c.rbac().listAbacPolicies("ten_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/abac-policies",
+                        null),
+                caseOf("rbac save abac policy",
+                        c -> c.rbac().saveAbacPolicy("ten_1",
+                                "env_1", mapOf("name", "p")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/abac-policies",
+                        "{\"name\":\"p\"}"),
+                caseOf("rbac validate abac policy",
+                        c -> c.rbac().validateAbacPolicy("ten_1",
+                                "env_1", mapOf("rego", "x")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/abac-policies/validate",
+                        "{\"rego\":\"x\"}"),
+                caseOf("rbac delete abac policy",
+                        c -> c.rbac().deleteAbacPolicy("ten_1",
+                                "env_1", "pol_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/abac-policies/pol_1",
+                        null),
+                caseOf("rbac my permissions",
+                        c -> c.rbac().myPermissions("ten_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/me/permissions",
                         null)
         );
     }

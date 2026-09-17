@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 namespace Authdog
 {
     /// <summary>
-    /// Organization Wave 1 operations
+    /// Organization Wave 1 and Wave 2 operations
     /// </summary>
     public class OrganizationsResource
     {
@@ -115,5 +115,51 @@ namespace Authdog
 
         public JObject UnlinkTenant(string organizationId, string tenantId) =>
             UnlinkTenantAsync(organizationId, tenantId).GetAwaiter().GetResult();
+
+        public Task<JObject> ListKeysAsync(string organizationId) =>
+            _client.RequestAsync<JObject>(HttpMethod.Get, $"/v1/organizations/{organizationId}/keys");
+
+        public JObject ListKeys(string organizationId) =>
+            ListKeysAsync(organizationId).GetAwaiter().GetResult();
+
+        public Task<JObject> CreateKeyAsync(string organizationId, object body) =>
+            _client.RequestAsync<JObject>(HttpMethod.Post, $"/v1/organizations/{organizationId}/keys", body);
+
+        public JObject CreateKey(string organizationId, object body) =>
+            CreateKeyAsync(organizationId, body).GetAwaiter().GetResult();
+
+        public Task<JObject> RevokeKeyAsync(string organizationId, string keyId) =>
+            _client.RequestAsync<JObject>(
+                HttpMethod.Post,
+                $"/v1/organizations/{organizationId}/keys/{keyId}/revoke");
+
+        public JObject RevokeKey(string organizationId, string keyId) =>
+            RevokeKeyAsync(organizationId, keyId).GetAwaiter().GetResult();
+
+        public Task<JObject> RotateKeyAsync(string organizationId, string keyId) =>
+            _client.RequestAsync<JObject>(
+                HttpMethod.Post,
+                $"/v1/organizations/{organizationId}/keys/{keyId}/rotate");
+
+        public JObject RotateKey(string organizationId, string keyId) =>
+            RotateKeyAsync(organizationId, keyId).GetAwaiter().GetResult();
+
+        public Task<JObject> UpdateKeyTenantsAsync(string organizationId, string keyId, object body) =>
+            _client.RequestAsync<JObject>(
+                HttpMethod.Put,
+                $"/v1/organizations/{organizationId}/keys/{keyId}/tenants",
+                body);
+
+        public JObject UpdateKeyTenants(string organizationId, string keyId, object body) =>
+            UpdateKeyTenantsAsync(organizationId, keyId, body).GetAwaiter().GetResult();
+
+        public Task<JObject> ListAuditLogsAsync(string organizationId, object? query = null) =>
+            _client.RequestAsync<JObject>(
+                HttpMethod.Get,
+                $"/v1/organizations/{organizationId}/audit/logs",
+                query: AuthdogClient.QueryFrom(query));
+
+        public JObject ListAuditLogs(string organizationId, object? query = null) =>
+            ListAuditLogsAsync(organizationId, query).GetAwaiter().GetResult();
     }
 }

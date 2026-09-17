@@ -108,6 +108,30 @@ func (s *OrganizationsService) UnlinkTenant(ctx context.Context, organizationID,
 	return s.client.requestMap(ctx, http.MethodDelete, "/v1/organizations/"+organizationID+"/tenants/"+tenantID, nil, nil)
 }
 
+func (s *OrganizationsService) ListKeys(ctx context.Context, organizationID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/organizations/"+organizationID+"/keys", nil, nil)
+}
+
+func (s *OrganizationsService) CreateKey(ctx context.Context, organizationID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/organizations/"+organizationID+"/keys", body, nil)
+}
+
+func (s *OrganizationsService) RevokeKey(ctx context.Context, organizationID, keyID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/organizations/"+organizationID+"/keys/"+keyID+"/revoke", nil, nil)
+}
+
+func (s *OrganizationsService) RotateKey(ctx context.Context, organizationID, keyID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/organizations/"+organizationID+"/keys/"+keyID+"/rotate", nil, nil)
+}
+
+func (s *OrganizationsService) UpdateKeyTenants(ctx context.Context, organizationID, keyID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPut, "/v1/organizations/"+organizationID+"/keys/"+keyID+"/tenants", body, nil)
+}
+
+func (s *OrganizationsService) ListAuditLogs(ctx context.Context, organizationID string, query url.Values) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/organizations/"+organizationID+"/audit/logs", nil, query)
+}
+
 // TenantsService is the tenants management namespace.
 type TenantsService struct {
 	client *Client
@@ -318,4 +342,256 @@ func (s *GroupsService) AddMember(ctx context.Context, tenantID, environmentID, 
 
 func (s *GroupsService) RemoveMember(ctx context.Context, tenantID, environmentID, groupID, userID string) (map[string]interface{}, error) {
 	return s.client.requestMap(ctx, http.MethodDelete, "/v1/tenants/"+tenantID+"/environments/"+environmentID+"/groups/"+groupID+"/members/"+userID, nil, nil)
+}
+
+func envPath(tenantID, environmentID string) string {
+	return "/v1/tenants/" + tenantID + "/environments/" + environmentID
+}
+
+// RbacService is the environment RBAC / ABAC namespace.
+type RbacService struct {
+	client *Client
+}
+
+func (s *RbacService) ListRoles(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/roles", nil, nil)
+}
+
+func (s *RbacService) CreateRole(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/roles", body, nil)
+}
+
+func (s *RbacService) DeleteRole(ctx context.Context, tenantID, environmentID, roleID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, envPath(tenantID, environmentID)+"/roles/"+roleID, nil, nil)
+}
+
+func (s *RbacService) ListRolePermissions(ctx context.Context, tenantID, environmentID, roleID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/roles/"+roleID+"/permissions", nil, nil)
+}
+
+func (s *RbacService) SetRolePermissions(ctx context.Context, tenantID, environmentID, roleID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPut, envPath(tenantID, environmentID)+"/roles/"+roleID+"/permissions", body, nil)
+}
+
+func (s *RbacService) ListPermissions(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/permissions", nil, nil)
+}
+
+func (s *RbacService) CreatePermission(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/permissions", body, nil)
+}
+
+func (s *RbacService) DeletePermission(ctx context.Context, tenantID, environmentID, permissionID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, envPath(tenantID, environmentID)+"/permissions/"+permissionID, nil, nil)
+}
+
+func (s *RbacService) ListResources(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/resources", nil, nil)
+}
+
+func (s *RbacService) CreateResource(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/resources", body, nil)
+}
+
+func (s *RbacService) DeleteResource(ctx context.Context, tenantID, environmentID, resourceID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, envPath(tenantID, environmentID)+"/resources/"+resourceID, nil, nil)
+}
+
+func (s *RbacService) ListGroupRoles(ctx context.Context, tenantID, environmentID, groupID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/groups/"+groupID+"/roles", nil, nil)
+}
+
+func (s *RbacService) AddGroupRole(ctx context.Context, tenantID, environmentID, groupID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/groups/"+groupID+"/roles", body, nil)
+}
+
+func (s *RbacService) RemoveGroupRole(ctx context.Context, tenantID, environmentID, groupID, roleID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, envPath(tenantID, environmentID)+"/groups/"+groupID+"/roles/"+roleID, nil, nil)
+}
+
+func (s *RbacService) ListGroupRoleMappings(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/group-role-mappings", nil, nil)
+}
+
+func (s *RbacService) CreateGroupRoleMapping(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/group-role-mappings", body, nil)
+}
+
+func (s *RbacService) ApplyGroupRoleMappings(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/group-role-mappings/apply", nil, nil)
+}
+
+func (s *RbacService) DeleteGroupRoleMapping(ctx context.Context, tenantID, environmentID, mappingID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, envPath(tenantID, environmentID)+"/group-role-mappings/"+mappingID, nil, nil)
+}
+
+func (s *RbacService) ListAbacPolicies(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/abac-policies", nil, nil)
+}
+
+func (s *RbacService) SaveAbacPolicy(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/abac-policies", body, nil)
+}
+
+func (s *RbacService) ValidateAbacPolicy(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/abac-policies/validate", body, nil)
+}
+
+func (s *RbacService) DeleteAbacPolicy(ctx context.Context, tenantID, environmentID, policyID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, envPath(tenantID, environmentID)+"/abac-policies/"+policyID, nil, nil)
+}
+
+func (s *RbacService) MyPermissions(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/me/permissions", nil, nil)
+}
+
+// AuditService is the environment audit log namespace.
+type AuditService struct {
+	client *Client
+}
+
+func (s *AuditService) ListLogs(ctx context.Context, tenantID, environmentID string, query url.Values) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/audit/logs", nil, query)
+}
+
+func (s *AuditService) EventMetadata(ctx context.Context, tenantID, environmentID string, query url.Values) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/audit/event-metadata", nil, query)
+}
+
+func (s *AuditService) EventTypes(ctx context.Context, tenantID, environmentID string, query url.Values) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/audit/event-types", nil, query)
+}
+
+func (s *AuditService) EventTypesCatalog(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/audit/event-types/catalog", nil, nil)
+}
+
+// EventsService is the environment events namespace.
+type EventsService struct {
+	client *Client
+}
+
+func (s *EventsService) List(ctx context.Context, tenantID, environmentID string, query url.Values) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/events", nil, query)
+}
+
+func (s *EventsService) ListTypes(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/events/types", nil, nil)
+}
+
+func (s *EventsService) Ingest(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/events/ingest", body, nil)
+}
+
+// WebhooksService is the environment webhook channels namespace.
+type WebhooksService struct {
+	client *Client
+}
+
+func (s *WebhooksService) List(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/webhooks", nil, nil)
+}
+
+func (s *WebhooksService) Create(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/webhooks", body, nil)
+}
+
+func (s *WebhooksService) Update(ctx context.Context, tenantID, environmentID, channelID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPut, envPath(tenantID, environmentID)+"/webhooks/"+channelID, body, nil)
+}
+
+func (s *WebhooksService) Delete(ctx context.Context, tenantID, environmentID, channelID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, envPath(tenantID, environmentID)+"/webhooks/"+channelID, nil, nil)
+}
+
+func (s *WebhooksService) RotateSecret(ctx context.Context, tenantID, environmentID, channelID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/webhooks/"+channelID+"/rotate-secret", nil, nil)
+}
+
+func (s *WebhooksService) ListDeliveries(ctx context.Context, tenantID, environmentID string, query url.Values) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/webhooks/deliveries", nil, query)
+}
+
+func (s *WebhooksService) Redeliver(ctx context.Context, tenantID, environmentID, deliveryID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/webhooks/deliveries/"+deliveryID+"/redeliver", nil, nil)
+}
+
+// NotificationChannelsService is the environment notification-channels namespace.
+type NotificationChannelsService struct {
+	client *Client
+}
+
+func (s *NotificationChannelsService) List(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/notification-channels", nil, nil)
+}
+
+func (s *NotificationChannelsService) Create(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/notification-channels", body, nil)
+}
+
+func (s *NotificationChannelsService) Update(ctx context.Context, tenantID, environmentID, channelID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPut, envPath(tenantID, environmentID)+"/notification-channels/"+channelID, body, nil)
+}
+
+func (s *NotificationChannelsService) Delete(ctx context.Context, tenantID, environmentID, channelID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, envPath(tenantID, environmentID)+"/notification-channels/"+channelID, nil, nil)
+}
+
+func (s *NotificationChannelsService) Test(ctx context.Context, tenantID, environmentID, channelID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/notification-channels/"+channelID+"/test", body, nil)
+}
+
+// ServiceAccountsService is the organization service-accounts namespace.
+type ServiceAccountsService struct {
+	client *Client
+}
+
+func (s *ServiceAccountsService) List(ctx context.Context) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/service-accounts", nil, nil)
+}
+
+func (s *ServiceAccountsService) Create(ctx context.Context, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/service-accounts", body, nil)
+}
+
+func (s *ServiceAccountsService) Get(ctx context.Context, serviceAccountID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/service-accounts/"+serviceAccountID, nil, nil)
+}
+
+func (s *ServiceAccountsService) Delete(ctx context.Context, serviceAccountID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, "/v1/service-accounts/"+serviceAccountID, nil, nil)
+}
+
+// PersonalAccessTokensService is the personal-access-tokens namespace.
+type PersonalAccessTokensService struct {
+	client *Client
+}
+
+func (s *PersonalAccessTokensService) List(ctx context.Context) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, "/v1/personal-access-tokens", nil, nil)
+}
+
+func (s *PersonalAccessTokensService) Create(ctx context.Context, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/personal-access-tokens", body, nil)
+}
+
+func (s *PersonalAccessTokensService) Revoke(ctx context.Context, tokenID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, "/v1/personal-access-tokens/"+tokenID+"/revoke", nil, nil)
+}
+
+// ApiSecretsService is the environment API secrets namespace.
+type ApiSecretsService struct {
+	client *Client
+}
+
+func (s *ApiSecretsService) List(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/api-secrets", nil, nil)
+}
+
+func (s *ApiSecretsService) Create(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/api-secrets", body, nil)
+}
+
+func (s *ApiSecretsService) Revoke(ctx context.Context, tenantID, environmentID, secretID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/api-secrets/"+secretID+"/revoke", nil, nil)
 }

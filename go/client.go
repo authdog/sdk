@@ -17,12 +17,20 @@ type Client struct {
 	apiKey     string
 	httpClient *http.Client
 
-	Organizations *OrganizationsService
-	Tenants       *TenantsService
-	Projects      *ProjectsService
-	Environments  *EnvironmentsService
-	Users         *UsersService
-	Groups        *GroupsService
+	Organizations        *OrganizationsService
+	Tenants              *TenantsService
+	Projects             *ProjectsService
+	Environments         *EnvironmentsService
+	Users                *UsersService
+	Groups               *GroupsService
+	Rbac                 *RbacService
+	Audit                *AuditService
+	Events               *EventsService
+	Webhooks             *WebhooksService
+	NotificationChannels *NotificationChannelsService
+	ServiceAccounts      *ServiceAccountsService
+	PersonalAccessTokens *PersonalAccessTokensService
+	ApiSecrets           *ApiSecretsService
 }
 
 // ClientConfig holds configuration for the Authdog client
@@ -57,6 +65,14 @@ func NewClient(config ClientConfig) *Client {
 	c.Environments = &EnvironmentsService{client: c}
 	c.Users = &UsersService{client: c}
 	c.Groups = &GroupsService{client: c}
+	c.Rbac = &RbacService{client: c}
+	c.Audit = &AuditService{client: c}
+	c.Events = &EventsService{client: c}
+	c.Webhooks = &WebhooksService{client: c}
+	c.NotificationChannels = &NotificationChannelsService{client: c}
+	c.ServiceAccounts = &ServiceAccountsService{client: c}
+	c.PersonalAccessTokens = &PersonalAccessTokensService{client: c}
+	c.ApiSecrets = &ApiSecretsService{client: c}
 	return c
 }
 

@@ -6,12 +6,20 @@ import httpx
 
 from .exceptions import APIError, AuthenticationError
 from .resources import (
+    ApiSecretsResource,
+    AuditResource,
     EnvironmentsResource,
+    EventsResource,
     GroupsResource,
+    NotificationChannelsResource,
     OrganizationsResource,
+    PersonalAccessTokensResource,
     ProjectsResource,
+    RbacResource,
+    ServiceAccountsResource,
     TenantsResource,
     UsersResource,
+    WebhooksResource,
 )
 from .types import Probe, UserInfoResponse
 
@@ -47,6 +55,14 @@ class AuthdogClient:
         self.environments = EnvironmentsResource(self)
         self.users = UsersResource(self)
         self.groups = GroupsResource(self)
+        self.rbac = RbacResource(self)
+        self.audit = AuditResource(self)
+        self.events = EventsResource(self)
+        self.webhooks = WebhooksResource(self)
+        self.notification_channels = NotificationChannelsResource(self)
+        self.service_accounts = ServiceAccountsResource(self)
+        self.personal_access_tokens = PersonalAccessTokensResource(self)
+        self.api_secrets = ApiSecretsResource(self)
 
     def _get_default_headers(self) -> Dict[str, str]:
         """Get default headers for API requests."""

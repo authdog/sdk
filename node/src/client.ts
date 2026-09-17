@@ -1,12 +1,20 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { AuthenticationError, APIError } from './exceptions';
 import {
+  ApiSecretsResource,
+  AuditResource,
   EnvironmentsResource,
+  EventsResource,
   GroupsResource,
+  NotificationChannelsResource,
   OrganizationsResource,
+  PersonalAccessTokensResource,
   ProjectsResource,
+  RbacResource,
+  ServiceAccountsResource,
   TenantsResource,
   UsersResource,
+  WebhooksResource,
 } from './resources';
 import { Probe, UserInfoResponse } from './types';
 
@@ -25,6 +33,14 @@ export class AuthdogClient {
   readonly environments: EnvironmentsResource;
   readonly users: UsersResource;
   readonly groups: GroupsResource;
+  readonly rbac: RbacResource;
+  readonly audit: AuditResource;
+  readonly events: EventsResource;
+  readonly webhooks: WebhooksResource;
+  readonly notificationChannels: NotificationChannelsResource;
+  readonly serviceAccounts: ServiceAccountsResource;
+  readonly personalAccessTokens: PersonalAccessTokensResource;
+  readonly apiSecrets: ApiSecretsResource;
 
   constructor(config: AuthdogClientConfig) {
     this.config = config;
@@ -43,6 +59,14 @@ export class AuthdogClient {
     this.environments = new EnvironmentsResource(this);
     this.users = new UsersResource(this);
     this.groups = new GroupsResource(this);
+    this.rbac = new RbacResource(this);
+    this.audit = new AuditResource(this);
+    this.events = new EventsResource(this);
+    this.webhooks = new WebhooksResource(this);
+    this.notificationChannels = new NotificationChannelsResource(this);
+    this.serviceAccounts = new ServiceAccountsResource(this);
+    this.personalAccessTokens = new PersonalAccessTokensResource(this);
+    this.apiSecrets = new ApiSecretsResource(this);
   }
 
   async request<T = Record<string, unknown>>(

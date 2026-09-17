@@ -93,9 +93,11 @@ public AuthdogClient(String baseUrl, String apiKey, int timeoutMs)
 #### Methods
 
 `health()`, `organizations()`, `tenants()`, `projects()`,
-`environments()`, `users()`, and `groups()` wrap Wave 1 of the public
-API. Constructor `apiKey` is the management Bearer credential.
-See `specs/004-api-parity/`.
+`environments()`, `users()`, `groups()`, `rbac()`, `audit()`,
+`events()`, `webhooks()`, `notificationChannels()`,
+`serviceAccounts()`, `personalAccessTokens()`, and `apiSecrets()`
+wrap Waves 1–2 of the public API. Constructor `apiKey` is the
+management Bearer credential. See `specs/004-api-parity/`.
 
 ##### getUserInfo
 

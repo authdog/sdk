@@ -5,6 +5,7 @@ import com.authdog.exceptions.ApiException;
 import com.authdog.exceptions.AuthenticationException;
 import com.authdog.types.OrganizationsList;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Map;
 
 /**
  * Organization management operations.
@@ -262,5 +263,117 @@ public final class OrganizationsResource {
                 "/v1/organizations/" + organizationId
                         + "/tenants/" + tenantId,
                 null, null, JsonNode.class);
+    }
+
+    /**
+     * List organization API keys.
+     * @param organizationId organization ID
+     * @return keys envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode listKeys(final String organizationId)
+            throws AuthenticationException, ApiException {
+        return client.request("GET",
+                "/v1/organizations/" + organizationId + "/keys",
+                null, null, JsonNode.class);
+    }
+
+    /**
+     * Create an organization API key.
+     * @param organizationId organization ID
+     * @param body request body
+     * @return created key envelope, including a one-time secret
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode createKey(final String organizationId,
+                              final Object body)
+            throws AuthenticationException, ApiException {
+        return client.request("POST",
+                "/v1/organizations/" + organizationId + "/keys",
+                body, null, JsonNode.class);
+    }
+
+    /**
+     * Revoke an organization API key.
+     * @param organizationId organization ID
+     * @param keyId key ID
+     * @return revoke envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode revokeKey(final String organizationId,
+                              final String keyId)
+            throws AuthenticationException, ApiException {
+        return client.request("POST",
+                "/v1/organizations/" + organizationId + "/keys/"
+                        + keyId + "/revoke",
+                null, null, JsonNode.class);
+    }
+
+    /**
+     * Rotate an organization API key.
+     * @param organizationId organization ID
+     * @param keyId key ID
+     * @return rotate envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode rotateKey(final String organizationId,
+                              final String keyId)
+            throws AuthenticationException, ApiException {
+        return client.request("POST",
+                "/v1/organizations/" + organizationId + "/keys/"
+                        + keyId + "/rotate",
+                null, null, JsonNode.class);
+    }
+
+    /**
+     * Replace the tenants an organization key can access.
+     * @param organizationId organization ID
+     * @param keyId key ID
+     * @param body request body
+     * @return update envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode updateKeyTenants(final String organizationId,
+                                     final String keyId,
+                                     final Object body)
+            throws AuthenticationException, ApiException {
+        return client.request("PUT",
+                "/v1/organizations/" + organizationId + "/keys/"
+                        + keyId + "/tenants",
+                body, null, JsonNode.class);
+    }
+
+    /**
+     * List organization audit logs.
+     * @param organizationId organization ID
+     * @return logs envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode listAuditLogs(final String organizationId)
+            throws AuthenticationException, ApiException {
+        return listAuditLogs(organizationId, null);
+    }
+
+    /**
+     * List organization audit logs with caller query parameters.
+     * @param organizationId organization ID
+     * @param params optional query parameters
+     * @return logs envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode listAuditLogs(final String organizationId,
+                                  final Map<String, String> params)
+            throws AuthenticationException, ApiException {
+        return client.request("GET",
+                "/v1/organizations/" + organizationId
+                        + "/audit/logs",
+                null, params, JsonNode.class);
     }
 }

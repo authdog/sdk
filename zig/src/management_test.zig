@@ -814,3 +814,668 @@ test "environments list and projects get" {
         try std.testing.expectEqualStrings("/v1/tenants/ten_1/applications/app_1", mock.seen_target.?);
     }
 }
+
+const wave2_cases = [_]Wave1Case{
+    .{
+        .name = "organizations.listKeys",
+        .method = .GET,
+        .path = "/v1/organizations/org_1/keys",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.organizations().listKeys("org_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "organizations.createKey",
+        .method = .POST,
+        .path = "/v1/organizations/org_1/keys",
+        .body = "{\"name\":\"ci\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.organizations().createKey("org_1", "{\"name\":\"ci\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "organizations.revokeKey",
+        .method = .POST,
+        .path = "/v1/organizations/org_1/keys/key_1/revoke",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.organizations().revokeKey("org_1", "key_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "organizations.rotateKey",
+        .method = .POST,
+        .path = "/v1/organizations/org_1/keys/key_1/rotate",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.organizations().rotateKey("org_1", "key_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "organizations.updateKeyTenants",
+        .method = .PUT,
+        .path = "/v1/organizations/org_1/keys/key_1/tenants",
+        .body = "{\"tenantIds\":[\"ten_1\"]}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.organizations().updateKeyTenants("org_1", "key_1", "{\"tenantIds\":[\"ten_1\"]}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "organizations.listAuditLogs",
+        .method = .GET,
+        .path = "/v1/organizations/org_1/audit/logs",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.organizations().listAuditLogs("org_1", &.{})).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "serviceAccounts.list",
+        .method = .GET,
+        .path = "/v1/service-accounts",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.serviceAccounts().list()).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "serviceAccounts.create",
+        .method = .POST,
+        .path = "/v1/service-accounts",
+        .body = "{\"name\":\"bot\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.serviceAccounts().create("{\"name\":\"bot\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "serviceAccounts.get",
+        .method = .GET,
+        .path = "/v1/service-accounts/sa_1",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.serviceAccounts().get("sa_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "serviceAccounts.delete",
+        .method = .DELETE,
+        .path = "/v1/service-accounts/sa_1",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.serviceAccounts().delete("sa_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "personalAccessTokens.list",
+        .method = .GET,
+        .path = "/v1/personal-access-tokens",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.personalAccessTokens().list()).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "personalAccessTokens.create",
+        .method = .POST,
+        .path = "/v1/personal-access-tokens",
+        .body = "{\"name\":\"cli\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.personalAccessTokens().create("{\"name\":\"cli\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "personalAccessTokens.revoke",
+        .method = .POST,
+        .path = "/v1/personal-access-tokens/pat_1/revoke",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.personalAccessTokens().revoke("pat_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "apiSecrets.list",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/api-secrets",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.apiSecrets().list("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "apiSecrets.create",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/api-secrets",
+        .body = "{\"name\":\"runtime\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.apiSecrets().create("ten_1", "env_1", "{\"name\":\"runtime\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "apiSecrets.revoke",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/api-secrets/sec_1/revoke",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.apiSecrets().revoke("ten_1", "env_1", "sec_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "audit.listLogs",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/audit/logs",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.audit().listLogs("ten_1", "env_1", &.{})).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "audit.eventMetadata",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/audit/event-metadata",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.audit().eventMetadata("ten_1", "env_1", &.{})).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "audit.eventTypes",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/audit/event-types",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.audit().eventTypes("ten_1", "env_1", &.{})).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "audit.eventTypesCatalog",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/audit/event-types/catalog",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.audit().eventTypesCatalog("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "events.list",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/events",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.events().list("ten_1", "env_1", &.{})).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "events.listTypes",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/events/types",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.events().listTypes("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "events.ingest",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/events/ingest",
+        .body = "{\"events\":[]}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.events().ingest("ten_1", "env_1", "{\"events\":[]}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "webhooks.list",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/webhooks",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.webhooks().list("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "webhooks.create",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/webhooks",
+        .body = "{\"url\":\"https://ex\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.webhooks().create("ten_1", "env_1", "{\"url\":\"https://ex\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "webhooks.update",
+        .method = .PUT,
+        .path = "/v1/tenants/ten_1/environments/env_1/webhooks/ch_1",
+        .body = "{\"url\":\"https://ex\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.webhooks().update("ten_1", "env_1", "ch_1", "{\"url\":\"https://ex\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "webhooks.delete",
+        .method = .DELETE,
+        .path = "/v1/tenants/ten_1/environments/env_1/webhooks/ch_1",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.webhooks().delete("ten_1", "env_1", "ch_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "webhooks.rotateSecret",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/webhooks/ch_1/rotate-secret",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.webhooks().rotateSecret("ten_1", "env_1", "ch_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "webhooks.listDeliveries",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/webhooks/deliveries",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.webhooks().listDeliveries("ten_1", "env_1", &.{})).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "webhooks.redeliver",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/webhooks/deliveries/del_1/redeliver",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.webhooks().redeliver("ten_1", "env_1", "del_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "notificationChannels.list",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/notification-channels",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.notificationChannels().list("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "notificationChannels.create",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/notification-channels",
+        .body = "{\"type\":\"webhook\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.notificationChannels().create("ten_1", "env_1", "{\"type\":\"webhook\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "notificationChannels.update",
+        .method = .PUT,
+        .path = "/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1",
+        .body = "{\"name\":\"n\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.notificationChannels().update("ten_1", "env_1", "ch_1", "{\"name\":\"n\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "notificationChannels.delete",
+        .method = .DELETE,
+        .path = "/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.notificationChannels().delete("ten_1", "env_1", "ch_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "notificationChannels.test",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1/test",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.notificationChannels().@"test"("ten_1", "env_1", "ch_1", null)).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.listRoles",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/roles",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().listRoles("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.createRole",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/roles",
+        .body = "{\"name\":\"admin\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().createRole("ten_1", "env_1", "{\"name\":\"admin\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.deleteRole",
+        .method = .DELETE,
+        .path = "/v1/tenants/ten_1/environments/env_1/roles/role_1",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().deleteRole("ten_1", "env_1", "role_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.listRolePermissions",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/roles/role_1/permissions",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().listRolePermissions("ten_1", "env_1", "role_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.setRolePermissions",
+        .method = .PUT,
+        .path = "/v1/tenants/ten_1/environments/env_1/roles/role_1/permissions",
+        .body = "{\"permissionIds\":[]}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().setRolePermissions("ten_1", "env_1", "role_1", "{\"permissionIds\":[]}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.listPermissions",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/permissions",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().listPermissions("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.createPermission",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/permissions",
+        .body = "{\"name\":\"read\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().createPermission("ten_1", "env_1", "{\"name\":\"read\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.deletePermission",
+        .method = .DELETE,
+        .path = "/v1/tenants/ten_1/environments/env_1/permissions/perm_1",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().deletePermission("ten_1", "env_1", "perm_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.listResources",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/resources",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().listResources("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.createResource",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/resources",
+        .body = "{\"name\":\"doc\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().createResource("ten_1", "env_1", "{\"name\":\"doc\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.deleteResource",
+        .method = .DELETE,
+        .path = "/v1/tenants/ten_1/environments/env_1/resources/res_1",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().deleteResource("ten_1", "env_1", "res_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.listGroupRoles",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().listGroupRoles("ten_1", "env_1", "grp_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.addGroupRole",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles",
+        .body = "{\"roleId\":\"role_1\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().addGroupRole("ten_1", "env_1", "grp_1", "{\"roleId\":\"role_1\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.removeGroupRole",
+        .method = .DELETE,
+        .path = "/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles/role_1",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().removeGroupRole("ten_1", "env_1", "grp_1", "role_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.listGroupRoleMappings",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/group-role-mappings",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().listGroupRoleMappings("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.createGroupRoleMapping",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/group-role-mappings",
+        .body = "{\"groupId\":\"grp_1\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().createGroupRoleMapping("ten_1", "env_1", "{\"groupId\":\"grp_1\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.applyGroupRoleMappings",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/group-role-mappings/apply",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().applyGroupRoleMappings("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.deleteGroupRoleMapping",
+        .method = .DELETE,
+        .path = "/v1/tenants/ten_1/environments/env_1/group-role-mappings/map_1",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().deleteGroupRoleMapping("ten_1", "env_1", "map_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.listAbacPolicies",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/abac-policies",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().listAbacPolicies("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.saveAbacPolicy",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/abac-policies",
+        .body = "{\"name\":\"p\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().saveAbacPolicy("ten_1", "env_1", "{\"name\":\"p\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.validateAbacPolicy",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/abac-policies/validate",
+        .body = "{\"rego\":\"x\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().validateAbacPolicy("ten_1", "env_1", "{\"rego\":\"x\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.deleteAbacPolicy",
+        .method = .DELETE,
+        .path = "/v1/tenants/ten_1/environments/env_1/abac-policies/pol_1",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().deleteAbacPolicy("ten_1", "env_1", "pol_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "rbac.myPermissions",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/me/permissions",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.rbac().myPermissions("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+};
+
+test "wave2 method and path" {
+    try std.testing.expectEqual(@as(usize, 58), wave2_cases.len);
+    for (wave2_cases) |case| {
+        const mock = try MockHttp.start(std.testing.allocator, .ok, case.response, "Bearer key-1");
+        defer mock.deinit();
+
+        var started = try startClient(mock, "key-1");
+        defer std.testing.allocator.free(started.url);
+        defer started.client.deinit();
+
+        case.invoke(&started.client) catch |err| {
+            std.debug.print("wave2 case {s} failed: {s} ({s})\n", .{
+                case.name,
+                @errorName(err),
+                started.client.lastErrorMessage(),
+            });
+            return err;
+        };
+
+        try std.testing.expectEqual(case.method, mock.seen_method.?);
+        try std.testing.expectEqualStrings(case.path, mock.seen_target.?);
+        try std.testing.expectEqualStrings("Bearer key-1", mock.seen_authorization.?);
+        if (case.body) |body| {
+            try std.testing.expectEqualStrings(body, mock.seen_body.?);
+        } else {
+            try std.testing.expectEqual(@as(?[]u8, null), mock.seen_body);
+        }
+    }
+}
+
+test "wave2 create key exposes one-time secret" {
+    const mock = try MockHttp.start(
+        std.testing.allocator,
+        .ok,
+        "{\"token\":\"orgk_secret_once\",\"key\":{\"id\":\"key_1\"}}",
+        "Bearer key-1",
+    );
+    defer mock.deinit();
+
+    var started = try startClient(mock, "key-1");
+    defer std.testing.allocator.free(started.url);
+    defer started.client.deinit();
+
+    const created = try started.client.organizations().createKey("org_1", "{\"name\":\"ci\"}");
+    defer created.deinit();
+    try std.testing.expectEqualStrings("orgk_secret_once", created.value.object.get("token").?.string);
+}
+
+test "wave2 audit forwards query params" {
+    const mock = try MockHttp.start(std.testing.allocator, .ok, "{}", "Bearer key-1");
+    defer mock.deinit();
+
+    var started = try startClient(mock, "key-1");
+    defer std.testing.allocator.free(started.url);
+    defer started.client.deinit();
+
+    const listed = try started.client.events().list("ten_1", "env_1", &.{
+        .{ .name = "limit", .value = "50" },
+        .{ .name = "after", .value = "cur_1" },
+    });
+    defer listed.deinit();
+    try std.testing.expectEqualStrings("/v1/tenants/ten_1/environments/env_1/events?limit=50&after=cur_1", mock.seen_target.?);
+}

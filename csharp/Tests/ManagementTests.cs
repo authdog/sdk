@@ -185,6 +185,59 @@ namespace Authdog.Sdk.Tests
             }
         }
 
+        [Theory]
+        [MemberData(nameof(Wave2Cases))]
+        public async Task Wave2_MethodAndPath(Func<AuthdogClient, Task> call, string method, string path, object? body)
+        {
+            var (client, captured, _) = ClientFor(JsonResponse(new { }));
+
+            await call(client);
+
+            captured().Should().NotBeNull();
+            captured()!.Method.Method.Should().Be(method);
+            captured()!.RequestUri!.AbsolutePath.Should().Be(path);
+            if (body == null)
+            {
+                captured()!.Content.Should().BeNull();
+            }
+            else
+            {
+                var sent = await captured()!.Content!.ReadAsStringAsync();
+                JToken.DeepEquals(JObject.FromObject(body), JObject.Parse(sent)).Should().BeTrue();
+            }
+        }
+
+        [Fact]
+        public async Task Wave2_CreateKey_ExposesOneTimeSecret()
+        {
+            var (client, _, _) = ClientFor(JsonResponse(new { token = "orgk_secret_once", key = new { id = "key_1" } }));
+
+            var created = await client.Organizations.CreateKeyAsync("org_1", new Dictionary<string, object> { ["name"] = "ci" });
+
+            created["token"]!.ToString().Should().Be("orgk_secret_once");
+        }
+
+        [Fact]
+        public async Task Wave2_RotateKey_ExposesOneTimeSecret()
+        {
+            var (client, _, _) = ClientFor(JsonResponse(new { token = "orgk_rotated_once", key = new { id = "key_1" } }));
+
+            var rotated = await client.Organizations.RotateKeyAsync("org_1", "key_1");
+
+            rotated["token"]!.ToString().Should().Be("orgk_rotated_once");
+        }
+
+        [Fact]
+        public async Task Wave2_EventsList_ForwardsQueryParams()
+        {
+            var (client, captured, _) = ClientFor(JsonResponse(new { }));
+
+            await client.Events.ListAsync("ten_1", "env_1", new Dictionary<string, object> { ["limit"] = 50, ["after"] = "cur_1" });
+
+            captured()!.RequestUri!.AbsolutePath.Should().Be("/v1/tenants/ten_1/environments/env_1/events");
+            captured()!.RequestUri!.Query.Should().Be("?limit=50&after=cur_1");
+        }
+
         public static IEnumerable<object[]> Wave1Cases()
         {
             foreach (var row in OrgTenantCases())
@@ -196,6 +249,68 @@ namespace Authdog.Sdk.Tests
             {
                 yield return row;
             }
+        }
+
+        public static IEnumerable<object[]> Wave2Cases()
+        {
+            yield return Case(c => c.Organizations.ListKeysAsync("org_1"), "GET", "/v1/organizations/org_1/keys", null);
+            yield return Case(c => c.Organizations.CreateKeyAsync("org_1", new Dictionary<string, object> { ["name"] = "ci" }), "POST", "/v1/organizations/org_1/keys", new Dictionary<string, object> { ["name"] = "ci" });
+            yield return Case(c => c.Organizations.RevokeKeyAsync("org_1", "key_1"), "POST", "/v1/organizations/org_1/keys/key_1/revoke", null);
+            yield return Case(c => c.Organizations.RotateKeyAsync("org_1", "key_1"), "POST", "/v1/organizations/org_1/keys/key_1/rotate", null);
+            yield return Case(c => c.Organizations.UpdateKeyTenantsAsync("org_1", "key_1", new Dictionary<string, object> { ["tenantIds"] = new[] { "ten_1" } }), "PUT", "/v1/organizations/org_1/keys/key_1/tenants", new Dictionary<string, object> { ["tenantIds"] = new[] { "ten_1" } });
+            yield return Case(c => c.Organizations.ListAuditLogsAsync("org_1"), "GET", "/v1/organizations/org_1/audit/logs", null);
+            yield return Case(c => c.ServiceAccounts.ListAsync(), "GET", "/v1/service-accounts", null);
+            yield return Case(c => c.ServiceAccounts.CreateAsync(new Dictionary<string, object> { ["name"] = "bot" }), "POST", "/v1/service-accounts", new Dictionary<string, object> { ["name"] = "bot" });
+            yield return Case(c => c.ServiceAccounts.GetAsync("sa_1"), "GET", "/v1/service-accounts/sa_1", null);
+            yield return Case(c => c.ServiceAccounts.DeleteAsync("sa_1"), "DELETE", "/v1/service-accounts/sa_1", null);
+            yield return Case(c => c.PersonalAccessTokens.ListAsync(), "GET", "/v1/personal-access-tokens", null);
+            yield return Case(c => c.PersonalAccessTokens.CreateAsync(new Dictionary<string, object> { ["name"] = "cli" }), "POST", "/v1/personal-access-tokens", new Dictionary<string, object> { ["name"] = "cli" });
+            yield return Case(c => c.PersonalAccessTokens.RevokeAsync("pat_1"), "POST", "/v1/personal-access-tokens/pat_1/revoke", null);
+            yield return Case(c => c.ApiSecrets.ListAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/api-secrets", null);
+            yield return Case(c => c.ApiSecrets.CreateAsync("ten_1", "env_1", new Dictionary<string, object> { ["name"] = "runtime" }), "POST", "/v1/tenants/ten_1/environments/env_1/api-secrets", new Dictionary<string, object> { ["name"] = "runtime" });
+            yield return Case(c => c.ApiSecrets.RevokeAsync("ten_1", "env_1", "sec_1"), "POST", "/v1/tenants/ten_1/environments/env_1/api-secrets/sec_1/revoke", null);
+            yield return Case(c => c.Audit.ListLogsAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/audit/logs", null);
+            yield return Case(c => c.Audit.EventMetadataAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/audit/event-metadata", null);
+            yield return Case(c => c.Audit.EventTypesAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/audit/event-types", null);
+            yield return Case(c => c.Audit.EventTypesCatalogAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/audit/event-types/catalog", null);
+            yield return Case(c => c.Events.ListAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/events", null);
+            yield return Case(c => c.Events.ListTypesAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/events/types", null);
+            yield return Case(c => c.Events.IngestAsync("ten_1", "env_1", new Dictionary<string, object> { ["events"] = Array.Empty<object>() }), "POST", "/v1/tenants/ten_1/environments/env_1/events/ingest", new Dictionary<string, object> { ["events"] = Array.Empty<object>() });
+            yield return Case(c => c.Webhooks.ListAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/webhooks", null);
+            yield return Case(c => c.Webhooks.CreateAsync("ten_1", "env_1", new Dictionary<string, object> { ["url"] = "https://ex" }), "POST", "/v1/tenants/ten_1/environments/env_1/webhooks", new Dictionary<string, object> { ["url"] = "https://ex" });
+            yield return Case(c => c.Webhooks.UpdateAsync("ten_1", "env_1", "ch_1", new Dictionary<string, object> { ["url"] = "https://ex" }), "PUT", "/v1/tenants/ten_1/environments/env_1/webhooks/ch_1", new Dictionary<string, object> { ["url"] = "https://ex" });
+            yield return Case(c => c.Webhooks.DeleteAsync("ten_1", "env_1", "ch_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/webhooks/ch_1", null);
+            yield return Case(c => c.Webhooks.RotateSecretAsync("ten_1", "env_1", "ch_1"), "POST", "/v1/tenants/ten_1/environments/env_1/webhooks/ch_1/rotate-secret", null);
+            yield return Case(c => c.Webhooks.ListDeliveriesAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/webhooks/deliveries", null);
+            yield return Case(c => c.Webhooks.RedeliverAsync("ten_1", "env_1", "del_1"), "POST", "/v1/tenants/ten_1/environments/env_1/webhooks/deliveries/del_1/redeliver", null);
+            yield return Case(c => c.NotificationChannels.ListAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/notification-channels", null);
+            yield return Case(c => c.NotificationChannels.CreateAsync("ten_1", "env_1", new Dictionary<string, object> { ["type"] = "webhook" }), "POST", "/v1/tenants/ten_1/environments/env_1/notification-channels", new Dictionary<string, object> { ["type"] = "webhook" });
+            yield return Case(c => c.NotificationChannels.UpdateAsync("ten_1", "env_1", "ch_1", new Dictionary<string, object> { ["name"] = "n" }), "PUT", "/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1", new Dictionary<string, object> { ["name"] = "n" });
+            yield return Case(c => c.NotificationChannels.DeleteAsync("ten_1", "env_1", "ch_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1", null);
+            yield return Case(c => c.NotificationChannels.TestAsync("ten_1", "env_1", "ch_1"), "POST", "/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1/test", null);
+            yield return Case(c => c.Rbac.ListRolesAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/roles", null);
+            yield return Case(c => c.Rbac.CreateRoleAsync("ten_1", "env_1", new Dictionary<string, object> { ["name"] = "admin" }), "POST", "/v1/tenants/ten_1/environments/env_1/roles", new Dictionary<string, object> { ["name"] = "admin" });
+            yield return Case(c => c.Rbac.DeleteRoleAsync("ten_1", "env_1", "role_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/roles/role_1", null);
+            yield return Case(c => c.Rbac.ListRolePermissionsAsync("ten_1", "env_1", "role_1"), "GET", "/v1/tenants/ten_1/environments/env_1/roles/role_1/permissions", null);
+            yield return Case(c => c.Rbac.SetRolePermissionsAsync("ten_1", "env_1", "role_1", new Dictionary<string, object> { ["permissionIds"] = Array.Empty<object>() }), "PUT", "/v1/tenants/ten_1/environments/env_1/roles/role_1/permissions", new Dictionary<string, object> { ["permissionIds"] = Array.Empty<object>() });
+            yield return Case(c => c.Rbac.ListPermissionsAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/permissions", null);
+            yield return Case(c => c.Rbac.CreatePermissionAsync("ten_1", "env_1", new Dictionary<string, object> { ["name"] = "read" }), "POST", "/v1/tenants/ten_1/environments/env_1/permissions", new Dictionary<string, object> { ["name"] = "read" });
+            yield return Case(c => c.Rbac.DeletePermissionAsync("ten_1", "env_1", "perm_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/permissions/perm_1", null);
+            yield return Case(c => c.Rbac.ListResourcesAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/resources", null);
+            yield return Case(c => c.Rbac.CreateResourceAsync("ten_1", "env_1", new Dictionary<string, object> { ["name"] = "doc" }), "POST", "/v1/tenants/ten_1/environments/env_1/resources", new Dictionary<string, object> { ["name"] = "doc" });
+            yield return Case(c => c.Rbac.DeleteResourceAsync("ten_1", "env_1", "res_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/resources/res_1", null);
+            yield return Case(c => c.Rbac.ListGroupRolesAsync("ten_1", "env_1", "grp_1"), "GET", "/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles", null);
+            yield return Case(c => c.Rbac.AddGroupRoleAsync("ten_1", "env_1", "grp_1", new Dictionary<string, object> { ["roleId"] = "role_1" }), "POST", "/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles", new Dictionary<string, object> { ["roleId"] = "role_1" });
+            yield return Case(c => c.Rbac.RemoveGroupRoleAsync("ten_1", "env_1", "grp_1", "role_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles/role_1", null);
+            yield return Case(c => c.Rbac.ListGroupRoleMappingsAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/group-role-mappings", null);
+            yield return Case(c => c.Rbac.CreateGroupRoleMappingAsync("ten_1", "env_1", new Dictionary<string, object> { ["groupId"] = "grp_1" }), "POST", "/v1/tenants/ten_1/environments/env_1/group-role-mappings", new Dictionary<string, object> { ["groupId"] = "grp_1" });
+            yield return Case(c => c.Rbac.ApplyGroupRoleMappingsAsync("ten_1", "env_1"), "POST", "/v1/tenants/ten_1/environments/env_1/group-role-mappings/apply", null);
+            yield return Case(c => c.Rbac.DeleteGroupRoleMappingAsync("ten_1", "env_1", "map_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/group-role-mappings/map_1", null);
+            yield return Case(c => c.Rbac.ListAbacPoliciesAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/abac-policies", null);
+            yield return Case(c => c.Rbac.SaveAbacPolicyAsync("ten_1", "env_1", new Dictionary<string, object> { ["name"] = "p" }), "POST", "/v1/tenants/ten_1/environments/env_1/abac-policies", new Dictionary<string, object> { ["name"] = "p" });
+            yield return Case(c => c.Rbac.ValidateAbacPolicyAsync("ten_1", "env_1", new Dictionary<string, object> { ["rego"] = "x" }), "POST", "/v1/tenants/ten_1/environments/env_1/abac-policies/validate", new Dictionary<string, object> { ["rego"] = "x" });
+            yield return Case(c => c.Rbac.DeleteAbacPolicyAsync("ten_1", "env_1", "pol_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/abac-policies/pol_1", null);
+            yield return Case(c => c.Rbac.MyPermissionsAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/me/permissions", null);
         }
 
         private static IEnumerable<object[]> OrgTenantCases()

@@ -63,8 +63,11 @@ Initialize the Authdog client.
 
 #### Management namespaces
 
-`organizations`, `tenants`, `projects`, `environments`, `users`, and
-`groups` wrap Wave 1 of the public API. Example:
+`organizations`, `tenants`, `projects`, `environments`, `users`,
+`groups`, `rbac`, `audit`, `events`, `webhooks`,
+`notification_channels`, `service_accounts`,
+`personal_access_tokens`, and `api_secrets` wrap Waves 1–2 of the
+public API. Example:
 
 ```python
 with AuthdogClient("https://api.authdog.com", api_key="ad_...") as client:

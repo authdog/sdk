@@ -84,6 +84,32 @@ export class OrganizationsResource {
   unlinkTenant(id: string, tenantId: string): Promise<Json> {
     return this.client.request('DELETE', `/v1/organizations/${id}/tenants/${tenantId}`);
   }
+
+  listKeys(id: string): Promise<Json> {
+    return this.client.request('GET', `/v1/organizations/${id}/keys`);
+  }
+
+  createKey(id: string, body: Json): Promise<Json> {
+    return this.client.request('POST', `/v1/organizations/${id}/keys`, { data: body });
+  }
+
+  revokeKey(id: string, keyId: string): Promise<Json> {
+    return this.client.request('POST', `/v1/organizations/${id}/keys/${keyId}/revoke`);
+  }
+
+  rotateKey(id: string, keyId: string): Promise<Json> {
+    return this.client.request('POST', `/v1/organizations/${id}/keys/${keyId}/rotate`);
+  }
+
+  updateKeyTenants(id: string, keyId: string, body: Json): Promise<Json> {
+    return this.client.request('PUT', `/v1/organizations/${id}/keys/${keyId}/tenants`, {
+      data: body,
+    });
+  }
+
+  listAuditLogs(id: string, params?: Json): Promise<Json> {
+    return this.client.request('GET', `/v1/organizations/${id}/audit/logs`, { params });
+  }
 }
 
 export class TenantsResource {
@@ -340,6 +366,417 @@ export class GroupsResource {
     return this.client.request(
       'DELETE',
       `/v1/tenants/${tenantId}/environments/${environmentId}/groups/${groupId}/members/${userId}`
+    );
+  }
+}
+
+function envPath(tenantId: string, environmentId: string): string {
+  return `/v1/tenants/${tenantId}/environments/${environmentId}`;
+}
+
+export class RbacResource {
+  constructor(private readonly client: ManagementRequester) {}
+
+  listRoles(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request('GET', `${envPath(tenantId, environmentId)}/roles`);
+  }
+
+  createRole(tenantId: string, environmentId: string, body: Json): Promise<Json> {
+    return this.client.request('POST', `${envPath(tenantId, environmentId)}/roles`, {
+      data: body,
+    });
+  }
+
+  deleteRole(tenantId: string, environmentId: string, roleId: string): Promise<Json> {
+    return this.client.request(
+      'DELETE',
+      `${envPath(tenantId, environmentId)}/roles/${roleId}`
+    );
+  }
+
+  listRolePermissions(
+    tenantId: string,
+    environmentId: string,
+    roleId: string
+  ): Promise<Json> {
+    return this.client.request(
+      'GET',
+      `${envPath(tenantId, environmentId)}/roles/${roleId}/permissions`
+    );
+  }
+
+  setRolePermissions(
+    tenantId: string,
+    environmentId: string,
+    roleId: string,
+    body: Json
+  ): Promise<Json> {
+    return this.client.request(
+      'PUT',
+      `${envPath(tenantId, environmentId)}/roles/${roleId}/permissions`,
+      { data: body }
+    );
+  }
+
+  listPermissions(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request('GET', `${envPath(tenantId, environmentId)}/permissions`);
+  }
+
+  createPermission(tenantId: string, environmentId: string, body: Json): Promise<Json> {
+    return this.client.request('POST', `${envPath(tenantId, environmentId)}/permissions`, {
+      data: body,
+    });
+  }
+
+  deletePermission(
+    tenantId: string,
+    environmentId: string,
+    permissionId: string
+  ): Promise<Json> {
+    return this.client.request(
+      'DELETE',
+      `${envPath(tenantId, environmentId)}/permissions/${permissionId}`
+    );
+  }
+
+  listResources(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request('GET', `${envPath(tenantId, environmentId)}/resources`);
+  }
+
+  createResource(tenantId: string, environmentId: string, body: Json): Promise<Json> {
+    return this.client.request('POST', `${envPath(tenantId, environmentId)}/resources`, {
+      data: body,
+    });
+  }
+
+  deleteResource(
+    tenantId: string,
+    environmentId: string,
+    resourceId: string
+  ): Promise<Json> {
+    return this.client.request(
+      'DELETE',
+      `${envPath(tenantId, environmentId)}/resources/${resourceId}`
+    );
+  }
+
+  listGroupRoles(tenantId: string, environmentId: string, groupId: string): Promise<Json> {
+    return this.client.request(
+      'GET',
+      `${envPath(tenantId, environmentId)}/groups/${groupId}/roles`
+    );
+  }
+
+  addGroupRole(
+    tenantId: string,
+    environmentId: string,
+    groupId: string,
+    body: Json
+  ): Promise<Json> {
+    return this.client.request(
+      'POST',
+      `${envPath(tenantId, environmentId)}/groups/${groupId}/roles`,
+      { data: body }
+    );
+  }
+
+  removeGroupRole(
+    tenantId: string,
+    environmentId: string,
+    groupId: string,
+    roleId: string
+  ): Promise<Json> {
+    return this.client.request(
+      'DELETE',
+      `${envPath(tenantId, environmentId)}/groups/${groupId}/roles/${roleId}`
+    );
+  }
+
+  listGroupRoleMappings(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request(
+      'GET',
+      `${envPath(tenantId, environmentId)}/group-role-mappings`
+    );
+  }
+
+  createGroupRoleMapping(
+    tenantId: string,
+    environmentId: string,
+    body: Json
+  ): Promise<Json> {
+    return this.client.request(
+      'POST',
+      `${envPath(tenantId, environmentId)}/group-role-mappings`,
+      { data: body }
+    );
+  }
+
+  applyGroupRoleMappings(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request(
+      'POST',
+      `${envPath(tenantId, environmentId)}/group-role-mappings/apply`
+    );
+  }
+
+  deleteGroupRoleMapping(
+    tenantId: string,
+    environmentId: string,
+    mappingId: string
+  ): Promise<Json> {
+    return this.client.request(
+      'DELETE',
+      `${envPath(tenantId, environmentId)}/group-role-mappings/${mappingId}`
+    );
+  }
+
+  listAbacPolicies(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request('GET', `${envPath(tenantId, environmentId)}/abac-policies`);
+  }
+
+  saveAbacPolicy(tenantId: string, environmentId: string, body: Json): Promise<Json> {
+    return this.client.request('POST', `${envPath(tenantId, environmentId)}/abac-policies`, {
+      data: body,
+    });
+  }
+
+  validateAbacPolicy(tenantId: string, environmentId: string, body: Json): Promise<Json> {
+    return this.client.request(
+      'POST',
+      `${envPath(tenantId, environmentId)}/abac-policies/validate`,
+      { data: body }
+    );
+  }
+
+  deleteAbacPolicy(
+    tenantId: string,
+    environmentId: string,
+    policyId: string
+  ): Promise<Json> {
+    return this.client.request(
+      'DELETE',
+      `${envPath(tenantId, environmentId)}/abac-policies/${policyId}`
+    );
+  }
+
+  myPermissions(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request('GET', `${envPath(tenantId, environmentId)}/me/permissions`);
+  }
+}
+
+export class AuditResource {
+  constructor(private readonly client: ManagementRequester) {}
+
+  listLogs(tenantId: string, environmentId: string, params?: Json): Promise<Json> {
+    return this.client.request('GET', `${envPath(tenantId, environmentId)}/audit/logs`, {
+      params,
+    });
+  }
+
+  eventMetadata(tenantId: string, environmentId: string, params?: Json): Promise<Json> {
+    return this.client.request(
+      'GET',
+      `${envPath(tenantId, environmentId)}/audit/event-metadata`,
+      { params }
+    );
+  }
+
+  eventTypes(tenantId: string, environmentId: string, params?: Json): Promise<Json> {
+    return this.client.request(
+      'GET',
+      `${envPath(tenantId, environmentId)}/audit/event-types`,
+      { params }
+    );
+  }
+
+  eventTypesCatalog(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request(
+      'GET',
+      `${envPath(tenantId, environmentId)}/audit/event-types/catalog`
+    );
+  }
+}
+
+export class EventsResource {
+  constructor(private readonly client: ManagementRequester) {}
+
+  list(tenantId: string, environmentId: string, params?: Json): Promise<Json> {
+    return this.client.request('GET', `${envPath(tenantId, environmentId)}/events`, {
+      params,
+    });
+  }
+
+  listTypes(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request('GET', `${envPath(tenantId, environmentId)}/events/types`);
+  }
+
+  ingest(tenantId: string, environmentId: string, body: Json): Promise<Json> {
+    return this.client.request('POST', `${envPath(tenantId, environmentId)}/events/ingest`, {
+      data: body,
+    });
+  }
+}
+
+export class WebhooksResource {
+  constructor(private readonly client: ManagementRequester) {}
+
+  list(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request('GET', `${envPath(tenantId, environmentId)}/webhooks`);
+  }
+
+  create(tenantId: string, environmentId: string, body: Json): Promise<Json> {
+    return this.client.request('POST', `${envPath(tenantId, environmentId)}/webhooks`, {
+      data: body,
+    });
+  }
+
+  update(
+    tenantId: string,
+    environmentId: string,
+    channelId: string,
+    body: Json
+  ): Promise<Json> {
+    return this.client.request(
+      'PUT',
+      `${envPath(tenantId, environmentId)}/webhooks/${channelId}`,
+      { data: body }
+    );
+  }
+
+  delete(tenantId: string, environmentId: string, channelId: string): Promise<Json> {
+    return this.client.request(
+      'DELETE',
+      `${envPath(tenantId, environmentId)}/webhooks/${channelId}`
+    );
+  }
+
+  rotateSecret(tenantId: string, environmentId: string, channelId: string): Promise<Json> {
+    return this.client.request(
+      'POST',
+      `${envPath(tenantId, environmentId)}/webhooks/${channelId}/rotate-secret`
+    );
+  }
+
+  listDeliveries(tenantId: string, environmentId: string, params?: Json): Promise<Json> {
+    return this.client.request(
+      'GET',
+      `${envPath(tenantId, environmentId)}/webhooks/deliveries`,
+      { params }
+    );
+  }
+
+  redeliver(tenantId: string, environmentId: string, deliveryId: string): Promise<Json> {
+    return this.client.request(
+      'POST',
+      `${envPath(tenantId, environmentId)}/webhooks/deliveries/${deliveryId}/redeliver`
+    );
+  }
+}
+
+export class NotificationChannelsResource {
+  constructor(private readonly client: ManagementRequester) {}
+
+  list(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request(
+      'GET',
+      `${envPath(tenantId, environmentId)}/notification-channels`
+    );
+  }
+
+  create(tenantId: string, environmentId: string, body: Json): Promise<Json> {
+    return this.client.request(
+      'POST',
+      `${envPath(tenantId, environmentId)}/notification-channels`,
+      { data: body }
+    );
+  }
+
+  update(
+    tenantId: string,
+    environmentId: string,
+    channelId: string,
+    body: Json
+  ): Promise<Json> {
+    return this.client.request(
+      'PUT',
+      `${envPath(tenantId, environmentId)}/notification-channels/${channelId}`,
+      { data: body }
+    );
+  }
+
+  delete(tenantId: string, environmentId: string, channelId: string): Promise<Json> {
+    return this.client.request(
+      'DELETE',
+      `${envPath(tenantId, environmentId)}/notification-channels/${channelId}`
+    );
+  }
+
+  test(
+    tenantId: string,
+    environmentId: string,
+    channelId: string,
+    body?: Json
+  ): Promise<Json> {
+    return this.client.request(
+      'POST',
+      `${envPath(tenantId, environmentId)}/notification-channels/${channelId}/test`,
+      body !== undefined ? { data: body } : undefined
+    );
+  }
+}
+
+export class ServiceAccountsResource {
+  constructor(private readonly client: ManagementRequester) {}
+
+  list(): Promise<Json> {
+    return this.client.request('GET', '/v1/service-accounts');
+  }
+
+  create(body: Json): Promise<Json> {
+    return this.client.request('POST', '/v1/service-accounts', { data: body });
+  }
+
+  get(serviceAccountId: string): Promise<Json> {
+    return this.client.request('GET', `/v1/service-accounts/${serviceAccountId}`);
+  }
+
+  delete(serviceAccountId: string): Promise<Json> {
+    return this.client.request('DELETE', `/v1/service-accounts/${serviceAccountId}`);
+  }
+}
+
+export class PersonalAccessTokensResource {
+  constructor(private readonly client: ManagementRequester) {}
+
+  list(): Promise<Json> {
+    return this.client.request('GET', '/v1/personal-access-tokens');
+  }
+
+  create(body: Json): Promise<Json> {
+    return this.client.request('POST', '/v1/personal-access-tokens', { data: body });
+  }
+
+  revoke(tokenId: string): Promise<Json> {
+    return this.client.request('POST', `/v1/personal-access-tokens/${tokenId}/revoke`);
+  }
+}
+
+export class ApiSecretsResource {
+  constructor(private readonly client: ManagementRequester) {}
+
+  list(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request('GET', `${envPath(tenantId, environmentId)}/api-secrets`);
+  }
+
+  create(tenantId: string, environmentId: string, body: Json): Promise<Json> {
+    return this.client.request('POST', `${envPath(tenantId, environmentId)}/api-secrets`, {
+      data: body,
+    });
+  }
+
+  revoke(tenantId: string, environmentId: string, secretId: string): Promise<Json> {
+    return this.client.request(
+      'POST',
+      `${envPath(tenantId, environmentId)}/api-secrets/${secretId}/revoke`
     );
   }
 }

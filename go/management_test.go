@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"reflect"
 	"strings"
 	"testing"
@@ -473,6 +474,420 @@ func TestWave1MethodAndPath(t *testing.T) {
 				}
 			} else if !reflect.DeepEqual(gotBody, tt.body) {
 				t.Errorf("body = %#v, want %#v", gotBody, tt.body)
+			}
+		})
+	}
+}
+
+type wave2Case struct {
+	name   string
+	call   func(ctx context.Context, c *Client) error
+	method string
+	path   string
+	body   map[string]interface{}
+}
+
+func wave2Cases() []wave2Case {
+	return []wave2Case{
+		{"orgs.list_keys", func(ctx context.Context, c *Client) error {
+			_, err := c.Organizations.ListKeys(ctx, "org_1")
+			return err
+		}, "GET", "/v1/organizations/org_1/keys", nil},
+		{"orgs.create_key", func(ctx context.Context, c *Client) error {
+			_, err := c.Organizations.CreateKey(ctx, "org_1", map[string]interface{}{"name": "ci"})
+			return err
+		}, "POST", "/v1/organizations/org_1/keys", map[string]interface{}{"name": "ci"}},
+		{"orgs.revoke_key", func(ctx context.Context, c *Client) error {
+			_, err := c.Organizations.RevokeKey(ctx, "org_1", "key_1")
+			return err
+		}, "POST", "/v1/organizations/org_1/keys/key_1/revoke", nil},
+		{"orgs.rotate_key", func(ctx context.Context, c *Client) error {
+			_, err := c.Organizations.RotateKey(ctx, "org_1", "key_1")
+			return err
+		}, "POST", "/v1/organizations/org_1/keys/key_1/rotate", nil},
+		{"orgs.update_key_tenants", func(ctx context.Context, c *Client) error {
+			_, err := c.Organizations.UpdateKeyTenants(ctx, "org_1", "key_1", map[string]interface{}{"tenantIds": []interface{}{"ten_1"}})
+			return err
+		}, "PUT", "/v1/organizations/org_1/keys/key_1/tenants", map[string]interface{}{"tenantIds": []interface{}{"ten_1"}}},
+		{"orgs.list_audit_logs", func(ctx context.Context, c *Client) error {
+			_, err := c.Organizations.ListAuditLogs(ctx, "org_1", nil)
+			return err
+		}, "GET", "/v1/organizations/org_1/audit/logs", nil},
+		{"service_accounts.list", func(ctx context.Context, c *Client) error {
+			_, err := c.ServiceAccounts.List(ctx)
+			return err
+		}, "GET", "/v1/service-accounts", nil},
+		{"service_accounts.create", func(ctx context.Context, c *Client) error {
+			_, err := c.ServiceAccounts.Create(ctx, map[string]interface{}{"name": "bot"})
+			return err
+		}, "POST", "/v1/service-accounts", map[string]interface{}{"name": "bot"}},
+		{"service_accounts.get", func(ctx context.Context, c *Client) error {
+			_, err := c.ServiceAccounts.Get(ctx, "sa_1")
+			return err
+		}, "GET", "/v1/service-accounts/sa_1", nil},
+		{"service_accounts.delete", func(ctx context.Context, c *Client) error {
+			_, err := c.ServiceAccounts.Delete(ctx, "sa_1")
+			return err
+		}, "DELETE", "/v1/service-accounts/sa_1", nil},
+		{"personal_access_tokens.list", func(ctx context.Context, c *Client) error {
+			_, err := c.PersonalAccessTokens.List(ctx)
+			return err
+		}, "GET", "/v1/personal-access-tokens", nil},
+		{"personal_access_tokens.create", func(ctx context.Context, c *Client) error {
+			_, err := c.PersonalAccessTokens.Create(ctx, map[string]interface{}{"name": "cli"})
+			return err
+		}, "POST", "/v1/personal-access-tokens", map[string]interface{}{"name": "cli"}},
+		{"personal_access_tokens.revoke", func(ctx context.Context, c *Client) error {
+			_, err := c.PersonalAccessTokens.Revoke(ctx, "pat_1")
+			return err
+		}, "POST", "/v1/personal-access-tokens/pat_1/revoke", nil},
+		{"api_secrets.list", func(ctx context.Context, c *Client) error {
+			_, err := c.ApiSecrets.List(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/api-secrets", nil},
+		{"api_secrets.create", func(ctx context.Context, c *Client) error {
+			_, err := c.ApiSecrets.Create(ctx, "ten_1", "env_1", map[string]interface{}{"name": "runtime"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/api-secrets", map[string]interface{}{"name": "runtime"}},
+		{"api_secrets.revoke", func(ctx context.Context, c *Client) error {
+			_, err := c.ApiSecrets.Revoke(ctx, "ten_1", "env_1", "sec_1")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/api-secrets/sec_1/revoke", nil},
+		{"audit.list_logs", func(ctx context.Context, c *Client) error {
+			_, err := c.Audit.ListLogs(ctx, "ten_1", "env_1", nil)
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/audit/logs", nil},
+		{"audit.event_metadata", func(ctx context.Context, c *Client) error {
+			_, err := c.Audit.EventMetadata(ctx, "ten_1", "env_1", nil)
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/audit/event-metadata", nil},
+		{"audit.event_types", func(ctx context.Context, c *Client) error {
+			_, err := c.Audit.EventTypes(ctx, "ten_1", "env_1", nil)
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/audit/event-types", nil},
+		{"audit.event_types_catalog", func(ctx context.Context, c *Client) error {
+			_, err := c.Audit.EventTypesCatalog(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/audit/event-types/catalog", nil},
+		{"events.list", func(ctx context.Context, c *Client) error {
+			_, err := c.Events.List(ctx, "ten_1", "env_1", nil)
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/events", nil},
+		{"events.list_types", func(ctx context.Context, c *Client) error {
+			_, err := c.Events.ListTypes(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/events/types", nil},
+		{"events.ingest", func(ctx context.Context, c *Client) error {
+			_, err := c.Events.Ingest(ctx, "ten_1", "env_1", map[string]interface{}{"events": []interface{}{}})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/events/ingest", map[string]interface{}{"events": []interface{}{}}},
+		{"webhooks.list", func(ctx context.Context, c *Client) error {
+			_, err := c.Webhooks.List(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/webhooks", nil},
+		{"webhooks.create", func(ctx context.Context, c *Client) error {
+			_, err := c.Webhooks.Create(ctx, "ten_1", "env_1", map[string]interface{}{"url": "https://ex"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/webhooks", map[string]interface{}{"url": "https://ex"}},
+		{"webhooks.update", func(ctx context.Context, c *Client) error {
+			_, err := c.Webhooks.Update(ctx, "ten_1", "env_1", "ch_1", map[string]interface{}{"url": "https://ex"})
+			return err
+		}, "PUT", "/v1/tenants/ten_1/environments/env_1/webhooks/ch_1", map[string]interface{}{"url": "https://ex"}},
+		{"webhooks.delete", func(ctx context.Context, c *Client) error {
+			_, err := c.Webhooks.Delete(ctx, "ten_1", "env_1", "ch_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/webhooks/ch_1", nil},
+		{"webhooks.rotate_secret", func(ctx context.Context, c *Client) error {
+			_, err := c.Webhooks.RotateSecret(ctx, "ten_1", "env_1", "ch_1")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/webhooks/ch_1/rotate-secret", nil},
+		{"webhooks.list_deliveries", func(ctx context.Context, c *Client) error {
+			_, err := c.Webhooks.ListDeliveries(ctx, "ten_1", "env_1", nil)
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/webhooks/deliveries", nil},
+		{"webhooks.redeliver", func(ctx context.Context, c *Client) error {
+			_, err := c.Webhooks.Redeliver(ctx, "ten_1", "env_1", "del_1")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/webhooks/deliveries/del_1/redeliver", nil},
+		{"notification_channels.list", func(ctx context.Context, c *Client) error {
+			_, err := c.NotificationChannels.List(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/notification-channels", nil},
+		{"notification_channels.create", func(ctx context.Context, c *Client) error {
+			_, err := c.NotificationChannels.Create(ctx, "ten_1", "env_1", map[string]interface{}{"type": "webhook"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/notification-channels", map[string]interface{}{"type": "webhook"}},
+		{"notification_channels.update", func(ctx context.Context, c *Client) error {
+			_, err := c.NotificationChannels.Update(ctx, "ten_1", "env_1", "ch_1", map[string]interface{}{"name": "n"})
+			return err
+		}, "PUT", "/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1", map[string]interface{}{"name": "n"}},
+		{"notification_channels.delete", func(ctx context.Context, c *Client) error {
+			_, err := c.NotificationChannels.Delete(ctx, "ten_1", "env_1", "ch_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1", nil},
+		{"notification_channels.test", func(ctx context.Context, c *Client) error {
+			_, err := c.NotificationChannels.Test(ctx, "ten_1", "env_1", "ch_1", nil)
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1/test", nil},
+		{"rbac.list_roles", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.ListRoles(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/roles", nil},
+		{"rbac.create_role", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.CreateRole(ctx, "ten_1", "env_1", map[string]interface{}{"name": "admin"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/roles", map[string]interface{}{"name": "admin"}},
+		{"rbac.delete_role", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.DeleteRole(ctx, "ten_1", "env_1", "role_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/roles/role_1", nil},
+		{"rbac.list_role_permissions", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.ListRolePermissions(ctx, "ten_1", "env_1", "role_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/roles/role_1/permissions", nil},
+		{"rbac.set_role_permissions", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.SetRolePermissions(ctx, "ten_1", "env_1", "role_1", map[string]interface{}{"permissionIds": []interface{}{}})
+			return err
+		}, "PUT", "/v1/tenants/ten_1/environments/env_1/roles/role_1/permissions", map[string]interface{}{"permissionIds": []interface{}{}}},
+		{"rbac.list_permissions", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.ListPermissions(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/permissions", nil},
+		{"rbac.create_permission", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.CreatePermission(ctx, "ten_1", "env_1", map[string]interface{}{"name": "read"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/permissions", map[string]interface{}{"name": "read"}},
+		{"rbac.delete_permission", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.DeletePermission(ctx, "ten_1", "env_1", "perm_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/permissions/perm_1", nil},
+		{"rbac.list_resources", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.ListResources(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/resources", nil},
+		{"rbac.create_resource", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.CreateResource(ctx, "ten_1", "env_1", map[string]interface{}{"name": "doc"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/resources", map[string]interface{}{"name": "doc"}},
+		{"rbac.delete_resource", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.DeleteResource(ctx, "ten_1", "env_1", "res_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/resources/res_1", nil},
+		{"rbac.list_group_roles", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.ListGroupRoles(ctx, "ten_1", "env_1", "grp_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles", nil},
+		{"rbac.add_group_role", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.AddGroupRole(ctx, "ten_1", "env_1", "grp_1", map[string]interface{}{"roleId": "role_1"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles", map[string]interface{}{"roleId": "role_1"}},
+		{"rbac.remove_group_role", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.RemoveGroupRole(ctx, "ten_1", "env_1", "grp_1", "role_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles/role_1", nil},
+		{"rbac.list_group_role_mappings", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.ListGroupRoleMappings(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/group-role-mappings", nil},
+		{"rbac.create_group_role_mapping", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.CreateGroupRoleMapping(ctx, "ten_1", "env_1", map[string]interface{}{"groupId": "grp_1"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/group-role-mappings", map[string]interface{}{"groupId": "grp_1"}},
+		{"rbac.apply_group_role_mappings", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.ApplyGroupRoleMappings(ctx, "ten_1", "env_1")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/group-role-mappings/apply", nil},
+		{"rbac.delete_group_role_mapping", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.DeleteGroupRoleMapping(ctx, "ten_1", "env_1", "map_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/group-role-mappings/map_1", nil},
+		{"rbac.list_abac_policies", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.ListAbacPolicies(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/abac-policies", nil},
+		{"rbac.save_abac_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.SaveAbacPolicy(ctx, "ten_1", "env_1", map[string]interface{}{"name": "p"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/abac-policies", map[string]interface{}{"name": "p"}},
+		{"rbac.validate_abac_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.ValidateAbacPolicy(ctx, "ten_1", "env_1", map[string]interface{}{"rego": "x"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/abac-policies/validate", map[string]interface{}{"rego": "x"}},
+		{"rbac.delete_abac_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.DeleteAbacPolicy(ctx, "ten_1", "env_1", "pol_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/abac-policies/pol_1", nil},
+		{"rbac.my_permissions", func(ctx context.Context, c *Client) error {
+			_, err := c.Rbac.MyPermissions(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/me/permissions", nil},
+	}
+}
+
+func TestWave2MethodAndPath(t *testing.T) {
+	cases := wave2Cases()
+	if len(cases) != 58 {
+		t.Fatalf("wave2 resource cases = %d, want 58", len(cases))
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			var gotMethod, gotPath, gotAuth string
+			var gotBody map[string]interface{}
+			client := managementClient(t, func(w http.ResponseWriter, r *http.Request) {
+				gotMethod = r.Method
+				gotPath = r.URL.Path
+				gotAuth = r.Header.Get("Authorization")
+				if r.Body != nil {
+					if err := json.NewDecoder(r.Body).Decode(&gotBody); err != nil && err != io.EOF {
+						t.Errorf("decode body: %v", err)
+					}
+				}
+				writeJSON(t, w, http.StatusOK, map[string]interface{}{})
+			})
+
+			if err := tt.call(context.Background(), client); err != nil {
+				t.Fatalf("call error = %v", err)
+			}
+			if gotAuth != "Bearer key-1" {
+				t.Errorf("Authorization = %q, want Bearer key-1", gotAuth)
+			}
+			if gotMethod != tt.method {
+				t.Errorf("method = %s, want %s", gotMethod, tt.method)
+			}
+			if gotPath != tt.path {
+				t.Errorf("path = %s, want %s", gotPath, tt.path)
+			}
+			if tt.body == nil {
+				if gotBody != nil {
+					t.Errorf("body = %#v, want nil", gotBody)
+				}
+			} else if !reflect.DeepEqual(gotBody, tt.body) {
+				t.Errorf("body = %#v, want %#v", gotBody, tt.body)
+			}
+		})
+	}
+}
+
+func TestWave2_CreateKeyExposesOneTimeSecret(t *testing.T) {
+	client := managementClient(t, func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(t, w, http.StatusOK, map[string]interface{}{
+			"token": "orgk_secret_once",
+			"key":   map[string]interface{}{"id": "key_1"},
+		})
+	})
+
+	created, err := client.Organizations.CreateKey(context.Background(), "org_1", map[string]interface{}{"name": "ci"})
+	if err != nil {
+		t.Fatalf("CreateKey() error = %v", err)
+	}
+	if created["token"] != "orgk_secret_once" {
+		t.Errorf("token = %#v, want orgk_secret_once", created["token"])
+	}
+}
+
+func TestWave2_CreateRotateExposeOneTimeSecrets(t *testing.T) {
+	cases := []struct {
+		name   string
+		secret string
+		field  string
+		call   func(ctx context.Context, c *Client) (map[string]interface{}, error)
+	}{
+		{"orgs.create_key", "orgk_secret_once", "token", func(ctx context.Context, c *Client) (map[string]interface{}, error) {
+			return c.Organizations.CreateKey(ctx, "org_1", map[string]interface{}{"name": "ci"})
+		}},
+		{"orgs.rotate_key", "orgk_rotated", "token", func(ctx context.Context, c *Client) (map[string]interface{}, error) {
+			return c.Organizations.RotateKey(ctx, "org_1", "key_1")
+		}},
+		{"service_accounts.create", "sa_secret_once", "token", func(ctx context.Context, c *Client) (map[string]interface{}, error) {
+			return c.ServiceAccounts.Create(ctx, map[string]interface{}{"name": "bot"})
+		}},
+		{"personal_access_tokens.create", "pat_secret_once", "token", func(ctx context.Context, c *Client) (map[string]interface{}, error) {
+			return c.PersonalAccessTokens.Create(ctx, map[string]interface{}{"name": "cli"})
+		}},
+		{"api_secrets.create", "api_secret_once", "secret", func(ctx context.Context, c *Client) (map[string]interface{}, error) {
+			return c.ApiSecrets.Create(ctx, "ten_1", "env_1", map[string]interface{}{"name": "runtime"})
+		}},
+		{"webhooks.create", "whsec_once", "secret", func(ctx context.Context, c *Client) (map[string]interface{}, error) {
+			return c.Webhooks.Create(ctx, "ten_1", "env_1", map[string]interface{}{"url": "https://ex"})
+		}},
+		{"webhooks.rotate_secret", "whsec_rotated", "secret", func(ctx context.Context, c *Client) (map[string]interface{}, error) {
+			return c.Webhooks.RotateSecret(ctx, "ten_1", "env_1", "ch_1")
+		}},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			client := managementClient(t, func(w http.ResponseWriter, r *http.Request) {
+				writeJSON(t, w, http.StatusOK, map[string]interface{}{tt.field: tt.secret})
+			})
+			got, err := tt.call(context.Background(), client)
+			if err != nil {
+				t.Fatalf("call error = %v", err)
+			}
+			if got[tt.field] != tt.secret {
+				t.Errorf("%s = %#v, want %s", tt.field, got[tt.field], tt.secret)
+			}
+		})
+	}
+}
+
+func TestWave2_QueryParamsForwarded(t *testing.T) {
+	query := url.Values{}
+	query.Set("limit", "50")
+	query.Set("after", "cur_1")
+
+	cases := []struct {
+		name string
+		call func(ctx context.Context, c *Client) error
+		path string
+	}{
+		{"events.list", func(ctx context.Context, c *Client) error {
+			_, err := c.Events.List(ctx, "ten_1", "env_1", query)
+			return err
+		}, "/v1/tenants/ten_1/environments/env_1/events"},
+		{"audit.list_logs", func(ctx context.Context, c *Client) error {
+			_, err := c.Audit.ListLogs(ctx, "ten_1", "env_1", query)
+			return err
+		}, "/v1/tenants/ten_1/environments/env_1/audit/logs"},
+		{"audit.event_metadata", func(ctx context.Context, c *Client) error {
+			_, err := c.Audit.EventMetadata(ctx, "ten_1", "env_1", query)
+			return err
+		}, "/v1/tenants/ten_1/environments/env_1/audit/event-metadata"},
+		{"audit.event_types", func(ctx context.Context, c *Client) error {
+			_, err := c.Audit.EventTypes(ctx, "ten_1", "env_1", query)
+			return err
+		}, "/v1/tenants/ten_1/environments/env_1/audit/event-types"},
+		{"webhooks.list_deliveries", func(ctx context.Context, c *Client) error {
+			_, err := c.Webhooks.ListDeliveries(ctx, "ten_1", "env_1", query)
+			return err
+		}, "/v1/tenants/ten_1/environments/env_1/webhooks/deliveries"},
+		{"orgs.list_audit_logs", func(ctx context.Context, c *Client) error {
+			_, err := c.Organizations.ListAuditLogs(ctx, "org_1", query)
+			return err
+		}, "/v1/organizations/org_1/audit/logs"},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			var gotPath string
+			var gotQuery url.Values
+			client := managementClient(t, func(w http.ResponseWriter, r *http.Request) {
+				gotPath = r.URL.Path
+				gotQuery = r.URL.Query()
+				writeJSON(t, w, http.StatusOK, map[string]interface{}{})
+			})
+			if err := tt.call(context.Background(), client); err != nil {
+				t.Fatalf("call error = %v", err)
+			}
+			if gotPath != tt.path {
+				t.Errorf("path = %s, want %s", gotPath, tt.path)
+			}
+			if gotQuery.Get("limit") != "50" {
+				t.Errorf("limit = %q, want 50", gotQuery.Get("limit"))
+			}
+			if gotQuery.Get("after") != "cur_1" {
+				t.Errorf("after = %q, want cur_1", gotQuery.Get("after"))
 			}
 		})
 	}

@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-17
 
-**Status**: Wave 1 implemented (Waves 2–3 specified, not shipped)
+**Status**: Waves 1–2 implemented (Wave 3 specified, not shipped)
 
 **Input**: Keep official SDKs at parity with the public Authdog
 platform API at api.authdog.com, not only the current user-info call.

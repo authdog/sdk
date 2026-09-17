@@ -170,3 +170,122 @@ describe('Wave 1 management', () => {
     );
   });
 });
+
+describe('Wave 2 management', () => {
+  let client: AuthdogClient;
+  let mockAxiosInstance: any;
+
+  beforeEach(() => {
+    mockAxiosInstance = {
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      patch: vi.fn(),
+      delete: vi.fn(),
+      request: vi.fn(),
+    };
+    mockedAxios.create.mockReturnValue(mockAxiosInstance);
+    mockedAxios.isAxiosError.mockReturnValue(false);
+    client = new AuthdogClient({
+      baseUrl: 'https://api.authdog.com',
+      apiKey: 'key-1',
+    });
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const wave2Cases: Array<[string, () => Promise<unknown>, string, string, unknown]> = [
+    ['orgs list keys', () => client.organizations.listKeys('org_1'), 'GET', '/v1/organizations/org_1/keys', undefined],
+    ['orgs create key', () => client.organizations.createKey('org_1', { name: 'ci' }), 'POST', '/v1/organizations/org_1/keys', { name: 'ci' }],
+    ['orgs revoke key', () => client.organizations.revokeKey('org_1', 'key_1'), 'POST', '/v1/organizations/org_1/keys/key_1/revoke', undefined],
+    ['orgs rotate key', () => client.organizations.rotateKey('org_1', 'key_1'), 'POST', '/v1/organizations/org_1/keys/key_1/rotate', undefined],
+    ['orgs update key tenants', () => client.organizations.updateKeyTenants('org_1', 'key_1', { tenantIds: ['ten_1'] }), 'PUT', '/v1/organizations/org_1/keys/key_1/tenants', { tenantIds: ['ten_1'] }],
+    ['orgs list audit logs', () => client.organizations.listAuditLogs('org_1'), 'GET', '/v1/organizations/org_1/audit/logs', undefined],
+    ['service accounts list', () => client.serviceAccounts.list(), 'GET', '/v1/service-accounts', undefined],
+    ['service accounts create', () => client.serviceAccounts.create({ name: 'bot' }), 'POST', '/v1/service-accounts', { name: 'bot' }],
+    ['service accounts get', () => client.serviceAccounts.get('sa_1'), 'GET', '/v1/service-accounts/sa_1', undefined],
+    ['service accounts delete', () => client.serviceAccounts.delete('sa_1'), 'DELETE', '/v1/service-accounts/sa_1', undefined],
+    ['pats list', () => client.personalAccessTokens.list(), 'GET', '/v1/personal-access-tokens', undefined],
+    ['pats create', () => client.personalAccessTokens.create({ name: 'cli' }), 'POST', '/v1/personal-access-tokens', { name: 'cli' }],
+    ['pats revoke', () => client.personalAccessTokens.revoke('pat_1'), 'POST', '/v1/personal-access-tokens/pat_1/revoke', undefined],
+    ['api secrets list', () => client.apiSecrets.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/api-secrets', undefined],
+    ['api secrets create', () => client.apiSecrets.create('ten_1', 'env_1', { name: 'runtime' }), 'POST', '/v1/tenants/ten_1/environments/env_1/api-secrets', { name: 'runtime' }],
+    ['api secrets revoke', () => client.apiSecrets.revoke('ten_1', 'env_1', 'sec_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/api-secrets/sec_1/revoke', undefined],
+    ['audit list logs', () => client.audit.listLogs('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/audit/logs', undefined],
+    ['audit event metadata', () => client.audit.eventMetadata('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/audit/event-metadata', undefined],
+    ['audit event types', () => client.audit.eventTypes('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/audit/event-types', undefined],
+    ['audit event types catalog', () => client.audit.eventTypesCatalog('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/audit/event-types/catalog', undefined],
+    ['events list', () => client.events.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/events', undefined],
+    ['events list types', () => client.events.listTypes('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/events/types', undefined],
+    ['events ingest', () => client.events.ingest('ten_1', 'env_1', { events: [] }), 'POST', '/v1/tenants/ten_1/environments/env_1/events/ingest', { events: [] }],
+    ['webhooks list', () => client.webhooks.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/webhooks', undefined],
+    ['webhooks create', () => client.webhooks.create('ten_1', 'env_1', { url: 'https://ex' }), 'POST', '/v1/tenants/ten_1/environments/env_1/webhooks', { url: 'https://ex' }],
+    ['webhooks update', () => client.webhooks.update('ten_1', 'env_1', 'ch_1', { url: 'https://ex' }), 'PUT', '/v1/tenants/ten_1/environments/env_1/webhooks/ch_1', { url: 'https://ex' }],
+    ['webhooks delete', () => client.webhooks.delete('ten_1', 'env_1', 'ch_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/webhooks/ch_1', undefined],
+    ['webhooks rotate secret', () => client.webhooks.rotateSecret('ten_1', 'env_1', 'ch_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/webhooks/ch_1/rotate-secret', undefined],
+    ['webhooks deliveries', () => client.webhooks.listDeliveries('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/webhooks/deliveries', undefined],
+    ['webhooks redeliver', () => client.webhooks.redeliver('ten_1', 'env_1', 'del_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/webhooks/deliveries/del_1/redeliver', undefined],
+    ['notification channels list', () => client.notificationChannels.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/notification-channels', undefined],
+    ['notification channels create', () => client.notificationChannels.create('ten_1', 'env_1', { type: 'webhook' }), 'POST', '/v1/tenants/ten_1/environments/env_1/notification-channels', { type: 'webhook' }],
+    ['notification channels update', () => client.notificationChannels.update('ten_1', 'env_1', 'ch_1', { name: 'n' }), 'PUT', '/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1', { name: 'n' }],
+    ['notification channels delete', () => client.notificationChannels.delete('ten_1', 'env_1', 'ch_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1', undefined],
+    ['notification channels test', () => client.notificationChannels.test('ten_1', 'env_1', 'ch_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/notification-channels/ch_1/test', undefined],
+    ['rbac list roles', () => client.rbac.listRoles('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/roles', undefined],
+    ['rbac create role', () => client.rbac.createRole('ten_1', 'env_1', { name: 'admin' }), 'POST', '/v1/tenants/ten_1/environments/env_1/roles', { name: 'admin' }],
+    ['rbac delete role', () => client.rbac.deleteRole('ten_1', 'env_1', 'role_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/roles/role_1', undefined],
+    ['rbac list role permissions', () => client.rbac.listRolePermissions('ten_1', 'env_1', 'role_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/roles/role_1/permissions', undefined],
+    ['rbac set role permissions', () => client.rbac.setRolePermissions('ten_1', 'env_1', 'role_1', { permissionIds: [] }), 'PUT', '/v1/tenants/ten_1/environments/env_1/roles/role_1/permissions', { permissionIds: [] }],
+    ['rbac list permissions', () => client.rbac.listPermissions('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/permissions', undefined],
+    ['rbac create permission', () => client.rbac.createPermission('ten_1', 'env_1', { name: 'read' }), 'POST', '/v1/tenants/ten_1/environments/env_1/permissions', { name: 'read' }],
+    ['rbac delete permission', () => client.rbac.deletePermission('ten_1', 'env_1', 'perm_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/permissions/perm_1', undefined],
+    ['rbac list resources', () => client.rbac.listResources('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/resources', undefined],
+    ['rbac create resource', () => client.rbac.createResource('ten_1', 'env_1', { name: 'doc' }), 'POST', '/v1/tenants/ten_1/environments/env_1/resources', { name: 'doc' }],
+    ['rbac delete resource', () => client.rbac.deleteResource('ten_1', 'env_1', 'res_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/resources/res_1', undefined],
+    ['rbac list group roles', () => client.rbac.listGroupRoles('ten_1', 'env_1', 'grp_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles', undefined],
+    ['rbac add group role', () => client.rbac.addGroupRole('ten_1', 'env_1', 'grp_1', { roleId: 'role_1' }), 'POST', '/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles', { roleId: 'role_1' }],
+    ['rbac remove group role', () => client.rbac.removeGroupRole('ten_1', 'env_1', 'grp_1', 'role_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/groups/grp_1/roles/role_1', undefined],
+    ['rbac list group role mappings', () => client.rbac.listGroupRoleMappings('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/group-role-mappings', undefined],
+    ['rbac create group role mapping', () => client.rbac.createGroupRoleMapping('ten_1', 'env_1', { groupId: 'grp_1' }), 'POST', '/v1/tenants/ten_1/environments/env_1/group-role-mappings', { groupId: 'grp_1' }],
+    ['rbac apply group role mappings', () => client.rbac.applyGroupRoleMappings('ten_1', 'env_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/group-role-mappings/apply', undefined],
+    ['rbac delete group role mapping', () => client.rbac.deleteGroupRoleMapping('ten_1', 'env_1', 'map_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/group-role-mappings/map_1', undefined],
+    ['rbac list abac policies', () => client.rbac.listAbacPolicies('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/abac-policies', undefined],
+    ['rbac save abac policy', () => client.rbac.saveAbacPolicy('ten_1', 'env_1', { name: 'p' }), 'POST', '/v1/tenants/ten_1/environments/env_1/abac-policies', { name: 'p' }],
+    ['rbac validate abac policy', () => client.rbac.validateAbacPolicy('ten_1', 'env_1', { rego: 'x' }), 'POST', '/v1/tenants/ten_1/environments/env_1/abac-policies/validate', { rego: 'x' }],
+    ['rbac delete abac policy', () => client.rbac.deleteAbacPolicy('ten_1', 'env_1', 'pol_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/abac-policies/pol_1', undefined],
+    ['rbac my permissions', () => client.rbac.myPermissions('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/me/permissions', undefined],
+  ];
+
+  it.each(wave2Cases)('%s hits %s %s', async (_name, call, method, url, data) => {
+    mockAxiosInstance.request.mockResolvedValue({ data: {} });
+    await call();
+    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method,
+        url,
+        ...(data !== undefined ? { data } : {}),
+      })
+    );
+  });
+
+  it('createKey exposes one-time secret', async () => {
+    mockAxiosInstance.request.mockResolvedValue({
+      data: { token: 'orgk_secret_once', key: { id: 'key_1' } },
+    });
+    const created = await client.organizations.createKey('org_1', { name: 'ci' });
+    expect(created.token).toBe('orgk_secret_once');
+  });
+
+  it('events.list forwards query params', async () => {
+    mockAxiosInstance.request.mockResolvedValue({ data: {} });
+    await client.events.list('ten_1', 'env_1', { limit: 50, after: 'cur_1' });
+    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        url: '/v1/tenants/ten_1/environments/env_1/events',
+        params: { limit: 50, after: 'cur_1' },
+      })
+    );
+  });
+});

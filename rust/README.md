@@ -104,8 +104,10 @@ Creates a new Authdog client.
 - `timeout` (Option<Duration>): Request timeout (default: 10 seconds)
 
 `health()`, `organizations()`, `tenants()`, `projects()`, `environments()`,
-`users()`, and `groups()` wrap Wave 1 of the public API. See
-`specs/004-api-parity/`.
+`users()`, `groups()`, `rbac()`, `audit()`, `events()`, `webhooks()`,
+`notification_channels()`, `service_accounts()`,
+`personal_access_tokens()`, and `api_secrets()` wrap Waves 1–2 of the
+public API. See `specs/004-api-parity/`.
 
 #### Methods
 
