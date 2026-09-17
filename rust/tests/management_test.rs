@@ -672,8 +672,7 @@ async fn test_wave1_method_and_path() {
         assert_eq!(request.method.as_str(), case.method, "{}", case.name);
         assert_eq!(request.url.path(), case.path, "{}", case.name);
         if let Some(expected) = &case.body {
-            let actual: Value =
-                serde_json::from_slice(&request.body).unwrap_or(Value::Null);
+            let actual: Value = serde_json::from_slice(&request.body).unwrap_or(Value::Null);
             assert_eq!(&actual, expected, "body mismatch for {}", case.name);
         }
     }
@@ -1432,8 +1431,7 @@ async fn test_wave2_method_and_path() {
         assert_eq!(request.method.as_str(), case.method, "{}", case.name);
         assert_eq!(request.url.path(), case.path, "{}", case.name);
         if let Some(expected) = &case.body {
-            let actual: Value =
-                serde_json::from_slice(&request.body).unwrap_or(Value::Null);
+            let actual: Value = serde_json::from_slice(&request.body).unwrap_or(Value::Null);
             assert_eq!(&actual, expected, "body mismatch for {}", case.name);
         }
     }
