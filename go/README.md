@@ -90,14 +90,20 @@ Creates a new Authdog client.
 **Config Options:**
 - `BaseURL` (string): The base URL of the Authdog API
 - `APIKey` (string): Optional management Bearer credential (userinfo still uses the access token)
+- `EnvironmentSecret`, `SCIMToken`, `HRISToken`: optional specialized Bearers for AuthZEN/MCP runtime, SCIM, and HRIS
+- `Timeout` (time.Duration): Request timeout (default: 10 seconds)
+- `HTTPClient` (*http.Client): Optional custom HTTP client
 
 `Health`, `Organizations`, `Tenants`, `Projects`, `Environments`,
 `Users`, `Groups`, `Rbac`, `Audit`, `Events`, `Webhooks`,
 `NotificationChannels`, `ServiceAccounts`, `PersonalAccessTokens`,
-and `ApiSecrets` wrap Waves 1–2 of the public API. See
+`ApiSecrets`, `Authzen`, `Scim`, `Hris`, `Mcp`, `Otel`,
+`OidcClients`, `Actions`, `Addons`, `Billing`, `Settings`,
+`Elevate`, `EmailProviders`, `FeatureFlags`, `Forms`,
+`ProvisioningTokens`, `Impersonation`, `Portal`, `Security`,
+`Threats`, `VanityDomains`, and `Widgets` wrap Waves 1–3 of the
+public API. AuthZEN discovery is unauthenticated. See
 `specs/004-api-parity/`.
-- `Timeout` (time.Duration): Request timeout (default: 10 seconds)
-- `HTTPClient` (*http.Client): Optional custom HTTP client
 
 #### Methods
 

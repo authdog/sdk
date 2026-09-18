@@ -6,10 +6,14 @@ use serde_json::{self, Value};
 use std::time::Duration;
 
 pub use crate::resources::{
-    ApiSecretsResource, AuditResource, EnvironmentsResource, EventsResource, GroupsResource,
-    NotificationChannelsResource, OrganizationsResource, PersonalAccessTokensResource,
-    ProjectsResource, RbacResource, ServiceAccountsResource, TenantsResource, UsersResource,
-    WebhooksResource,
+    ActionsResource, AddonsResource, ApiSecretsResource, AuditResource, AuthzenResource,
+    BillingResource, ElevateResource, EmailProvidersResource, EnvironmentsResource, EventsResource,
+    FeatureFlagsResource, FormsResource, GroupsResource, HrisResource, ImpersonationResource,
+    McpResource, NotificationChannelsResource, OidcClientsResource, OrganizationsResource,
+    OtelResource, PersonalAccessTokensResource, PortalResource, ProjectsResource,
+    ProvisioningTokensResource, RbacResource, ScimResource, SecurityResource,
+    ServiceAccountsResource, SettingsResource, TenantsResource, ThreatsResource, UsersResource,
+    VanityDomainsResource, WebhooksResource, WidgetsResource,
 };
 
 /// Configuration for the Authdog client
@@ -18,6 +22,9 @@ pub struct AuthdogClientConfig {
     pub base_url: String,
     pub api_key: Option<String>,
     pub timeout: Option<Duration>,
+    pub environment_secret: Option<String>,
+    pub scim_token: Option<String>,
+    pub hris_token: Option<String>,
 }
 
 impl Default for AuthdogClientConfig {
@@ -26,6 +33,9 @@ impl Default for AuthdogClientConfig {
             base_url: "https://api.authdog.com".to_string(),
             api_key: None,
             timeout: Some(Duration::from_secs(10)),
+            environment_secret: None,
+            scim_token: None,
+            hris_token: None,
         }
     }
 }
@@ -56,16 +66,56 @@ impl AuthdogClient {
         self.config.base_url.trim_end_matches('/')
     }
 
+    pub(crate) fn environment_secret(&self) -> Option<&str> {
+        self.config.environment_secret.as_deref()
+    }
+
+    pub(crate) fn scim_token(&self) -> Option<&str> {
+        self.config.scim_token.as_deref()
+    }
+
+    pub(crate) fn hris_token(&self) -> Option<&str> {
+        self.config.hris_token.as_deref()
+    }
+
     /// Send a JSON request and map HTTP failures onto the error taxonomy.
     ///
     /// Constructor `api_key` is sent as `Authorization: Bearer`. Per-call
     /// `get_user_info` remains a separate path so the access token still wins.
+    /// `omit_auth` sends no Authorization header (AuthZEN discovery).
+    /// `access_token` overrides the constructor key when present.
     pub(crate) async fn request(
         &self,
         method: &str,
         path: &str,
         body: Option<&Value>,
         query: &[(String, String)],
+    ) -> Result<Value, AuthdogError> {
+        self.request_inner(method, path, body, query, None, false)
+            .await
+    }
+
+    pub(crate) async fn request_with_auth(
+        &self,
+        method: &str,
+        path: &str,
+        body: Option<&Value>,
+        query: &[(String, String)],
+        access_token: Option<&str>,
+        omit_auth: bool,
+    ) -> Result<Value, AuthdogError> {
+        self.request_inner(method, path, body, query, access_token, omit_auth)
+            .await
+    }
+
+    async fn request_inner(
+        &self,
+        method: &str,
+        path: &str,
+        body: Option<&Value>,
+        query: &[(String, String)],
+        access_token: Option<&str>,
+        omit_auth: bool,
     ) -> Result<Value, AuthdogError> {
         let url = format!("{}{}", self.base_url(), path);
         let http_method = Method::from_bytes(method.as_bytes())
@@ -76,7 +126,11 @@ impl AuthdogClient {
             .request(http_method, &url)
             .header("Content-Type", "application/json");
 
-        if let Some(api_key) = &self.config.api_key {
+        if omit_auth {
+            // AuthZEN discovery: do not send Authorization.
+        } else if let Some(token) = access_token {
+            request = request.header("Authorization", format!("Bearer {}", token));
+        } else if let Some(api_key) = &self.config.api_key {
             request = request.header("Authorization", format!("Bearer {}", api_key));
         }
 
@@ -130,7 +184,22 @@ impl AuthdogClient {
         body: Option<&Value>,
         query: &[(String, String)],
     ) -> Result<T, AuthdogError> {
-        let value = self.request(method, path, body, query).await?;
+        self.request_parsed_with_auth(method, path, body, query, None, false)
+            .await
+    }
+
+    pub(crate) async fn request_parsed_with_auth<T: DeserializeOwned>(
+        &self,
+        method: &str,
+        path: &str,
+        body: Option<&Value>,
+        query: &[(String, String)],
+        access_token: Option<&str>,
+        omit_auth: bool,
+    ) -> Result<T, AuthdogError> {
+        let value = self
+            .request_inner(method, path, body, query, access_token, omit_auth)
+            .await?;
         serde_json::from_value(value)
             .map_err(|e| APIError::new(format!("Failed to parse response: {}", e)).into())
     }
@@ -194,6 +263,90 @@ impl AuthdogClient {
 
     pub fn api_secrets(&self) -> ApiSecretsResource<'_> {
         ApiSecretsResource::new(self)
+    }
+
+    pub fn authzen(&self) -> AuthzenResource<'_> {
+        AuthzenResource::new(self)
+    }
+
+    pub fn scim(&self) -> ScimResource<'_> {
+        ScimResource::new(self)
+    }
+
+    pub fn hris(&self) -> HrisResource<'_> {
+        HrisResource::new(self)
+    }
+
+    pub fn mcp(&self) -> McpResource<'_> {
+        McpResource::new(self)
+    }
+
+    pub fn otel(&self) -> OtelResource<'_> {
+        OtelResource::new(self)
+    }
+
+    pub fn oidc_clients(&self) -> OidcClientsResource<'_> {
+        OidcClientsResource::new(self)
+    }
+
+    pub fn actions(&self) -> ActionsResource<'_> {
+        ActionsResource::new(self)
+    }
+
+    pub fn addons(&self) -> AddonsResource<'_> {
+        AddonsResource::new(self)
+    }
+
+    pub fn billing(&self) -> BillingResource<'_> {
+        BillingResource::new(self)
+    }
+
+    pub fn settings(&self) -> SettingsResource<'_> {
+        SettingsResource::new(self)
+    }
+
+    pub fn elevate(&self) -> ElevateResource<'_> {
+        ElevateResource::new(self)
+    }
+
+    pub fn email_providers(&self) -> EmailProvidersResource<'_> {
+        EmailProvidersResource::new(self)
+    }
+
+    pub fn feature_flags(&self) -> FeatureFlagsResource<'_> {
+        FeatureFlagsResource::new(self)
+    }
+
+    pub fn forms(&self) -> FormsResource<'_> {
+        FormsResource::new(self)
+    }
+
+    pub fn provisioning_tokens(&self) -> ProvisioningTokensResource<'_> {
+        ProvisioningTokensResource::new(self)
+    }
+
+    pub fn impersonation(&self) -> ImpersonationResource<'_> {
+        ImpersonationResource::new(self)
+    }
+
+    pub fn portal(&self) -> PortalResource<'_> {
+        PortalResource::new(self)
+    }
+
+    pub fn security(&self) -> SecurityResource<'_> {
+        SecurityResource::new(self)
+    }
+
+    pub fn threats(&self) -> ThreatsResource<'_> {
+        ThreatsResource::new(self)
+    }
+
+    pub fn vanity_domains(&self) -> VanityDomainsResource<'_> {
+        VanityDomainsResource::new(self)
+    }
+
+    pub fn widgets(&self) -> WidgetsResource<'_> {
+        WidgetsResource::new(self)
     }
 
     /// Get user information using an access token

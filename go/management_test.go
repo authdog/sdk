@@ -892,3 +892,822 @@ func TestWave2_QueryParamsForwarded(t *testing.T) {
 		})
 	}
 }
+
+func managementClientWith(t *testing.T, handler http.HandlerFunc, cfg ClientConfig) *Client {
+	t.Helper()
+	server := httptest.NewServer(handler)
+	t.Cleanup(server.Close)
+	cfg.BaseURL = server.URL
+	if cfg.APIKey == "" {
+		cfg.APIKey = "key-1"
+	}
+	return NewClient(cfg)
+}
+
+type wave3Case struct {
+	name   string
+	call   func(ctx context.Context, c *Client) error
+	method string
+	path   string
+	body   map[string]interface{}
+}
+
+func wave3Cases() []wave3Case {
+	return []wave3Case{
+		{"authzen.configuration", func(ctx context.Context, c *Client) error {
+			_, err := c.Authzen.Configuration(ctx)
+			return err
+		}, "GET", "/.well-known/authzen-configuration", nil},
+		{"authzen.evaluate", func(ctx context.Context, c *Client) error {
+			_, err := c.Authzen.Evaluate(ctx, map[string]interface{}{"subject": map[string]interface{}{}})
+			return err
+		}, "POST", "/access/v1/evaluation", map[string]interface{}{"subject": map[string]interface{}{}}},
+		{"authzen.evaluate_batch", func(ctx context.Context, c *Client) error {
+			_, err := c.Authzen.EvaluateBatch(ctx, map[string]interface{}{"evaluations": []interface{}{}})
+			return err
+		}, "POST", "/access/v1/evaluations", map[string]interface{}{"evaluations": []interface{}{}}},
+		{"authzen.search_action", func(ctx context.Context, c *Client) error {
+			_, err := c.Authzen.SearchAction(ctx, map[string]interface{}{"subject": map[string]interface{}{}})
+			return err
+		}, "POST", "/access/v1/search/action", map[string]interface{}{"subject": map[string]interface{}{}}},
+		{"authzen.search_resource", func(ctx context.Context, c *Client) error {
+			_, err := c.Authzen.SearchResource(ctx, map[string]interface{}{"subject": map[string]interface{}{}})
+			return err
+		}, "POST", "/access/v1/search/resource", map[string]interface{}{"subject": map[string]interface{}{}}},
+		{"authzen.search_subject", func(ctx context.Context, c *Client) error {
+			_, err := c.Authzen.SearchSubject(ctx, map[string]interface{}{"resource": map[string]interface{}{}})
+			return err
+		}, "POST", "/access/v1/search/subject", map[string]interface{}{"resource": map[string]interface{}{}}},
+		{"users.revoke_session", func(ctx context.Context, c *Client) error {
+			_, err := c.Users.RevokeSession(ctx, "env_1", "sess_1")
+			return err
+		}, "DELETE", "/v1/environments/env_1/sessions/sess_1", nil},
+		{"hris.list_departments", func(ctx context.Context, c *Client) error {
+			_, err := c.Hris.ListDepartments(ctx)
+			return err
+		}, "GET", "/v1/hris/v1/Departments", nil},
+		{"hris.create_department", func(ctx context.Context, c *Client) error {
+			_, err := c.Hris.CreateDepartment(ctx, map[string]interface{}{"name": "Eng"})
+			return err
+		}, "POST", "/v1/hris/v1/Departments", map[string]interface{}{"name": "Eng"}},
+		{"hris.get_department", func(ctx context.Context, c *Client) error {
+			_, err := c.Hris.GetDepartment(ctx, "dep_1")
+			return err
+		}, "GET", "/v1/hris/v1/Departments/dep_1", nil},
+		{"hris.replace_department", func(ctx context.Context, c *Client) error {
+			_, err := c.Hris.ReplaceDepartment(ctx, "dep_1", map[string]interface{}{"name": "Eng"})
+			return err
+		}, "PUT", "/v1/hris/v1/Departments/dep_1", map[string]interface{}{"name": "Eng"}},
+		{"hris.patch_department", func(ctx context.Context, c *Client) error {
+			_, err := c.Hris.PatchDepartment(ctx, "dep_1", map[string]interface{}{"name": "E"})
+			return err
+		}, "PATCH", "/v1/hris/v1/Departments/dep_1", map[string]interface{}{"name": "E"}},
+		{"hris.delete_department", func(ctx context.Context, c *Client) error {
+			_, err := c.Hris.DeleteDepartment(ctx, "dep_1")
+			return err
+		}, "DELETE", "/v1/hris/v1/Departments/dep_1", nil},
+		{"hris.list_employees", func(ctx context.Context, c *Client) error {
+			_, err := c.Hris.ListEmployees(ctx)
+			return err
+		}, "GET", "/v1/hris/v1/Employees", nil},
+		{"hris.create_employee", func(ctx context.Context, c *Client) error {
+			_, err := c.Hris.CreateEmployee(ctx, map[string]interface{}{"name": "Ada"})
+			return err
+		}, "POST", "/v1/hris/v1/Employees", map[string]interface{}{"name": "Ada"}},
+		{"hris.get_employee", func(ctx context.Context, c *Client) error {
+			_, err := c.Hris.GetEmployee(ctx, "emp_1")
+			return err
+		}, "GET", "/v1/hris/v1/Employees/emp_1", nil},
+		{"hris.replace_employee", func(ctx context.Context, c *Client) error {
+			_, err := c.Hris.ReplaceEmployee(ctx, "emp_1", map[string]interface{}{"name": "Ada"})
+			return err
+		}, "PUT", "/v1/hris/v1/Employees/emp_1", map[string]interface{}{"name": "Ada"}},
+		{"hris.patch_employee", func(ctx context.Context, c *Client) error {
+			_, err := c.Hris.PatchEmployee(ctx, "emp_1", map[string]interface{}{"name": "A"})
+			return err
+		}, "PATCH", "/v1/hris/v1/Employees/emp_1", map[string]interface{}{"name": "A"}},
+		{"hris.delete_employee", func(ctx context.Context, c *Client) error {
+			_, err := c.Hris.DeleteEmployee(ctx, "emp_1")
+			return err
+		}, "DELETE", "/v1/hris/v1/Employees/emp_1", nil},
+		{"hris.service_config", func(ctx context.Context, c *Client) error {
+			_, err := c.Hris.ServiceConfig(ctx)
+			return err
+		}, "GET", "/v1/hris/v1/ServiceConfig", nil},
+		{"otel.export_logs", func(ctx context.Context, c *Client) error {
+			_, err := c.Otel.ExportLogs(ctx, map[string]interface{}{"resourceLogs": []interface{}{}})
+			return err
+		}, "POST", "/v1/logs", map[string]interface{}{"resourceLogs": []interface{}{}}},
+		{"mcp.ingest_events", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.IngestEvents(ctx, map[string]interface{}{"events": []interface{}{}})
+			return err
+		}, "POST", "/v1/mcp/events", map[string]interface{}{"events": []interface{}{}}},
+		{"mcp.resolve", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.Resolve(ctx, "agent-1")
+			return err
+		}, "GET", "/v1/mcp/trust-store/resolve", nil},
+		{"otel.export_metrics", func(ctx context.Context, c *Client) error {
+			_, err := c.Otel.ExportMetrics(ctx, map[string]interface{}{"resourceMetrics": []interface{}{}})
+			return err
+		}, "POST", "/v1/metrics", map[string]interface{}{"resourceMetrics": []interface{}{}}},
+		{"otel.export_logs_prefixed", func(ctx context.Context, c *Client) error {
+			_, err := c.Otel.ExportLogsPrefixed(ctx, map[string]interface{}{"resourceLogs": []interface{}{}})
+			return err
+		}, "POST", "/v1/otel/v1/logs", map[string]interface{}{"resourceLogs": []interface{}{}}},
+		{"otel.export_metrics_prefixed", func(ctx context.Context, c *Client) error {
+			_, err := c.Otel.ExportMetricsPrefixed(ctx, map[string]interface{}{"resourceMetrics": []interface{}{}})
+			return err
+		}, "POST", "/v1/otel/v1/metrics", map[string]interface{}{"resourceMetrics": []interface{}{}}},
+		{"otel.export_traces_prefixed", func(ctx context.Context, c *Client) error {
+			_, err := c.Otel.ExportTracesPrefixed(ctx, map[string]interface{}{"resourceSpans": []interface{}{}})
+			return err
+		}, "POST", "/v1/otel/v1/traces", map[string]interface{}{"resourceSpans": []interface{}{}}},
+		{"scim.list_groups", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.ListGroups(ctx)
+			return err
+		}, "GET", "/v1/scim/v2/Groups", nil},
+		{"scim.create_group", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.CreateGroup(ctx, map[string]interface{}{"displayName": "G"})
+			return err
+		}, "POST", "/v1/scim/v2/Groups", map[string]interface{}{"displayName": "G"}},
+		{"scim.get_group", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.GetGroup(ctx, "g_1")
+			return err
+		}, "GET", "/v1/scim/v2/Groups/g_1", nil},
+		{"scim.replace_group", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.ReplaceGroup(ctx, "g_1", map[string]interface{}{"displayName": "G"})
+			return err
+		}, "PUT", "/v1/scim/v2/Groups/g_1", map[string]interface{}{"displayName": "G"}},
+		{"scim.patch_group", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.PatchGroup(ctx, "g_1", map[string]interface{}{"Operations": []interface{}{}})
+			return err
+		}, "PATCH", "/v1/scim/v2/Groups/g_1", map[string]interface{}{"Operations": []interface{}{}}},
+		{"scim.delete_group", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.DeleteGroup(ctx, "g_1")
+			return err
+		}, "DELETE", "/v1/scim/v2/Groups/g_1", nil},
+		{"scim.resource_types", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.ResourceTypes(ctx)
+			return err
+		}, "GET", "/v1/scim/v2/ResourceTypes", nil},
+		{"scim.resource_type", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.ResourceType(ctx, "User")
+			return err
+		}, "GET", "/v1/scim/v2/ResourceTypes/User", nil},
+		{"scim.schemas", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.Schemas(ctx)
+			return err
+		}, "GET", "/v1/scim/v2/Schemas", nil},
+		{"scim.schema", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.Schema(ctx, "urn:ietf:params:scim:schemas:core:2.0:User")
+			return err
+		}, "GET", "/v1/scim/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:User", nil},
+		{"scim.service_provider_config", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.ServiceProviderConfig(ctx)
+			return err
+		}, "GET", "/v1/scim/v2/ServiceProviderConfig", nil},
+		{"scim.list_users", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.ListUsers(ctx)
+			return err
+		}, "GET", "/v1/scim/v2/Users", nil},
+		{"scim.create_user", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.CreateUser(ctx, map[string]interface{}{"userName": "ada"})
+			return err
+		}, "POST", "/v1/scim/v2/Users", map[string]interface{}{"userName": "ada"}},
+		{"scim.get_user", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.GetUser(ctx, "u_1")
+			return err
+		}, "GET", "/v1/scim/v2/Users/u_1", nil},
+		{"scim.replace_user", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.ReplaceUser(ctx, "u_1", map[string]interface{}{"userName": "ada"})
+			return err
+		}, "PUT", "/v1/scim/v2/Users/u_1", map[string]interface{}{"userName": "ada"}},
+		{"scim.patch_user", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.PatchUser(ctx, "u_1", map[string]interface{}{"Operations": []interface{}{}})
+			return err
+		}, "PATCH", "/v1/scim/v2/Users/u_1", map[string]interface{}{"Operations": []interface{}{}}},
+		{"scim.delete_user", func(ctx context.Context, c *Client) error {
+			_, err := c.Scim.DeleteUser(ctx, "u_1")
+			return err
+		}, "DELETE", "/v1/scim/v2/Users/u_1", nil},
+		{"environments.list_connections", func(ctx context.Context, c *Client) error {
+			_, err := c.Environments.ListConnections(ctx, "ten_1", "app_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/applications/app_1/environments/env_1/connections", nil},
+		{"oidc_clients.list", func(ctx context.Context, c *Client) error {
+			_, err := c.OidcClients.List(ctx, "ten_1", "app_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/applications/app_1/environments/env_1/oidc-clients", nil},
+		{"oidc_clients.register", func(ctx context.Context, c *Client) error {
+			_, err := c.OidcClients.Register(ctx, "ten_1", "app_1", "env_1", map[string]interface{}{"name": "cli"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/applications/app_1/environments/env_1/oidc-clients", map[string]interface{}{"name": "cli"}},
+		{"oidc_clients.update", func(ctx context.Context, c *Client) error {
+			_, err := c.OidcClients.Update(ctx, "ten_1", "app_1", "env_1", "cid_1", map[string]interface{}{"name": "n"})
+			return err
+		}, "PATCH", "/v1/tenants/ten_1/applications/app_1/environments/env_1/oidc-clients/cid_1", map[string]interface{}{"name": "n"}},
+		{"oidc_clients.delete", func(ctx context.Context, c *Client) error {
+			_, err := c.OidcClients.Delete(ctx, "ten_1", "app_1", "env_1", "cid_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/applications/app_1/environments/env_1/oidc-clients/cid_1", nil},
+		{"environments.list_redirect_uris", func(ctx context.Context, c *Client) error {
+			_, err := c.Environments.ListRedirectURIs(ctx, "ten_1", "app_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/applications/app_1/environments/env_1/redirect-uris", nil},
+		{"actions.list", func(ctx context.Context, c *Client) error {
+			_, err := c.Actions.List(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/actions", nil},
+		{"actions.save", func(ctx context.Context, c *Client) error {
+			_, err := c.Actions.Save(ctx, "ten_1", "env_1", map[string]interface{}{"url": "https://ex"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/actions", map[string]interface{}{"url": "https://ex"}},
+		{"actions.executions", func(ctx context.Context, c *Client) error {
+			_, err := c.Actions.Executions(ctx, "ten_1", "env_1", nil)
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/actions/executions", nil},
+		{"actions.test", func(ctx context.Context, c *Client) error {
+			_, err := c.Actions.Test(ctx, "ten_1", "env_1", map[string]interface{}{"url": "https://ex"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/actions/test", map[string]interface{}{"url": "https://ex"}},
+		{"actions.delete", func(ctx context.Context, c *Client) error {
+			_, err := c.Actions.Delete(ctx, "ten_1", "env_1", "act_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/actions/act_1", nil},
+		{"addons.list", func(ctx context.Context, c *Client) error {
+			_, err := c.Addons.List(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/addons", nil},
+		{"addons.save", func(ctx context.Context, c *Client) error {
+			_, err := c.Addons.Save(ctx, "ten_1", "env_1", map[string]interface{}{"provider": "slack"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/addons", map[string]interface{}{"provider": "slack"}},
+		{"addons.delete", func(ctx context.Context, c *Client) error {
+			_, err := c.Addons.Delete(ctx, "ten_1", "env_1", "slack")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/addons/slack", nil},
+		{"billing.list_features", func(ctx context.Context, c *Client) error {
+			_, err := c.Billing.ListFeatures(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/billing/features", nil},
+		{"billing.save_feature", func(ctx context.Context, c *Client) error {
+			_, err := c.Billing.SaveFeature(ctx, "ten_1", "env_1", map[string]interface{}{"name": "pro"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/billing/features", map[string]interface{}{"name": "pro"}},
+		{"billing.delete_feature", func(ctx context.Context, c *Client) error {
+			_, err := c.Billing.DeleteFeature(ctx, "ten_1", "env_1", "feat_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/billing/features/feat_1", nil},
+		{"billing.list_plans", func(ctx context.Context, c *Client) error {
+			_, err := c.Billing.ListPlans(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/billing/plans", nil},
+		{"billing.save_plan", func(ctx context.Context, c *Client) error {
+			_, err := c.Billing.SavePlan(ctx, "ten_1", "env_1", map[string]interface{}{"name": "pro"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/billing/plans", map[string]interface{}{"name": "pro"}},
+		{"billing.delete_plan", func(ctx context.Context, c *Client) error {
+			_, err := c.Billing.DeletePlan(ctx, "ten_1", "env_1", "plan_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/billing/plans/plan_1", nil},
+		{"billing.sync_stripe", func(ctx context.Context, c *Client) error {
+			_, err := c.Billing.SyncStripe(ctx, "ten_1", "env_1", "plan_1")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/billing/plans/plan_1/sync-stripe", nil},
+		{"settings.get_bot_detection_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.GetBotDetectionPolicy(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/bot-detection-policy", nil},
+		{"settings.update_bot_detection_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.UpdateBotDetectionPolicy(ctx, "ten_1", "env_1", map[string]interface{}{"enabled": true})
+			return err
+		}, "PUT", "/v1/tenants/ten_1/environments/env_1/bot-detection-policy", map[string]interface{}{"enabled": true}},
+		{"settings.get_breached_password_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.GetBreachedPasswordPolicy(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/breached-password-policy", nil},
+		{"settings.update_breached_password_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.UpdateBreachedPasswordPolicy(ctx, "ten_1", "env_1", map[string]interface{}{"enabled": true})
+			return err
+		}, "PUT", "/v1/tenants/ten_1/environments/env_1/breached-password-policy", map[string]interface{}{"enabled": true}},
+		{"settings.get_brute_force_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.GetBruteForcePolicy(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/brute-force-policy", nil},
+		{"settings.update_brute_force_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.UpdateBruteForcePolicy(ctx, "ten_1", "env_1", map[string]interface{}{"enabled": true})
+			return err
+		}, "PUT", "/v1/tenants/ten_1/environments/env_1/brute-force-policy", map[string]interface{}{"enabled": true}},
+		{"environments.save_connection", func(ctx context.Context, c *Client) error {
+			_, err := c.Environments.SaveConnection(ctx, "ten_1", "env_1", map[string]interface{}{"provider": "okta"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/connections", map[string]interface{}{"provider": "okta"}},
+		{"environments.resolve_saml_metadata", func(ctx context.Context, c *Client) error {
+			_, err := c.Environments.ResolveSAMLMetadata(ctx, "ten_1", "env_1", map[string]interface{}{"url": "https://ex"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/connections/resolve-saml-metadata", map[string]interface{}{"url": "https://ex"}},
+		{"environments.get_sso_metadata", func(ctx context.Context, c *Client) error {
+			_, err := c.Environments.GetSSOMetadata(ctx, "ten_1", "env_1", nil)
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/connections/sso-metadata", nil},
+		{"environments.delete_connection", func(ctx context.Context, c *Client) error {
+			_, err := c.Environments.DeleteConnection(ctx, "ten_1", "env_1", "con_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/connections/con_1", nil},
+		{"settings.get_device_risk_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.GetDeviceRiskPolicy(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/device-risk-policy", nil},
+		{"settings.update_device_risk_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.UpdateDeviceRiskPolicy(ctx, "ten_1", "env_1", map[string]interface{}{"enabled": true})
+			return err
+		}, "PUT", "/v1/tenants/ten_1/environments/env_1/device-risk-policy", map[string]interface{}{"enabled": true}},
+		{"elevate.activate_grant", func(ctx context.Context, c *Client) error {
+			_, err := c.Elevate.ActivateGrant(ctx, "ten_1", "env_1", "gr_1", map[string]interface{}{"reason": "x"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/elevate/access-grants/gr_1/activate", map[string]interface{}{"reason": "x"}},
+		{"elevate.revoke_grant", func(ctx context.Context, c *Client) error {
+			_, err := c.Elevate.RevokeGrant(ctx, "ten_1", "env_1", "gr_1", map[string]interface{}{"reason": "x"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/elevate/access-grants/gr_1/revoke", map[string]interface{}{"reason": "x"}},
+		{"elevate.list_requests", func(ctx context.Context, c *Client) error {
+			_, err := c.Elevate.ListRequests(ctx, "ten_1", "env_1", "")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/elevate/access-requests", nil},
+		{"elevate.create_request", func(ctx context.Context, c *Client) error {
+			_, err := c.Elevate.CreateRequest(ctx, "ten_1", "env_1", map[string]interface{}{"reason": "x"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/elevate/access-requests", map[string]interface{}{"reason": "x"}},
+		{"elevate.get_request", func(ctx context.Context, c *Client) error {
+			_, err := c.Elevate.GetRequest(ctx, "ten_1", "env_1", "req_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/elevate/access-requests/req_1", nil},
+		{"elevate.approve_request", func(ctx context.Context, c *Client) error {
+			_, err := c.Elevate.ApproveRequest(ctx, "ten_1", "env_1", "req_1", map[string]interface{}{"note": "ok"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/elevate/access-requests/req_1/approve", map[string]interface{}{"note": "ok"}},
+		{"elevate.cancel_request", func(ctx context.Context, c *Client) error {
+			_, err := c.Elevate.CancelRequest(ctx, "ten_1", "env_1", "req_1")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/elevate/access-requests/req_1/cancel", nil},
+		{"elevate.deny_request", func(ctx context.Context, c *Client) error {
+			_, err := c.Elevate.DenyRequest(ctx, "ten_1", "env_1", "req_1", map[string]interface{}{"note": "no"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/elevate/access-requests/req_1/deny", map[string]interface{}{"note": "no"}},
+		{"elevate.get_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Elevate.GetPolicy(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/elevate/policy", nil},
+		{"elevate.update_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Elevate.UpdatePolicy(ctx, "ten_1", "env_1", map[string]interface{}{"enabled": true})
+			return err
+		}, "PUT", "/v1/tenants/ten_1/environments/env_1/elevate/policy", map[string]interface{}{"enabled": true}},
+		{"email_providers.list", func(ctx context.Context, c *Client) error {
+			_, err := c.EmailProviders.List(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/email-providers", nil},
+		{"email_providers.save", func(ctx context.Context, c *Client) error {
+			_, err := c.EmailProviders.Save(ctx, "ten_1", "env_1", map[string]interface{}{"provider": "ses"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/email-providers", map[string]interface{}{"provider": "ses"}},
+		{"email_providers.test", func(ctx context.Context, c *Client) error {
+			_, err := c.EmailProviders.Test(ctx, "ten_1", "env_1", map[string]interface{}{"to": "a@b.c"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/email-providers/test", map[string]interface{}{"to": "a@b.c"}},
+		{"email_providers.delete", func(ctx context.Context, c *Client) error {
+			_, err := c.EmailProviders.Delete(ctx, "ten_1", "env_1", "ses")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/email-providers/ses", nil},
+		{"email_providers.activate", func(ctx context.Context, c *Client) error {
+			_, err := c.EmailProviders.Activate(ctx, "ten_1", "env_1", "ses")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/email-providers/ses/activate", nil},
+		{"feature_flags.list", func(ctx context.Context, c *Client) error {
+			_, err := c.FeatureFlags.List(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/feature-flags", nil},
+		{"feature_flags.save", func(ctx context.Context, c *Client) error {
+			_, err := c.FeatureFlags.Save(ctx, "ten_1", "env_1", map[string]interface{}{"key": "x"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/feature-flags", map[string]interface{}{"key": "x"}},
+		{"feature_flags.delete", func(ctx context.Context, c *Client) error {
+			_, err := c.FeatureFlags.Delete(ctx, "ten_1", "env_1", "flag_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/feature-flags/flag_1", nil},
+		{"forms.list_attachments", func(ctx context.Context, c *Client) error {
+			_, err := c.Forms.ListAttachments(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/form-attachments", nil},
+		{"forms.list", func(ctx context.Context, c *Client) error {
+			_, err := c.Forms.List(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/forms", nil},
+		{"forms.save", func(ctx context.Context, c *Client) error {
+			_, err := c.Forms.Save(ctx, "ten_1", "env_1", map[string]interface{}{"name": "login"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/forms", map[string]interface{}{"name": "login"}},
+		{"forms.delete", func(ctx context.Context, c *Client) error {
+			_, err := c.Forms.Delete(ctx, "ten_1", "env_1", "form_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/forms/form_1", nil},
+		{"provisioning_tokens.list_hris", func(ctx context.Context, c *Client) error {
+			_, err := c.ProvisioningTokens.ListHris(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/hris-tokens", nil},
+		{"provisioning_tokens.create_hris", func(ctx context.Context, c *Client) error {
+			_, err := c.ProvisioningTokens.CreateHris(ctx, "ten_1", "env_1", map[string]interface{}{"name": "hr"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/hris-tokens", map[string]interface{}{"name": "hr"}},
+		{"provisioning_tokens.revoke_hris", func(ctx context.Context, c *Client) error {
+			_, err := c.ProvisioningTokens.RevokeHris(ctx, "ten_1", "env_1", "tok_1")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/hris-tokens/tok_1/revoke", nil},
+		{"provisioning_tokens.rotate_hris", func(ctx context.Context, c *Client) error {
+			_, err := c.ProvisioningTokens.RotateHris(ctx, "ten_1", "env_1", "tok_1")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/hris-tokens/tok_1/rotate", nil},
+		{"impersonation.list", func(ctx context.Context, c *Client) error {
+			_, err := c.Impersonation.List(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/impersonation-grants", nil},
+		{"impersonation.create", func(ctx context.Context, c *Client) error {
+			_, err := c.Impersonation.Create(ctx, "ten_1", "env_1", map[string]interface{}{"userId": "usr_1"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/impersonation-grants", map[string]interface{}{"userId": "usr_1"}},
+		{"impersonation.revoke", func(ctx context.Context, c *Client) error {
+			_, err := c.Impersonation.Revoke(ctx, "ten_1", "env_1", "gr_1")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/impersonation-grants/gr_1/revoke", nil},
+		{"settings.list_jwt_claim_mappings", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.ListJWTClaimMappings(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/jwt-claim-mappings", nil},
+		{"settings.save_jwt_claim_mapping", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.SaveJWTClaimMapping(ctx, "ten_1", "env_1", map[string]interface{}{"claim": "role"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/jwt-claim-mappings", map[string]interface{}{"claim": "role"}},
+		{"settings.delete_jwt_claim_mapping", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.DeleteJWTClaimMapping(ctx, "ten_1", "env_1", "map_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/jwt-claim-mappings/map_1", nil},
+		{"mcp.list_entries", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.ListEntries(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store", nil},
+		{"mcp.create_entry", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.CreateEntry(ctx, "ten_1", "env_1", map[string]interface{}{"subject": "a"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store", map[string]interface{}{"subject": "a"}},
+		{"mcp.get_entry", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.GetEntry(ctx, "ten_1", "env_1", "ent_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1", nil},
+		{"mcp.update_entry", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.UpdateEntry(ctx, "ten_1", "env_1", "ent_1", map[string]interface{}{"name": "n"})
+			return err
+		}, "PATCH", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1", map[string]interface{}{"name": "n"}},
+		{"mcp.delete_entry", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.DeleteEntry(ctx, "ten_1", "env_1", "ent_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1", nil},
+		{"mcp.add_key", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.AddKey(ctx, "ten_1", "env_1", "ent_1", map[string]interface{}{"jwk": map[string]interface{}{}})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/keys", map[string]interface{}{"jwk": map[string]interface{}{}}},
+		{"mcp.revoke_key", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.RevokeKey(ctx, "ten_1", "env_1", "ent_1", "key_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/keys/key_1", nil},
+		{"mcp.rotate_key", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.RotateKey(ctx, "ten_1", "env_1", "ent_1", "key_1", nil)
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/keys/key_1/rotate", nil},
+		{"mcp.revoke_entry", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.RevokeEntry(ctx, "ten_1", "env_1", "ent_1")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/revoke", nil},
+		{"mcp.verify_entry", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.VerifyEntry(ctx, "ten_1", "env_1", "ent_1", map[string]interface{}{"verified": true})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify", map[string]interface{}{"verified": true}},
+		{"users.totp_status", func(ctx context.Context, c *Client) error {
+			_, err := c.Users.TOTPStatus(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/me/mfa/totp", nil},
+		{"settings.get_password_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.GetPasswordPolicy(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/password-policy", nil},
+		{"settings.update_password_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.UpdatePasswordPolicy(ctx, "ten_1", "env_1", map[string]interface{}{"minLength": float64(8)})
+			return err
+		}, "PUT", "/v1/tenants/ten_1/environments/env_1/password-policy", map[string]interface{}{"minLength": float64(8)}},
+		{"portal.generate_link", func(ctx context.Context, c *Client) error {
+			_, err := c.Portal.GenerateLink(ctx, "ten_1", "env_1", map[string]interface{}{"email": "a@b.c"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/portal/generate-link", map[string]interface{}{"email": "a@b.c"}},
+		{"settings.get_rate_limit_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.GetRateLimitPolicy(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/rate-limit-policy", nil},
+		{"settings.update_rate_limit_policy", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.UpdateRateLimitPolicy(ctx, "ten_1", "env_1", map[string]interface{}{"limit": float64(10)})
+			return err
+		}, "PUT", "/v1/tenants/ten_1/environments/env_1/rate-limit-policy", map[string]interface{}{"limit": float64(10)}},
+		{"environments.save_redirect_uris", func(ctx context.Context, c *Client) error {
+			_, err := c.Environments.SaveRedirectURIs(ctx, "ten_1", "env_1", map[string]interface{}{"uris": []interface{}{}})
+			return err
+		}, "PUT", "/v1/tenants/ten_1/environments/env_1/redirect-uris", map[string]interface{}{"uris": []interface{}{}}},
+		{"settings.get_restrictions", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.GetRestrictions(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/restrictions", nil},
+		{"settings.update_restrictions", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.UpdateRestrictions(ctx, "ten_1", "env_1", map[string]interface{}{"signup": false})
+			return err
+		}, "PUT", "/v1/tenants/ten_1/environments/env_1/restrictions", map[string]interface{}{"signup": false}},
+		{"provisioning_tokens.list_scim", func(ctx context.Context, c *Client) error {
+			_, err := c.ProvisioningTokens.ListScim(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/scim-tokens", nil},
+		{"provisioning_tokens.create_scim", func(ctx context.Context, c *Client) error {
+			_, err := c.ProvisioningTokens.CreateScim(ctx, "ten_1", "env_1", map[string]interface{}{"name": "scim"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/scim-tokens", map[string]interface{}{"name": "scim"}},
+		{"provisioning_tokens.revoke_scim", func(ctx context.Context, c *Client) error {
+			_, err := c.ProvisioningTokens.RevokeScim(ctx, "ten_1", "env_1", "tok_1")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/scim-tokens/tok_1/revoke", nil},
+		{"provisioning_tokens.rotate_scim", func(ctx context.Context, c *Client) error {
+			_, err := c.ProvisioningTokens.RotateScim(ctx, "ten_1", "env_1", "tok_1")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/scim-tokens/tok_1/rotate", nil},
+		{"security.posture", func(ctx context.Context, c *Client) error {
+			_, err := c.Security.Posture(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/security/posture", nil},
+		{"settings.get_session_config", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.GetSessionConfig(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/session-config", nil},
+		{"settings.update_session_config", func(ctx context.Context, c *Client) error {
+			_, err := c.Settings.UpdateSessionConfig(ctx, "ten_1", "env_1", map[string]interface{}{"ttl": float64(3600)})
+			return err
+		}, "PUT", "/v1/tenants/ten_1/environments/env_1/session-config", map[string]interface{}{"ttl": float64(3600)}},
+		{"threats.list", func(ctx context.Context, c *Client) error {
+			_, err := c.Threats.List(ctx, "ten_1", "env_1", nil)
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/threats", nil},
+		{"threats.create", func(ctx context.Context, c *Client) error {
+			_, err := c.Threats.Create(ctx, "ten_1", "env_1", map[string]interface{}{"type": "bot"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/threats", map[string]interface{}{"type": "bot"}},
+		{"threats.get", func(ctx context.Context, c *Client) error {
+			_, err := c.Threats.Get(ctx, "ten_1", "env_1", "th_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/threats/th_1", nil},
+		{"threats.update", func(ctx context.Context, c *Client) error {
+			_, err := c.Threats.Update(ctx, "ten_1", "env_1", "th_1", map[string]interface{}{"status": "open"})
+			return err
+		}, "PATCH", "/v1/tenants/ten_1/environments/env_1/threats/th_1", map[string]interface{}{"status": "open"}},
+		{"threats.delete", func(ctx context.Context, c *Client) error {
+			_, err := c.Threats.Delete(ctx, "ten_1", "env_1", "th_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/threats/th_1", nil},
+		{"threats.resolve", func(ctx context.Context, c *Client) error {
+			_, err := c.Threats.Resolve(ctx, "ten_1", "env_1", "th_1", map[string]interface{}{"status": "resolved"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/threats/th_1/resolve", map[string]interface{}{"status": "resolved"}},
+		{"users.bulk_delete", func(ctx context.Context, c *Client) error {
+			_, err := c.Users.BulkDelete(ctx, "ten_1", "env_1", map[string]interface{}{"userIds": []interface{}{"usr_1"}})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/users/bulk/delete", map[string]interface{}{"userIds": []interface{}{"usr_1"}}},
+		{"users.bulk_set_active", func(ctx context.Context, c *Client) error {
+			_, err := c.Users.BulkSetActive(ctx, "ten_1", "env_1", map[string]interface{}{"userIds": []interface{}{"usr_1"}, "active": false})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/users/bulk/set-active", map[string]interface{}{"userIds": []interface{}{"usr_1"}, "active": false}},
+		{"users.import_users", func(ctx context.Context, c *Client) error {
+			_, err := c.Users.ImportUsers(ctx, "ten_1", "env_1", map[string]interface{}{"users": []interface{}{}})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/users/import", map[string]interface{}{"users": []interface{}{}}},
+		{"users.disable_mfa", func(ctx context.Context, c *Client) error {
+			_, err := c.Users.DisableMFA(ctx, "ten_1", "env_1", "usr_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/users/usr_1/mfa", nil},
+		{"users.list_sessions", func(ctx context.Context, c *Client) error {
+			_, err := c.Users.ListSessions(ctx, "ten_1", "env_1", "usr_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/users/usr_1/sessions", nil},
+		{"vanity_domains.list", func(ctx context.Context, c *Client) error {
+			_, err := c.VanityDomains.List(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/vanity-domains", nil},
+		{"vanity_domains.create", func(ctx context.Context, c *Client) error {
+			_, err := c.VanityDomains.Create(ctx, "ten_1", "env_1", map[string]interface{}{"domain": "a.com"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/vanity-domains", map[string]interface{}{"domain": "a.com"}},
+		{"vanity_domains.delete", func(ctx context.Context, c *Client) error {
+			_, err := c.VanityDomains.Delete(ctx, "ten_1", "env_1", "dom_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/vanity-domains/dom_1", nil},
+		{"vanity_domains.check", func(ctx context.Context, c *Client) error {
+			_, err := c.VanityDomains.Check(ctx, "ten_1", "env_1", "dom_1")
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/vanity-domains/dom_1/check", nil},
+		{"widgets.create_token", func(ctx context.Context, c *Client) error {
+			_, err := c.Widgets.CreateToken(ctx, "ten_1", "env_1", map[string]interface{}{"ttl": float64(60)})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/widgets/token", map[string]interface{}{"ttl": float64(60)}},
+		{"otel.export_traces", func(ctx context.Context, c *Client) error {
+			_, err := c.Otel.ExportTraces(ctx, map[string]interface{}{"resourceSpans": []interface{}{}})
+			return err
+		}, "POST", "/v1/traces", map[string]interface{}{"resourceSpans": []interface{}{}}},
+	}
+}
+
+func TestWave3MethodAndPath(t *testing.T) {
+	cases := wave3Cases()
+	if len(cases) != 152 {
+		t.Fatalf("wave3 resource cases = %d, want 152", len(cases))
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			var gotMethod, gotPath, gotAuth string
+			var gotBody map[string]interface{}
+			client := managementClient(t, func(w http.ResponseWriter, r *http.Request) {
+				gotMethod = r.Method
+				gotPath = r.URL.Path
+				gotAuth = r.Header.Get("Authorization")
+				if r.Body != nil {
+					if err := json.NewDecoder(r.Body).Decode(&gotBody); err != nil && err != io.EOF {
+						t.Errorf("decode body: %v", err)
+					}
+				}
+				writeJSON(t, w, http.StatusOK, map[string]interface{}{})
+			})
+
+			if err := tt.call(context.Background(), client); err != nil {
+				t.Fatalf("call error = %v", err)
+			}
+			if tt.path == "/.well-known/authzen-configuration" {
+				if gotAuth != "" {
+					t.Errorf("Authorization = %q, want empty", gotAuth)
+				}
+			} else if gotAuth != "Bearer key-1" {
+				t.Errorf("Authorization = %q, want Bearer key-1", gotAuth)
+			}
+			if gotMethod != tt.method {
+				t.Errorf("method = %s, want %s", gotMethod, tt.method)
+			}
+			if gotPath != tt.path {
+				t.Errorf("path = %s, want %s", gotPath, tt.path)
+			}
+			if tt.body == nil {
+				if gotBody != nil {
+					t.Errorf("body = %#v, want nil", gotBody)
+				}
+			} else if !reflect.DeepEqual(gotBody, tt.body) {
+				t.Errorf("body = %#v, want %#v", gotBody, tt.body)
+			}
+		})
+	}
+}
+
+func TestWave3_AuthzenDiscoveryOmitsBearer(t *testing.T) {
+	var gotAuth, gotPath string
+	client := managementClient(t, func(w http.ResponseWriter, r *http.Request) {
+		gotAuth = r.Header.Get("Authorization")
+		gotPath = r.URL.Path
+		writeJSON(t, w, http.StatusOK, map[string]interface{}{})
+	})
+
+	if _, err := client.Authzen.Configuration(context.Background()); err != nil {
+		t.Fatalf("Configuration() error = %v", err)
+	}
+	if gotPath != "/.well-known/authzen-configuration" {
+		t.Errorf("path = %s, want /.well-known/authzen-configuration", gotPath)
+	}
+	if gotAuth != "" {
+		t.Errorf("Authorization = %q, want empty", gotAuth)
+	}
+}
+
+func TestWave3_AuthzenEvaluateUsesEnvironmentSecret(t *testing.T) {
+	var gotAuth, gotPath string
+	client := managementClientWith(t, func(w http.ResponseWriter, r *http.Request) {
+		gotAuth = r.Header.Get("Authorization")
+		gotPath = r.URL.Path
+		writeJSON(t, w, http.StatusOK, map[string]interface{}{"decision": "Permit"})
+	}, ClientConfig{EnvironmentSecret: "adenv_secret"})
+
+	result, err := client.Authzen.Evaluate(context.Background(), map[string]interface{}{"subject": map[string]interface{}{"id": "u"}})
+	if err != nil {
+		t.Fatalf("Evaluate() error = %v", err)
+	}
+	if result["decision"] != "Permit" {
+		t.Errorf("decision = %#v, want Permit", result["decision"])
+	}
+	if gotPath != "/access/v1/evaluation" {
+		t.Errorf("path = %s, want /access/v1/evaluation", gotPath)
+	}
+	if gotAuth != "Bearer adenv_secret" {
+		t.Errorf("Authorization = %q, want Bearer adenv_secret", gotAuth)
+	}
+}
+
+func TestWave3_ScimAndHrisUseSpecializedTokens(t *testing.T) {
+	var gotAuth []string
+	client := managementClientWith(t, func(w http.ResponseWriter, r *http.Request) {
+		gotAuth = append(gotAuth, r.Header.Get("Authorization"))
+		writeJSON(t, w, http.StatusOK, map[string]interface{}{})
+	}, ClientConfig{SCIMToken: "adscim_token", HRISToken: "adhris_token"})
+
+	if _, err := client.Scim.ListUsers(context.Background()); err != nil {
+		t.Fatalf("ListUsers() error = %v", err)
+	}
+	if _, err := client.Hris.ListEmployees(context.Background()); err != nil {
+		t.Fatalf("ListEmployees() error = %v", err)
+	}
+	if len(gotAuth) != 2 {
+		t.Fatalf("auth headers = %d, want 2", len(gotAuth))
+	}
+	if gotAuth[0] != "Bearer adscim_token" {
+		t.Errorf("SCIM Authorization = %q, want Bearer adscim_token", gotAuth[0])
+	}
+	if gotAuth[1] != "Bearer adhris_token" {
+		t.Errorf("HRIS Authorization = %q, want Bearer adhris_token", gotAuth[1])
+	}
+}
+
+func TestWave3_CreateScimTokenExposesOneTimeSecret(t *testing.T) {
+	client := managementClient(t, func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(t, w, http.StatusOK, map[string]interface{}{
+			"token": "adscim_once",
+			"id":    "tok_1",
+		})
+	})
+
+	created, err := client.ProvisioningTokens.CreateScim(context.Background(), "ten_1", "env_1", map[string]interface{}{"name": "scim"})
+	if err != nil {
+		t.Fatalf("CreateScim() error = %v", err)
+	}
+	if created["token"] != "adscim_once" {
+		t.Errorf("token = %#v, want adscim_once", created["token"])
+	}
+}
+
+func TestWave3_QueryParamsForwarded(t *testing.T) {
+	t.Run("mcp.resolve", func(t *testing.T) {
+		var gotPath string
+		var gotQuery url.Values
+		client := managementClient(t, func(w http.ResponseWriter, r *http.Request) {
+			gotPath = r.URL.Path
+			gotQuery = r.URL.Query()
+			writeJSON(t, w, http.StatusOK, map[string]interface{}{})
+		})
+		if _, err := client.Mcp.Resolve(context.Background(), "agent-1"); err != nil {
+			t.Fatalf("Resolve() error = %v", err)
+		}
+		if gotPath != "/v1/mcp/trust-store/resolve" {
+			t.Errorf("path = %s, want /v1/mcp/trust-store/resolve", gotPath)
+		}
+		if gotQuery.Get("subject") != "agent-1" {
+			t.Errorf("subject = %q, want agent-1", gotQuery.Get("subject"))
+		}
+	})
+
+	t.Run("threats.list", func(t *testing.T) {
+		query := url.Values{}
+		query.Set("status", "open")
+		query.Set("limit", "10")
+		var gotQuery url.Values
+		client := managementClient(t, func(w http.ResponseWriter, r *http.Request) {
+			gotQuery = r.URL.Query()
+			writeJSON(t, w, http.StatusOK, map[string]interface{}{})
+		})
+		if _, err := client.Threats.List(context.Background(), "ten_1", "env_1", query); err != nil {
+			t.Fatalf("List() error = %v", err)
+		}
+		if gotQuery.Get("status") != "open" {
+			t.Errorf("status = %q, want open", gotQuery.Get("status"))
+		}
+		if gotQuery.Get("limit") != "10" {
+			t.Errorf("limit = %q, want 10", gotQuery.Get("limit"))
+		}
+	})
+
+	t.Run("elevate.list_requests", func(t *testing.T) {
+		var gotQuery url.Values
+		client := managementClient(t, func(w http.ResponseWriter, r *http.Request) {
+			gotQuery = r.URL.Query()
+			writeJSON(t, w, http.StatusOK, map[string]interface{}{})
+		})
+		if _, err := client.Elevate.ListRequests(context.Background(), "ten_1", "env_1", "pending"); err != nil {
+			t.Fatalf("ListRequests() error = %v", err)
+		}
+		if gotQuery.Get("status") != "pending" {
+			t.Errorf("status = %q, want pending", gotQuery.Get("status"))
+		}
+	})
+}

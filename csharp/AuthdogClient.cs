@@ -20,6 +20,9 @@ namespace Authdog
         private readonly HttpClient _httpClient;
         private readonly string _baseUrl;
         private readonly string? _apiKey;
+        private readonly string? _environmentSecret;
+        private readonly string? _scimToken;
+        private readonly string? _hrisToken;
         private bool _disposed = false;
 
         /// <summary>
@@ -31,6 +34,21 @@ namespace Authdog
         /// Optional management Bearer credential. Userinfo still uses the access-token argument.
         /// </summary>
         public string? ApiKey => _apiKey;
+
+        /// <summary>
+        /// Optional <c>adenv_</c> secret for AuthZEN evaluation/search and MCP runtime.
+        /// </summary>
+        public string? EnvironmentSecret => _environmentSecret;
+
+        /// <summary>
+        /// Optional <c>adscim_</c> token for <c>/v1/scim/v2</c>.
+        /// </summary>
+        public string? ScimToken => _scimToken;
+
+        /// <summary>
+        /// Optional <c>adhris_</c> token for <c>/v1/hris/v1</c>.
+        /// </summary>
+        public string? HrisToken => _hrisToken;
 
         public OrganizationsResource Organizations { get; }
 
@@ -60,6 +78,48 @@ namespace Authdog
 
         public ApiSecretsResource ApiSecrets { get; }
 
+        public AuthzenResource Authzen { get; }
+
+        public ScimResource Scim { get; }
+
+        public HrisResource Hris { get; }
+
+        public McpResource Mcp { get; }
+
+        public OtelResource Otel { get; }
+
+        public OidcClientsResource OidcClients { get; }
+
+        public ActionsResource Actions { get; }
+
+        public AddonsResource Addons { get; }
+
+        public BillingResource Billing { get; }
+
+        public SettingsResource Settings { get; }
+
+        public ElevateResource Elevate { get; }
+
+        public EmailProvidersResource EmailProviders { get; }
+
+        public FeatureFlagsResource FeatureFlags { get; }
+
+        public FormsResource Forms { get; }
+
+        public ProvisioningTokensResource ProvisioningTokens { get; }
+
+        public ImpersonationResource Impersonation { get; }
+
+        public PortalResource Portal { get; }
+
+        public SecurityResource Security { get; }
+
+        public ThreatsResource Threats { get; }
+
+        public VanityDomainsResource VanityDomains { get; }
+
+        public WidgetsResource Widgets { get; }
+
         /// <summary>
         /// Initialize the Authdog client
         /// </summary>
@@ -67,10 +127,23 @@ namespace Authdog
         /// <param name="apiKey">Optional management Bearer credential; unused on userinfo</param>
         /// <param name="httpClient">Optional custom HttpClient instance</param>
         /// <param name="timeout">Timeout for an owned HttpClient (default 10 seconds)</param>
-        public AuthdogClient(string baseUrl, string? apiKey = null, HttpClient? httpClient = null, TimeSpan? timeout = null)
+        /// <param name="environmentSecret">Optional <c>adenv_</c> secret for AuthZEN and MCP runtime</param>
+        /// <param name="scimToken">Optional <c>adscim_</c> token for SCIM</param>
+        /// <param name="hrisToken">Optional <c>adhris_</c> token for HRIS</param>
+        public AuthdogClient(
+            string baseUrl,
+            string? apiKey = null,
+            HttpClient? httpClient = null,
+            TimeSpan? timeout = null,
+            string? environmentSecret = null,
+            string? scimToken = null,
+            string? hrisToken = null)
         {
             _baseUrl = baseUrl.TrimEnd('/');
             _apiKey = apiKey;
+            _environmentSecret = environmentSecret;
+            _scimToken = scimToken;
+            _hrisToken = hrisToken;
             Timeout = timeout ?? TimeSpan.FromSeconds(10);
             _httpClient = httpClient ?? new HttpClient { Timeout = Timeout };
 
@@ -93,6 +166,27 @@ namespace Authdog
             ServiceAccounts = new ServiceAccountsResource(this);
             PersonalAccessTokens = new PersonalAccessTokensResource(this);
             ApiSecrets = new ApiSecretsResource(this);
+            Authzen = new AuthzenResource(this);
+            Scim = new ScimResource(this);
+            Hris = new HrisResource(this);
+            Mcp = new McpResource(this);
+            Otel = new OtelResource(this);
+            OidcClients = new OidcClientsResource(this);
+            Actions = new ActionsResource(this);
+            Addons = new AddonsResource(this);
+            Billing = new BillingResource(this);
+            Settings = new SettingsResource(this);
+            Elevate = new ElevateResource(this);
+            EmailProviders = new EmailProvidersResource(this);
+            FeatureFlags = new FeatureFlagsResource(this);
+            Forms = new FormsResource(this);
+            ProvisioningTokens = new ProvisioningTokensResource(this);
+            Impersonation = new ImpersonationResource(this);
+            Portal = new PortalResource(this);
+            Security = new SecurityResource(this);
+            Threats = new ThreatsResource(this);
+            VanityDomains = new VanityDomainsResource(this);
+            Widgets = new WidgetsResource(this);
         }
 
         /// <summary>
@@ -185,23 +279,28 @@ namespace Authdog
 
         /// <summary>
         /// Send a JSON management request. Constructor apiKey is sent as Bearer unless
-        /// <paramref name="accessToken"/> is provided. Does not set DefaultRequestHeaders.
+        /// <paramref name="accessToken"/> is provided. <paramref name="omitAuth"/> skips
+        /// Authorization even when ApiKey is set. Does not set DefaultRequestHeaders.
         /// </summary>
         public async Task<T> RequestAsync<T>(
             HttpMethod method,
             string path,
             object? body = null,
             IDictionary<string, string?>? query = null,
-            string? accessToken = null)
+            string? accessToken = null,
+            bool omitAuth = false)
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(AuthdogClient));
 
             var request = new HttpRequestMessage(method, BuildRequestUri(path, query));
-            var token = accessToken ?? _apiKey;
-            if (token != null)
+            if (!omitAuth)
             {
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                var token = accessToken ?? _apiKey;
+                if (token != null)
+                {
+                    request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                }
             }
 
             if (body != null)
@@ -282,9 +381,10 @@ namespace Authdog
             string path,
             object? body = null,
             IDictionary<string, string?>? query = null,
-            string? accessToken = null)
+            string? accessToken = null,
+            bool omitAuth = false)
         {
-            return RequestAsync<T>(method, path, body, query, accessToken).GetAwaiter().GetResult();
+            return RequestAsync<T>(method, path, body, query, accessToken, omitAuth).GetAwaiter().GetResult();
         }
 
         /// <summary>

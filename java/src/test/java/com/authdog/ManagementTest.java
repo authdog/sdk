@@ -206,6 +206,126 @@ class ManagementTest {
                 + "?limit=50&after=cur_1", request.getPath());
     }
 
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("wave3Cases")
+    void testWave3MethodAndPath(final String name,
+                                final Consumer<AuthdogClient> call,
+                                final String method,
+                                final String path,
+                                final String body) throws Exception {
+        enqueueJson(200, "{}");
+        client = newClient();
+        call.accept(client);
+
+        RecordedRequest request = mockServer.takeRequest();
+        assertEquals(method, request.getMethod());
+        assertEquals(path, request.getPath());
+        assertJsonBody(body, request.getBody().readUtf8());
+        if ("/.well-known/authzen-configuration".equals(path)) {
+            String auth = request.getHeader("Authorization");
+            assertTrue(auth == null || auth.isEmpty());
+        } else {
+            assertEquals("Bearer key-1",
+                    request.getHeader("Authorization"));
+        }
+    }
+
+    @Test
+    void testWave3CoversAllInventoryOperations() {
+        assertEquals(152, wave3Cases().count());
+    }
+
+    @Test
+    void testWave3AuthzenDiscoveryOmitsBearer() throws Exception {
+        enqueueJson(200, "{}");
+        client = newClient();
+        client.authzen().configuration();
+
+        RecordedRequest request = mockServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals("/.well-known/authzen-configuration",
+                request.getPath());
+        String auth = request.getHeader("Authorization");
+        assertTrue(auth == null || auth.isEmpty());
+    }
+
+    @Test
+    void testWave3AuthzenEvaluateUsesEnvironmentSecret()
+            throws Exception {
+        enqueueJson(200, "{\"decision\":\"Permit\"}");
+        client = new AuthdogClient(mockServer.url("/").toString(),
+                "key-1", "adenv_secret", null, null);
+
+        JsonNode result = client.authzen().evaluate(
+                mapOf("subject", mapOf("id", "u")));
+        assertEquals("Permit", result.get("decision").asText());
+
+        RecordedRequest request = mockServer.takeRequest();
+        assertEquals("POST", request.getMethod());
+        assertEquals("/access/v1/evaluation", request.getPath());
+        assertEquals("Bearer adenv_secret",
+                request.getHeader("Authorization"));
+    }
+
+    @Test
+    void testWave3ScimAndHrisUseSpecializedTokens() throws Exception {
+        enqueueJson(200, "{}");
+        enqueueJson(200, "{}");
+        client = new AuthdogClient(mockServer.url("/").toString(),
+                "key-1", null, "adscim_token", "adhris_token");
+
+        client.scim().listUsers();
+        RecordedRequest scimReq = mockServer.takeRequest();
+        assertEquals("Bearer adscim_token",
+                scimReq.getHeader("Authorization"));
+
+        client.hris().listEmployees();
+        RecordedRequest hrisReq = mockServer.takeRequest();
+        assertEquals("Bearer adhris_token",
+                hrisReq.getHeader("Authorization"));
+    }
+
+    @Test
+    void testWave3CreateScimTokenExposesOneTimeSecret()
+            throws Exception {
+        enqueueJson(200,
+                "{\"token\":\"adscim_once\",\"id\":\"tok_1\"}");
+        client = newClient();
+
+        JsonNode created = client.provisioningTokens()
+                .createScim("ten_1", "env_1", mapOf("name", "scim"));
+        assertEquals("adscim_once", created.get("token").asText());
+    }
+
+    @Test
+    void testWave3QueryParamsForwarded() throws Exception {
+        enqueueJson(200, "{}");
+        enqueueJson(200, "{}");
+        enqueueJson(200, "{}");
+        client = newClient();
+
+        client.mcp().resolve("agent-1");
+        RecordedRequest resolve = mockServer.takeRequest();
+        assertEquals("GET", resolve.getMethod());
+        assertEquals("/v1/mcp/trust-store/resolve?subject=agent-1",
+                resolve.getPath());
+
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("status", "open");
+        params.put("limit", "10");
+        client.threats().list("ten_1", "env_1", params);
+        RecordedRequest threats = mockServer.takeRequest();
+        assertEquals("/v1/tenants/ten_1/environments/env_1/threats"
+                + "?status=open&limit=10", threats.getPath());
+
+        client.elevate().listRequests("ten_1", "env_1", "pending");
+        RecordedRequest elevate = mockServer.takeRequest();
+        assertEquals("/v1/tenants/ten_1/environments/env_1"
+                + "/elevate/access-requests?status=pending",
+                elevate.getPath());
+    }
+
     static Stream<Arguments> wave1Cases() {
         return Stream.of(
                 caseOf("orgs list",
@@ -841,6 +961,1130 @@ class ManagementTest {
                         "/v1/tenants/ten_1/environments/env_1"
                                 + "/me/permissions",
                         null)
+        );
+    }
+
+    static Stream<Arguments> wave3Cases() {
+        return Stream.of(
+                caseOf("authzen configuration",
+                        c -> c.authzen().configuration(),
+                        "GET",
+                        "/.well-known/authzen-configuration",
+                        null),
+                caseOf("authzen evaluate",
+                        c -> c.authzen().evaluate(mapOf("subject", mapOf())),
+                        "POST",
+                        "/access/v1/evaluation",
+                        "{\"subject\":{}}"),
+                caseOf("authzen evaluate batch",
+                        c -> c.authzen().
+                                evaluateBatch(
+                                mapOf("evaluations", Collections.emptyList())),
+                        "POST",
+                        "/access/v1/evaluations",
+                        "{\"evaluations\":[]}"),
+                caseOf("authzen search action",
+                        c -> c.authzen().searchAction(mapOf("subject", mapOf(
+                                ))),
+                        "POST",
+                        "/access/v1/search/action",
+                        "{\"subject\":{}}"),
+                caseOf("authzen search resource",
+                        c -> c.authzen().searchResource(mapOf("subject", mapOf(
+                                ))),
+                        "POST",
+                        "/access/v1/search/resource",
+                        "{\"subject\":{}}"),
+                caseOf("authzen search subject",
+                        c -> c.authzen().searchSubject(mapOf("resource", mapOf(
+                                ))),
+                        "POST",
+                        "/access/v1/search/subject",
+                        "{\"resource\":{}}"),
+                caseOf("users revoke session",
+                        c -> c.users().revokeSession("env_1", "sess_1"),
+                        "DELETE",
+                        "/v1/environments/env_1"
+                                + "/sessions/sess_1",
+                        null),
+                caseOf("hris list departments",
+                        c -> c.hris().listDepartments(),
+                        "GET",
+                        "/v1/hris/v1/Departments",
+                        null),
+                caseOf("hris create department",
+                        c -> c.hris().createDepartment(mapOf("name", "Eng")),
+                        "POST",
+                        "/v1/hris/v1/Departments",
+                        "{\"name\":\"Eng\"}"),
+                caseOf("hris get department",
+                        c -> c.hris().getDepartment("dep_1"),
+                        "GET",
+                        "/v1/hris/v1/Departments/dep_1",
+                        null),
+                caseOf("hris replace department",
+                        c -> c.hris().replaceDepartment("dep_1", mapOf(
+                                "name",
+                                "Eng")),
+                        "PUT",
+                        "/v1/hris/v1/Departments/dep_1",
+                        "{\"name\":\"Eng\"}"),
+                caseOf("hris patch department",
+                        c -> c.hris().patchDepartment("dep_1", mapOf(
+                                "name",
+                                "E")),
+                        "PATCH",
+                        "/v1/hris/v1/Departments/dep_1",
+                        "{\"name\":\"E\"}"),
+                caseOf("hris delete department",
+                        c -> c.hris().deleteDepartment("dep_1"),
+                        "DELETE",
+                        "/v1/hris/v1/Departments/dep_1",
+                        null),
+                caseOf("hris list employees",
+                        c -> c.hris().listEmployees(),
+                        "GET",
+                        "/v1/hris/v1/Employees",
+                        null),
+                caseOf("hris create employee",
+                        c -> c.hris().createEmployee(mapOf("name", "Ada")),
+                        "POST",
+                        "/v1/hris/v1/Employees",
+                        "{\"name\":\"Ada\"}"),
+                caseOf("hris get employee",
+                        c -> c.hris().getEmployee("emp_1"),
+                        "GET",
+                        "/v1/hris/v1/Employees/emp_1",
+                        null),
+                caseOf("hris replace employee",
+                        c -> c.hris().replaceEmployee("emp_1", mapOf(
+                                "name",
+                                "Ada")),
+                        "PUT",
+                        "/v1/hris/v1/Employees/emp_1",
+                        "{\"name\":\"Ada\"}"),
+                caseOf("hris patch employee",
+                        c -> c.hris().patchEmployee("emp_1", mapOf(
+                                "name",
+                                "A")),
+                        "PATCH",
+                        "/v1/hris/v1/Employees/emp_1",
+                        "{\"name\":\"A\"}"),
+                caseOf("hris delete employee",
+                        c -> c.hris().deleteEmployee("emp_1"),
+                        "DELETE",
+                        "/v1/hris/v1/Employees/emp_1",
+                        null),
+                caseOf("hris service config",
+                        c -> c.hris().serviceConfig(),
+                        "GET",
+                        "/v1/hris/v1/ServiceConfig",
+                        null),
+                caseOf("otel export logs",
+                        c -> c.otel().
+                                exportLogs(
+                                mapOf("resourceLogs", Collections.emptyList())),
+                        "POST",
+                        "/v1/logs",
+                        "{\"resourceLogs\":[]}"),
+                caseOf("mcp ingest events",
+                        c -> c.mcp().
+                                ingestEvents(
+                                mapOf("events", Collections.emptyList())),
+                        "POST",
+                        "/v1/mcp/events",
+                        "{\"events\":[]}"),
+                caseOf("mcp resolve",
+                        c -> c.mcp().resolve("agent-1"),
+                        "GET",
+                        "/v1/mcp/trust-store/resolve?subject=agent-1",
+                        null),
+                caseOf("otel export metrics",
+                        c -> c.otel().
+                                exportMetrics(
+                                mapOf("resourceMetrics", Collections.emptyList())),
+                        "POST",
+                        "/v1/metrics",
+                        "{\"resourceMetrics\":[]}"),
+                caseOf("otel export logs prefixed",
+                        c -> c.otel().
+                                exportLogsPrefixed(
+                                mapOf("resourceLogs", Collections.emptyList())),
+                        "POST",
+                        "/v1/otel/v1/logs",
+                        "{\"resourceLogs\":[]}"),
+                caseOf("otel export metrics prefixed",
+                        c -> c.otel().
+                                exportMetricsPrefixed(
+                                mapOf("resourceMetrics", Collections.emptyList())),
+                        "POST",
+                        "/v1/otel/v1/metrics",
+                        "{\"resourceMetrics\":[]}"),
+                caseOf("otel export traces prefixed",
+                        c -> c.otel().
+                                exportTracesPrefixed(
+                                mapOf("resourceSpans", Collections.emptyList())),
+                        "POST",
+                        "/v1/otel/v1/traces",
+                        "{\"resourceSpans\":[]}"),
+                caseOf("scim list groups",
+                        c -> c.scim().listGroups(),
+                        "GET",
+                        "/v1/scim/v2/Groups",
+                        null),
+                caseOf("scim create group",
+                        c -> c.scim().createGroup(mapOf("displayName", "G")),
+                        "POST",
+                        "/v1/scim/v2/Groups",
+                        "{\"displayName\":\"G\"}"),
+                caseOf("scim get group",
+                        c -> c.scim().getGroup("g_1"),
+                        "GET",
+                        "/v1/scim/v2/Groups/g_1",
+                        null),
+                caseOf("scim replace group",
+                        c -> c.scim().replaceGroup("g_1", mapOf(
+                                "displayName",
+                                "G")),
+                        "PUT",
+                        "/v1/scim/v2/Groups/g_1",
+                        "{\"displayName\":\"G\"}"),
+                caseOf("scim patch group",
+                        c -> c.scim().
+                                patchGroup(
+                                "g_1",
+                                mapOf("Operations", Collections.emptyList())),
+                        "PATCH",
+                        "/v1/scim/v2/Groups/g_1",
+                        "{\"Operations\":[]}"),
+                caseOf("scim delete group",
+                        c -> c.scim().deleteGroup("g_1"),
+                        "DELETE",
+                        "/v1/scim/v2/Groups/g_1",
+                        null),
+                caseOf("scim resource types",
+                        c -> c.scim().resourceTypes(),
+                        "GET",
+                        "/v1/scim/v2/ResourceTypes",
+                        null),
+                caseOf("scim resource type",
+                        c -> c.scim().resourceType("User"),
+                        "GET",
+                        "/v1/scim/v2/ResourceTypes/User",
+                        null),
+                caseOf("scim schemas",
+                        c -> c.scim().schemas(),
+                        "GET",
+                        "/v1/scim/v2/Schemas",
+                        null),
+                caseOf("scim schema",
+                        c -> c.scim().schema(
+                                "urn:ietf:params:scim:schemas:core:2.0:User"),
+                        "GET",
+                        "/v1/scim/v2/Schemas/"
+                                + "urn:ietf:params:scim:schemas:core:2.0:User",
+                        null),
+                caseOf("scim service provider config",
+                        c -> c.scim().serviceProviderConfig(),
+                        "GET",
+                        "/v1/scim/v2/ServiceProviderConfig",
+                        null),
+                caseOf("scim list users",
+                        c -> c.scim().listUsers(),
+                        "GET",
+                        "/v1/scim/v2/Users",
+                        null),
+                caseOf("scim create user",
+                        c -> c.scim().createUser(mapOf("userName", "ada")),
+                        "POST",
+                        "/v1/scim/v2/Users",
+                        "{\"userName\":\"ada\"}"),
+                caseOf("scim get user",
+                        c -> c.scim().getUser("u_1"),
+                        "GET",
+                        "/v1/scim/v2/Users/u_1",
+                        null),
+                caseOf("scim replace user",
+                        c -> c.scim().replaceUser("u_1", mapOf(
+                                "userName",
+                                "ada")),
+                        "PUT",
+                        "/v1/scim/v2/Users/u_1",
+                        "{\"userName\":\"ada\"}"),
+                caseOf("scim patch user",
+                        c -> c.scim().
+                                patchUser(
+                                "u_1",
+                                mapOf("Operations", Collections.emptyList())),
+                        "PATCH",
+                        "/v1/scim/v2/Users/u_1",
+                        "{\"Operations\":[]}"),
+                caseOf("scim delete user",
+                        c -> c.scim().deleteUser("u_1"),
+                        "DELETE",
+                        "/v1/scim/v2/Users/u_1",
+                        null),
+                caseOf("environments list connections",
+                        c -> c.environments().listConnections(
+                                "ten_1",
+                                "app_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/applications/app_1/environments/env_1"
+                                + "/connections",
+                        null),
+                caseOf("oidc clients list",
+                        c -> c.oidcClients().list("ten_1", "app_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/applications/app_1/environments/env_1"
+                                + "/oidc-clients",
+                        null),
+                caseOf("oidc clients register",
+                        c -> c.oidcClients().
+                                register(
+                                "ten_1",
+                                "app_1",
+                                "env_1",
+                                mapOf("name", "cli")),
+                        "POST",
+                        "/v1/tenants/ten_1/applications/app_1/environments/env_1"
+                                + "/oidc-clients",
+                        "{\"name\":\"cli\"}"),
+                caseOf("oidc clients update",
+                        c -> c.oidcClients().
+                                update(
+                                "ten_1",
+                                "app_1",
+                                "env_1",
+                                "cid_1",
+                                mapOf("name", "n")),
+                        "PATCH",
+                        "/v1/tenants/ten_1/applications/app_1/environments/env_1"
+                                + "/oidc-clients/cid_1",
+                        "{\"name\":\"n\"}"),
+                caseOf("oidc clients delete",
+                        c -> c.oidcClients().delete(
+                                "ten_1",
+                                "app_1",
+                                "env_1",
+                                "cid_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/applications/app_1/environments/env_1"
+                                + "/oidc-clients/cid_1",
+                        null),
+                caseOf("environments list redirect uris",
+                        c -> c.environments().listRedirectUris(
+                                "ten_1",
+                                "app_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/applications/app_1/environments/env_1"
+                                + "/redirect-uris",
+                        null),
+                caseOf("actions list",
+                        c -> c.actions().list("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/actions",
+                        null),
+                caseOf("actions save",
+                        c -> c.actions().save("ten_1", "env_1", mapOf(
+                                "url",
+                                "https://ex")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/actions",
+                        "{\"url\":\"https://ex\"}"),
+                caseOf("actions executions",
+                        c -> c.actions().executions("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/actions/executions",
+                        null),
+                caseOf("actions test",
+                        c -> c.actions().test("ten_1", "env_1", mapOf(
+                                "url",
+                                "https://ex")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/actions/test",
+                        "{\"url\":\"https://ex\"}"),
+                caseOf("actions delete",
+                        c -> c.actions().delete("ten_1", "env_1", "act_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/actions/act_1",
+                        null),
+                caseOf("addons list",
+                        c -> c.addons().list("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/addons",
+                        null),
+                caseOf("addons save",
+                        c -> c.addons().save("ten_1", "env_1", mapOf(
+                                "provider",
+                                "slack")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/addons",
+                        "{\"provider\":\"slack\"}"),
+                caseOf("addons delete",
+                        c -> c.addons().delete("ten_1", "env_1", "slack"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/addons/slack",
+                        null),
+                caseOf("billing list features",
+                        c -> c.billing().listFeatures("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/billing/features",
+                        null),
+                caseOf("billing save feature",
+                        c -> c.billing().saveFeature("ten_1", "env_1", mapOf(
+                                "name",
+                                "pro")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/billing/features",
+                        "{\"name\":\"pro\"}"),
+                caseOf("billing delete feature",
+                        c -> c.billing().deleteFeature(
+                                "ten_1",
+                                "env_1",
+                                "feat_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/billing/features/feat_1",
+                        null),
+                caseOf("billing list plans",
+                        c -> c.billing().listPlans("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/billing/plans",
+                        null),
+                caseOf("billing save plan",
+                        c -> c.billing().savePlan("ten_1", "env_1", mapOf(
+                                "name",
+                                "pro")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/billing/plans",
+                        "{\"name\":\"pro\"}"),
+                caseOf("billing delete plan",
+                        c -> c.billing().deletePlan("ten_1", "env_1", "plan_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/billing/plans/plan_1",
+                        null),
+                caseOf("billing sync stripe",
+                        c -> c.billing().syncStripe("ten_1", "env_1", "plan_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/billing/plans/plan_1/sync-stripe",
+                        null),
+                caseOf("settings get bot detection policy",
+                        c -> c.settings().getBotDetectionPolicy(
+                                "ten_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/bot-detection-policy",
+                        null),
+                caseOf("settings update bot detection policy",
+                        c -> c.settings().
+                                updateBotDetectionPolicy(
+                                "ten_1",
+                                "env_1",
+                                mapOf("enabled", true)),
+                        "PUT",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/bot-detection-policy",
+                        "{\"enabled\":true}"),
+                caseOf("settings get breached password policy",
+                        c -> c.settings().getBreachedPasswordPolicy(
+                                "ten_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/breached-password-policy",
+                        null),
+                caseOf("settings update breached password policy",
+                        c -> c.settings().
+                                updateBreachedPasswordPolicy(
+                                "ten_1",
+                                "env_1",
+                                mapOf("enabled", true)),
+                        "PUT",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/breached-password-policy",
+                        "{\"enabled\":true}"),
+                caseOf("settings get brute force policy",
+                        c -> c.settings().getBruteForcePolicy("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/brute-force-policy",
+                        null),
+                caseOf("settings update brute force policy",
+                        c -> c.settings().
+                                updateBruteForcePolicy(
+                                "ten_1",
+                                "env_1",
+                                mapOf("enabled", true)),
+                        "PUT",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/brute-force-policy",
+                        "{\"enabled\":true}"),
+                caseOf("environments save connection",
+                        c -> c.environments().
+                                saveConnection(
+                                "ten_1",
+                                "env_1",
+                                mapOf("provider", "okta")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/connections",
+                        "{\"provider\":\"okta\"}"),
+                caseOf("environments resolve saml metadata",
+                        c -> c.environments().
+                                resolveSamlMetadata(
+                                "ten_1",
+                                "env_1",
+                                mapOf("url", "https://ex")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/connections/resolve-saml-metadata",
+                        "{\"url\":\"https://ex\"}"),
+                caseOf("environments get sso metadata",
+                        c -> c.environments().getSsoMetadata("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/connections/sso-metadata",
+                        null),
+                caseOf("environments delete connection",
+                        c -> c.environments().deleteConnection(
+                                "ten_1",
+                                "env_1",
+                                "con_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/connections/con_1",
+                        null),
+                caseOf("settings get device risk policy",
+                        c -> c.settings().getDeviceRiskPolicy("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/device-risk-policy",
+                        null),
+                caseOf("settings update device risk policy",
+                        c -> c.settings().
+                                updateDeviceRiskPolicy(
+                                "ten_1",
+                                "env_1",
+                                mapOf("enabled", true)),
+                        "PUT",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/device-risk-policy",
+                        "{\"enabled\":true}"),
+                caseOf("elevate activate grant",
+                        c -> c.elevate().
+                                activateGrant(
+                                "ten_1",
+                                "env_1",
+                                "gr_1",
+                                mapOf("reason", "x")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/elevate/access-grants/gr_1/activate",
+                        "{\"reason\":\"x\"}"),
+                caseOf("elevate revoke grant",
+                        c -> c.elevate().
+                                revokeGrant(
+                                "ten_1",
+                                "env_1",
+                                "gr_1",
+                                mapOf("reason", "x")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/elevate/access-grants/gr_1/revoke",
+                        "{\"reason\":\"x\"}"),
+                caseOf("elevate list requests",
+                        c -> c.elevate().listRequests("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/elevate/access-requests",
+                        null),
+                caseOf("elevate create request",
+                        c -> c.elevate().createRequest("ten_1", "env_1", mapOf(
+                                "reason",
+                                "x")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/elevate/access-requests",
+                        "{\"reason\":\"x\"}"),
+                caseOf("elevate get request",
+                        c -> c.elevate().getRequest("ten_1", "env_1", "req_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/elevate/access-requests/req_1",
+                        null),
+                caseOf("elevate approve request",
+                        c -> c.elevate().
+                                approveRequest(
+                                "ten_1",
+                                "env_1",
+                                "req_1",
+                                mapOf("note", "ok")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/elevate/access-requests/req_1/approve",
+                        "{\"note\":\"ok\"}"),
+                caseOf("elevate cancel request",
+                        c -> c.elevate().cancelRequest(
+                                "ten_1",
+                                "env_1",
+                                "req_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/elevate/access-requests/req_1/cancel",
+                        null),
+                caseOf("elevate deny request",
+                        c -> c.elevate().
+                                denyRequest(
+                                "ten_1",
+                                "env_1",
+                                "req_1",
+                                mapOf("note", "no")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/elevate/access-requests/req_1/deny",
+                        "{\"note\":\"no\"}"),
+                caseOf("elevate get policy",
+                        c -> c.elevate().getPolicy("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/elevate/policy",
+                        null),
+                caseOf("elevate update policy",
+                        c -> c.elevate().updatePolicy("ten_1", "env_1", mapOf(
+                                "enabled",
+                                true)),
+                        "PUT",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/elevate/policy",
+                        "{\"enabled\":true}"),
+                caseOf("email providers list",
+                        c -> c.emailProviders().list("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/email-providers",
+                        null),
+                caseOf("email providers save",
+                        c -> c.emailProviders().save("ten_1", "env_1", mapOf(
+                                "provider",
+                                "ses")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/email-providers",
+                        "{\"provider\":\"ses\"}"),
+                caseOf("email providers test",
+                        c -> c.emailProviders().test("ten_1", "env_1", mapOf(
+                                "to",
+                                "a@b.c")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/email-providers/test",
+                        "{\"to\":\"a@b.c\"}"),
+                caseOf("email providers delete",
+                        c -> c.emailProviders().delete("ten_1", "env_1", "ses"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/email-providers/ses",
+                        null),
+                caseOf("email providers activate",
+                        c -> c.emailProviders().activate(
+                                "ten_1",
+                                "env_1",
+                                "ses"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/email-providers/ses/activate",
+                        null),
+                caseOf("feature flags list",
+                        c -> c.featureFlags().list("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/feature-flags",
+                        null),
+                caseOf("feature flags save",
+                        c -> c.featureFlags().save("ten_1", "env_1", mapOf(
+                                "key",
+                                "x")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/feature-flags",
+                        "{\"key\":\"x\"}"),
+                caseOf("feature flags delete",
+                        c -> c.featureFlags().delete(
+                                "ten_1",
+                                "env_1",
+                                "flag_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/feature-flags/flag_1",
+                        null),
+                caseOf("forms list attachments",
+                        c -> c.forms().listAttachments("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/form-attachments",
+                        null),
+                caseOf("forms list",
+                        c -> c.forms().list("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/forms",
+                        null),
+                caseOf("forms save",
+                        c -> c.forms().save("ten_1", "env_1", mapOf(
+                                "name",
+                                "login")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/forms",
+                        "{\"name\":\"login\"}"),
+                caseOf("forms delete",
+                        c -> c.forms().delete("ten_1", "env_1", "form_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/forms/form_1",
+                        null),
+                caseOf("provisioning tokens list hris",
+                        c -> c.provisioningTokens().listHris("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/hris-tokens",
+                        null),
+                caseOf("provisioning tokens create hris",
+                        c -> c.provisioningTokens().
+                                createHris(
+                                "ten_1",
+                                "env_1",
+                                mapOf("name", "hr")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/hris-tokens",
+                        "{\"name\":\"hr\"}"),
+                caseOf("provisioning tokens revoke hris",
+                        c -> c.provisioningTokens().revokeHris(
+                                "ten_1",
+                                "env_1",
+                                "tok_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/hris-tokens/tok_1/revoke",
+                        null),
+                caseOf("provisioning tokens rotate hris",
+                        c -> c.provisioningTokens().rotateHris(
+                                "ten_1",
+                                "env_1",
+                                "tok_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/hris-tokens/tok_1/rotate",
+                        null),
+                caseOf("impersonation list",
+                        c -> c.impersonation().list("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/impersonation-grants",
+                        null),
+                caseOf("impersonation create",
+                        c -> c.impersonation().create("ten_1", "env_1", mapOf(
+                                "userId",
+                                "usr_1")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/impersonation-grants",
+                        "{\"userId\":\"usr_1\"}"),
+                caseOf("impersonation revoke",
+                        c -> c.impersonation().revoke("ten_1", "env_1", "gr_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/impersonation-grants/gr_1/revoke",
+                        null),
+                caseOf("settings list jwt claim mappings",
+                        c -> c.settings().listJwtClaimMappings(
+                                "ten_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/jwt-claim-mappings",
+                        null),
+                caseOf("settings save jwt claim mapping",
+                        c -> c.settings().
+                                saveJwtClaimMapping(
+                                "ten_1",
+                                "env_1",
+                                mapOf("claim", "role")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/jwt-claim-mappings",
+                        "{\"claim\":\"role\"}"),
+                caseOf("settings delete jwt claim mapping",
+                        c -> c.settings().deleteJwtClaimMapping(
+                                "ten_1",
+                                "env_1",
+                                "map_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/jwt-claim-mappings/map_1",
+                        null),
+                caseOf("mcp list entries",
+                        c -> c.mcp().listEntries("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/mcp/trust-store",
+                        null),
+                caseOf("mcp create entry",
+                        c -> c.mcp().createEntry("ten_1", "env_1", mapOf(
+                                "subject",
+                                "a")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/mcp/trust-store",
+                        "{\"subject\":\"a\"}"),
+                caseOf("mcp get entry",
+                        c -> c.mcp().getEntry("ten_1", "env_1", "ent_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/mcp/trust-store/ent_1",
+                        null),
+                caseOf("mcp update entry",
+                        c -> c.mcp().
+                                updateEntry(
+                                "ten_1",
+                                "env_1",
+                                "ent_1",
+                                mapOf("name", "n")),
+                        "PATCH",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/mcp/trust-store/ent_1",
+                        "{\"name\":\"n\"}"),
+                caseOf("mcp delete entry",
+                        c -> c.mcp().deleteEntry("ten_1", "env_1", "ent_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/mcp/trust-store/ent_1",
+                        null),
+                caseOf("mcp add key",
+                        c -> c.mcp().
+                                addKey(
+                                "ten_1",
+                                "env_1",
+                                "ent_1",
+                                mapOf("jwk", mapOf())),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/mcp/trust-store/ent_1/keys",
+                        "{\"jwk\":{}}"),
+                caseOf("mcp revoke key",
+                        c -> c.mcp().revokeKey(
+                                "ten_1",
+                                "env_1",
+                                "ent_1",
+                                "key_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/mcp/trust-store/ent_1/keys/key_1",
+                        null),
+                caseOf("mcp rotate key",
+                        c -> c.mcp().rotateKey(
+                                "ten_1",
+                                "env_1",
+                                "ent_1",
+                                "key_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/mcp/trust-store/ent_1/keys/key_1/rotate",
+                        null),
+                caseOf("mcp revoke entry",
+                        c -> c.mcp().revokeEntry("ten_1", "env_1", "ent_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/mcp/trust-store/ent_1/revoke",
+                        null),
+                caseOf("mcp verify entry",
+                        c -> c.mcp().
+                                verifyEntry(
+                                "ten_1",
+                                "env_1",
+                                "ent_1",
+                                mapOf("verified", true)),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/mcp/trust-store/ent_1/verify",
+                        "{\"verified\":true}"),
+                caseOf("users totp status",
+                        c -> c.users().totpStatus("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/me/mfa/totp",
+                        null),
+                caseOf("settings get password policy",
+                        c -> c.settings().getPasswordPolicy("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/password-policy",
+                        null),
+                caseOf("settings update password policy",
+                        c -> c.settings().
+                                updatePasswordPolicy(
+                                "ten_1",
+                                "env_1",
+                                mapOf("minLength", 8)),
+                        "PUT",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/password-policy",
+                        "{\"minLength\":8}"),
+                caseOf("portal generate link",
+                        c -> c.portal().generateLink("ten_1", "env_1", mapOf(
+                                "email",
+                                "a@b.c")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/portal/generate-link",
+                        "{\"email\":\"a@b.c\"}"),
+                caseOf("settings get rate limit policy",
+                        c -> c.settings().getRateLimitPolicy("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/rate-limit-policy",
+                        null),
+                caseOf("settings update rate limit policy",
+                        c -> c.settings().
+                                updateRateLimitPolicy(
+                                "ten_1",
+                                "env_1",
+                                mapOf("limit", 10)),
+                        "PUT",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/rate-limit-policy",
+                        "{\"limit\":10}"),
+                caseOf("environments save redirect uris",
+                        c -> c.environments().
+                                saveRedirectUris(
+                                "ten_1",
+                                "env_1",
+                                mapOf("uris", Collections.emptyList())),
+                        "PUT",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/redirect-uris",
+                        "{\"uris\":[]}"),
+                caseOf("settings get restrictions",
+                        c -> c.settings().getRestrictions("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/restrictions",
+                        null),
+                caseOf("settings update restrictions",
+                        c -> c.settings().
+                                updateRestrictions(
+                                "ten_1",
+                                "env_1",
+                                mapOf("signup", false)),
+                        "PUT",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/restrictions",
+                        "{\"signup\":false}"),
+                caseOf("provisioning tokens list scim",
+                        c -> c.provisioningTokens().listScim("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/scim-tokens",
+                        null),
+                caseOf("provisioning tokens create scim",
+                        c -> c.provisioningTokens().
+                                createScim(
+                                "ten_1",
+                                "env_1",
+                                mapOf("name", "scim")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/scim-tokens",
+                        "{\"name\":\"scim\"}"),
+                caseOf("provisioning tokens revoke scim",
+                        c -> c.provisioningTokens().revokeScim(
+                                "ten_1",
+                                "env_1",
+                                "tok_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/scim-tokens/tok_1/revoke",
+                        null),
+                caseOf("provisioning tokens rotate scim",
+                        c -> c.provisioningTokens().rotateScim(
+                                "ten_1",
+                                "env_1",
+                                "tok_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/scim-tokens/tok_1/rotate",
+                        null),
+                caseOf("security posture",
+                        c -> c.security().posture("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/security/posture",
+                        null),
+                caseOf("settings get session config",
+                        c -> c.settings().getSessionConfig("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/session-config",
+                        null),
+                caseOf("settings update session config",
+                        c -> c.settings().
+                                updateSessionConfig(
+                                "ten_1",
+                                "env_1",
+                                mapOf("ttl", 3600)),
+                        "PUT",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/session-config",
+                        "{\"ttl\":3600}"),
+                caseOf("threats list",
+                        c -> c.threats().list("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/threats",
+                        null),
+                caseOf("threats create",
+                        c -> c.threats().create("ten_1", "env_1", mapOf(
+                                "type",
+                                "bot")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/threats",
+                        "{\"type\":\"bot\"}"),
+                caseOf("threats get",
+                        c -> c.threats().get("ten_1", "env_1", "th_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/threats/th_1",
+                        null),
+                caseOf("threats update",
+                        c -> c.threats().update("ten_1", "env_1", "th_1", mapOf(
+                                "status",
+                                "open")),
+                        "PATCH",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/threats/th_1",
+                        "{\"status\":\"open\"}"),
+                caseOf("threats delete",
+                        c -> c.threats().delete("ten_1", "env_1", "th_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/threats/th_1",
+                        null),
+                caseOf("threats resolve",
+                        c -> c.threats().
+                                resolve(
+                                "ten_1",
+                                "env_1",
+                                "th_1",
+                                mapOf("status", "resolved")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/threats/th_1/resolve",
+                        "{\"status\":\"resolved\"}"),
+                caseOf("users bulk delete",
+                        c -> c.users().
+                                bulkDelete(
+                                "ten_1",
+                                "env_1",
+                                mapOf("userIds", List.of("usr_1"))),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/users/bulk/delete",
+                        "{\"userIds\":[\"usr_1\"]}"),
+                caseOf("users bulk set active",
+                        c -> c.users().
+                                bulkSetActive(
+                                "ten_1",
+                                "env_1",
+                                mapOf("userIds", List.of("usr_1"), "active", false)),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/users/bulk/set-active",
+                        "{\"userIds\":[\"usr_1\"],\"active\":false}"),
+                caseOf("users import users",
+                        c -> c.users().
+                                importUsers(
+                                "ten_1",
+                                "env_1",
+                                mapOf("users", Collections.emptyList())),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/users/import",
+                        "{\"users\":[]}"),
+                caseOf("users disable mfa",
+                        c -> c.users().disableMfa("ten_1", "env_1", "usr_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/users/usr_1/mfa",
+                        null),
+                caseOf("users list sessions",
+                        c -> c.users().listSessions("ten_1", "env_1", "usr_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/users/usr_1/sessions",
+                        null),
+                caseOf("vanity domains list",
+                        c -> c.vanityDomains().list("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/vanity-domains",
+                        null),
+                caseOf("vanity domains create",
+                        c -> c.vanityDomains().create("ten_1", "env_1", mapOf(
+                                "domain",
+                                "a.com")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/vanity-domains",
+                        "{\"domain\":\"a.com\"}"),
+                caseOf("vanity domains delete",
+                        c -> c.vanityDomains().delete(
+                                "ten_1",
+                                "env_1",
+                                "dom_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/vanity-domains/dom_1",
+                        null),
+                caseOf("vanity domains check",
+                        c -> c.vanityDomains().check("ten_1", "env_1", "dom_1"),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/vanity-domains/dom_1/check",
+                        null),
+                caseOf("widgets create token",
+                        c -> c.widgets().createToken("ten_1", "env_1", mapOf(
+                                "ttl",
+                                60)),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/widgets/token",
+                        "{\"ttl\":60}"),
+                caseOf("otel export traces",
+                        c -> c.otel().
+                                exportTraces(
+                                mapOf("resourceSpans", Collections.emptyList())),
+                        "POST",
+                        "/v1/traces",
+                        "{\"resourceSpans\":[]}")
         );
     }
 

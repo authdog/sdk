@@ -3,8 +3,8 @@
 **Date**: 2026-09-17  
 **Feature**: `004-api-parity`
 
-This guide checks the Wave 1 contract after implementation. It does
-not replace language READMEs.
+This guide checks the platform catalog contract after implementation.
+It does not replace language READMEs.
 
 ## Prerequisites
 
@@ -99,4 +99,4 @@ Wave 1 is implemented. It should link here.
 moon run :test
 ```
 
-Expected: all core projects green; new Wave 1 tests included in each.
+Expected: all core projects green; Wave 1–3 tests included in each.

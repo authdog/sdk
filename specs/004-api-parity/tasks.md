@@ -205,3 +205,21 @@ Wave 1 is the MVP for this feature. Wave 2 follows below.
 - [x] T076 [P] [US4] Implement Wave 2 in `csharp/` with tests in `csharp/Tests/ManagementTests.cs`
 - [x] T077 [P] [US4] Implement Wave 2 in `zig/` with tests in `zig/src/management_test.zig`
 - [x] T078 [US4] Document Wave 2 namespaces in core READMEs and `specs/README.md`
+
+---
+
+## Phase 8: User Story 5 - Specialized surfaces (P3)
+
+**Goal**: Wave 3 — 152 remaining operations: AuthZEN, SCIM, HRIS, MCP, OTEL, environment settings/connections, elevate, and the rest of the snapshot
+
+**Independent Test**: Table-driven path/method tests; AuthZEN discovery is unauthenticated and evaluation stays on `/access/v1/...`; SCIM/HRIS send their constructor tokens; create/rotate secrets stay on the response
+
+- [x] T079 [US5] Add Wave 3 namespaces, specialized credentials, and directory/environment extras in `python/authdog/resources.py` and `python/authdog/client.py`
+- [x] T080 [US5] Add Wave 3 path/auth/secret/query tests in `python/tests/test_management.py`
+- [x] T081 [P] [US5] Implement Wave 3 in `node/src/resources.ts` and `node/src/client.ts` with tests in `node/tests/management.test.ts`
+- [x] T082 [P] [US5] Implement Wave 3 in `go/` with tests in `go/management_test.go`
+- [x] T083 [P] [US5] Implement Wave 3 in `rust/` with tests in `rust/tests/management_test.rs`
+- [x] T084 [P] [US5] Implement Wave 3 in `java/` with tests in `java/src/test/java/com/authdog/ManagementTest.java`
+- [x] T085 [P] [US5] Implement Wave 3 in `csharp/` with tests in `csharp/Tests/ManagementTests.cs`
+- [x] T086 [P] [US5] Implement Wave 3 in `zig/` with tests in `zig/src/management_test.zig`
+- [x] T087 [US5] Document Wave 3 namespaces and specialized credentials in core READMEs and `specs/README.md`

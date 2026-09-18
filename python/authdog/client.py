@@ -6,20 +6,41 @@ import httpx
 
 from .exceptions import APIError, AuthenticationError
 from .resources import (
+    ActionsResource,
+    AddonsResource,
     ApiSecretsResource,
     AuditResource,
+    AuthzenResource,
+    BillingResource,
+    ElevateResource,
+    EmailProvidersResource,
     EnvironmentsResource,
     EventsResource,
+    FeatureFlagsResource,
+    FormsResource,
     GroupsResource,
+    HrisResource,
+    ImpersonationResource,
+    McpResource,
     NotificationChannelsResource,
+    OidcClientsResource,
     OrganizationsResource,
+    OtelResource,
     PersonalAccessTokensResource,
+    PortalResource,
     ProjectsResource,
+    ProvisioningTokensResource,
     RbacResource,
+    ScimResource,
+    SecurityResource,
     ServiceAccountsResource,
+    SettingsResource,
     TenantsResource,
+    ThreatsResource,
     UsersResource,
+    VanityDomainsResource,
     WebhooksResource,
+    WidgetsResource,
 )
 from .types import Probe, UserInfoResponse
 
@@ -32,6 +53,9 @@ class AuthdogClient:
         base_url: str,
         api_key: Optional[str] = None,
         timeout: float = 10.0,
+        environment_secret: Optional[str] = None,
+        scim_token: Optional[str] = None,
+        hris_token: Optional[str] = None,
     ):
         """
         Initialize the Authdog client.
@@ -40,10 +64,16 @@ class AuthdogClient:
             base_url: The base URL of the Authdog API
             api_key: Optional management Bearer credential
             timeout: Request timeout in seconds (default 10)
+            environment_secret: Optional `adenv_` secret for AuthZEN and MCP runtime
+            scim_token: Optional `adscim_` token for `/v1/scim/v2`
+            hris_token: Optional `adhris_` token for `/v1/hris/v1`
         """
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.timeout = timeout
+        self.environment_secret = environment_secret
+        self.scim_token = scim_token
+        self.hris_token = hris_token
         self._client = httpx.Client(
             base_url=self.base_url,
             headers=self._get_default_headers(),
@@ -63,6 +93,27 @@ class AuthdogClient:
         self.service_accounts = ServiceAccountsResource(self)
         self.personal_access_tokens = PersonalAccessTokensResource(self)
         self.api_secrets = ApiSecretsResource(self)
+        self.authzen = AuthzenResource(self)
+        self.scim = ScimResource(self)
+        self.hris = HrisResource(self)
+        self.mcp = McpResource(self)
+        self.otel = OtelResource(self)
+        self.oidc_clients = OidcClientsResource(self)
+        self.actions = ActionsResource(self)
+        self.addons = AddonsResource(self)
+        self.billing = BillingResource(self)
+        self.settings = SettingsResource(self)
+        self.elevate = ElevateResource(self)
+        self.email_providers = EmailProvidersResource(self)
+        self.feature_flags = FeatureFlagsResource(self)
+        self.forms = FormsResource(self)
+        self.provisioning_tokens = ProvisioningTokensResource(self)
+        self.impersonation = ImpersonationResource(self)
+        self.portal = PortalResource(self)
+        self.security = SecurityResource(self)
+        self.threats = ThreatsResource(self)
+        self.vanity_domains = VanityDomainsResource(self)
+        self.widgets = WidgetsResource(self)
 
     def _get_default_headers(self) -> Dict[str, str]:
         """Get default headers for API requests."""
@@ -81,10 +132,13 @@ class AuthdogClient:
         json: Optional[Dict[str, Any]] = None,
         params: Optional[Dict[str, Any]] = None,
         access_token: Optional[str] = None,
+        omit_auth: bool = False,
     ) -> Any:
         """Send a JSON request and map HTTP failures onto the error taxonomy."""
         headers: Dict[str, str] = {}
-        if access_token is not None:
+        if omit_auth:
+            headers["Authorization"] = ""
+        elif access_token is not None:
             headers["Authorization"] = f"Bearer {access_token}"
 
         try:

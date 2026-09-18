@@ -95,9 +95,16 @@ public AuthdogClient(String baseUrl, String apiKey, int timeoutMs)
 `health()`, `organizations()`, `tenants()`, `projects()`,
 `environments()`, `users()`, `groups()`, `rbac()`, `audit()`,
 `events()`, `webhooks()`, `notificationChannels()`,
-`serviceAccounts()`, `personalAccessTokens()`, and `apiSecrets()`
-wrap Waves 1–2 of the public API. Constructor `apiKey` is the
-management Bearer credential. See `specs/004-api-parity/`.
+`serviceAccounts()`, `personalAccessTokens()`, `apiSecrets()`,
+`authzen()`, `scim()`, `hris()`, `mcp()`, `otel()`, `oidcClients()`,
+`actions()`, `addons()`, `billing()`, `settings()`, `elevate()`,
+`emailProviders()`, `featureFlags()`, `forms()`,
+`provisioningTokens()`, `impersonation()`, `portal()`, `security()`,
+`threats()`, `vanityDomains()`, and `widgets()` wrap Waves 1–3 of
+the public API. Optional constructor credentials:
+`environmentSecret` (AuthZEN + MCP runtime), `scimToken`,
+`hrisToken`. AuthZEN discovery is unauthenticated. See
+`specs/004-api-parity/`.
 
 ##### getUserInfo
 

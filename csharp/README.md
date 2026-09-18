@@ -107,12 +107,18 @@ public AuthdogClient(string baseUrl, string? apiKey = null, HttpClient? httpClie
 - `baseUrl`: The base URL of the Authdog API
 - `apiKey`: Optional management Bearer credential (userinfo still uses the access token)
 - `httpClient`: Optional custom HttpClient instance
+- `environmentSecret`, `scimToken`, `hrisToken`: optional specialized Bearers for AuthZEN/MCP runtime, SCIM, and HRIS
 
 `Health`/`HealthAsync` plus `Organizations`, `Tenants`, `Projects`,
 `Environments`, `Users`, `Groups`, `Rbac`, `Audit`, `Events`,
 `Webhooks`, `NotificationChannels`, `ServiceAccounts`,
-`PersonalAccessTokens`, and `ApiSecrets` wrap Waves 1–2 of the
-public API. See `specs/004-api-parity/`.
+`PersonalAccessTokens`, `ApiSecrets`, `Authzen`, `Scim`, `Hris`,
+`Mcp`, `Otel`, `OidcClients`, `Actions`, `Addons`, `Billing`,
+`Settings`, `Elevate`, `EmailProviders`, `FeatureFlags`, `Forms`,
+`ProvisioningTokens`, `Impersonation`, `Portal`, `Security`,
+`Threats`, `VanityDomains`, and `Widgets` wrap Waves 1–3 of the
+public API. AuthZEN discovery is unauthenticated. See
+`specs/004-api-parity/`.
 
 #### Methods
 

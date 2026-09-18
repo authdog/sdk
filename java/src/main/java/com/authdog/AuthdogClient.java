@@ -2,20 +2,41 @@ package com.authdog;
 
 import com.authdog.exceptions.AuthenticationException;
 import com.authdog.exceptions.ApiException;
+import com.authdog.resources.ActionsResource;
+import com.authdog.resources.AddonsResource;
 import com.authdog.resources.ApiSecretsResource;
 import com.authdog.resources.AuditResource;
+import com.authdog.resources.AuthzenResource;
+import com.authdog.resources.BillingResource;
+import com.authdog.resources.ElevateResource;
+import com.authdog.resources.EmailProvidersResource;
 import com.authdog.resources.EnvironmentsResource;
 import com.authdog.resources.EventsResource;
+import com.authdog.resources.FeatureFlagsResource;
+import com.authdog.resources.FormsResource;
 import com.authdog.resources.GroupsResource;
+import com.authdog.resources.HrisResource;
+import com.authdog.resources.ImpersonationResource;
+import com.authdog.resources.McpResource;
 import com.authdog.resources.NotificationChannelsResource;
+import com.authdog.resources.OidcClientsResource;
 import com.authdog.resources.OrganizationsResource;
+import com.authdog.resources.OtelResource;
 import com.authdog.resources.PersonalAccessTokensResource;
+import com.authdog.resources.PortalResource;
 import com.authdog.resources.ProjectsResource;
+import com.authdog.resources.ProvisioningTokensResource;
 import com.authdog.resources.RbacResource;
+import com.authdog.resources.ScimResource;
+import com.authdog.resources.SecurityResource;
 import com.authdog.resources.ServiceAccountsResource;
+import com.authdog.resources.SettingsResource;
 import com.authdog.resources.TenantsResource;
+import com.authdog.resources.ThreatsResource;
 import com.authdog.resources.UsersResource;
+import com.authdog.resources.VanityDomainsResource;
 import com.authdog.resources.WebhooksResource;
+import com.authdog.resources.WidgetsResource;
 import com.authdog.types.Probe;
 import com.authdog.types.UserInfoResponse;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -87,6 +108,21 @@ public class AuthdogClient implements AutoCloseable {
      * API key.
      */
     private final String apiKey;
+
+    /**
+     * Environment secret for AuthZEN and MCP runtime.
+     */
+    private final String environmentSecret;
+
+    /**
+     * SCIM Bearer token.
+     */
+    private final String scimToken;
+
+    /**
+     * HRIS Bearer token.
+     */
+    private final String hrisToken;
 
     /**
      * Object mapper.
@@ -164,6 +200,111 @@ public class AuthdogClient implements AutoCloseable {
     private final ApiSecretsResource apiSecrets;
 
     /**
+     * AuthZEN resource.
+     */
+    private final AuthzenResource authzen;
+
+    /**
+     * SCIM resource.
+     */
+    private final ScimResource scim;
+
+    /**
+     * HRIS resource.
+     */
+    private final HrisResource hris;
+
+    /**
+     * MCP resource.
+     */
+    private final McpResource mcp;
+
+    /**
+     * OpenTelemetry resource.
+     */
+    private final OtelResource otel;
+
+    /**
+     * OIDC clients resource.
+     */
+    private final OidcClientsResource oidcClients;
+
+    /**
+     * Actions resource.
+     */
+    private final ActionsResource actions;
+
+    /**
+     * Addons resource.
+     */
+    private final AddonsResource addons;
+
+    /**
+     * Billing resource.
+     */
+    private final BillingResource billing;
+
+    /**
+     * Settings resource.
+     */
+    private final SettingsResource settings;
+
+    /**
+     * Elevate resource.
+     */
+    private final ElevateResource elevate;
+
+    /**
+     * Email providers resource.
+     */
+    private final EmailProvidersResource emailProviders;
+
+    /**
+     * Feature flags resource.
+     */
+    private final FeatureFlagsResource featureFlags;
+
+    /**
+     * Forms resource.
+     */
+    private final FormsResource forms;
+
+    /**
+     * Provisioning tokens resource.
+     */
+    private final ProvisioningTokensResource provisioningTokens;
+
+    /**
+     * Impersonation resource.
+     */
+    private final ImpersonationResource impersonation;
+
+    /**
+     * Portal resource.
+     */
+    private final PortalResource portal;
+
+    /**
+     * Security resource.
+     */
+    private final SecurityResource security;
+
+    /**
+     * Threats resource.
+     */
+    private final ThreatsResource threats;
+
+    /**
+     * Vanity domains resource.
+     */
+    private final VanityDomainsResource vanityDomains;
+
+    /**
+     * Widgets resource.
+     */
+    private final WidgetsResource widgets;
+
+    /**
      * Initialize the Authdog client.
      * @param baseUrlParam The base URL of the Authdog API
      */
@@ -188,10 +329,46 @@ public class AuthdogClient implements AutoCloseable {
      */
     public AuthdogClient(final String baseUrlParam, final String apiKeyParam,
                         final int timeoutMsParam) {
+        this(baseUrlParam, apiKeyParam, timeoutMsParam, null, null, null);
+    }
+
+    /**
+     * Initialize the Authdog client with specialized credentials.
+     * @param baseUrlParam The base URL of the Authdog API
+     * @param apiKeyParam Optional management Bearer credential
+     * @param environmentSecretParam Optional {@code adenv_} secret
+     * @param scimTokenParam Optional {@code adscim_} token
+     * @param hrisTokenParam Optional {@code adhris_} token
+     */
+    public AuthdogClient(final String baseUrlParam, final String apiKeyParam,
+                        final String environmentSecretParam,
+                        final String scimTokenParam,
+                        final String hrisTokenParam) {
+        this(baseUrlParam, apiKeyParam, DEFAULT_TIMEOUT_MS,
+                environmentSecretParam, scimTokenParam, hrisTokenParam);
+    }
+
+    /**
+     * Initialize the Authdog client with timeout and credentials.
+     * @param baseUrlParam The base URL of the Authdog API
+     * @param apiKeyParam Optional management Bearer credential
+     * @param timeoutMsParam Timeout in milliseconds
+     * @param environmentSecretParam Optional {@code adenv_} secret
+     * @param scimTokenParam Optional {@code adscim_} token
+     * @param hrisTokenParam Optional {@code adhris_} token
+     */
+    public AuthdogClient(final String baseUrlParam, final String apiKeyParam,
+                        final int timeoutMsParam,
+                        final String environmentSecretParam,
+                        final String scimTokenParam,
+                        final String hrisTokenParam) {
         this.baseUrl = baseUrlParam.endsWith("/")
                 ? baseUrlParam.substring(0, baseUrlParam.length() - 1)
                 : baseUrlParam;
         this.apiKey = apiKeyParam;
+        this.environmentSecret = environmentSecretParam;
+        this.scimToken = scimTokenParam;
+        this.hrisToken = hrisTokenParam;
         this.objectMapper = new ObjectMapper();
 
         this.httpClient = new OkHttpClient.Builder()
@@ -215,6 +392,28 @@ public class AuthdogClient implements AutoCloseable {
         this.personalAccessTokens =
                 new PersonalAccessTokensResource(this);
         this.apiSecrets = new ApiSecretsResource(this);
+        this.authzen = new AuthzenResource(this);
+        this.scim = new ScimResource(this);
+        this.hris = new HrisResource(this);
+        this.mcp = new McpResource(this);
+        this.otel = new OtelResource(this);
+        this.oidcClients = new OidcClientsResource(this);
+        this.actions = new ActionsResource(this);
+        this.addons = new AddonsResource(this);
+        this.billing = new BillingResource(this);
+        this.settings = new SettingsResource(this);
+        this.elevate = new ElevateResource(this);
+        this.emailProviders = new EmailProvidersResource(this);
+        this.featureFlags = new FeatureFlagsResource(this);
+        this.forms = new FormsResource(this);
+        this.provisioningTokens =
+                new ProvisioningTokensResource(this);
+        this.impersonation = new ImpersonationResource(this);
+        this.portal = new PortalResource(this);
+        this.security = new SecurityResource(this);
+        this.threats = new ThreatsResource(this);
+        this.vanityDomains = new VanityDomainsResource(this);
+        this.widgets = new WidgetsResource(this);
     }
 
     /**
@@ -224,6 +423,31 @@ public class AuthdogClient implements AutoCloseable {
      */
     public String getApiKey() {
         return apiKey;
+    }
+
+    /**
+     * Environment secret used as a Bearer credential for AuthZEN
+     * evaluation and MCP runtime calls.
+     * @return environment secret or null
+     */
+    public String getEnvironmentSecret() {
+        return environmentSecret;
+    }
+
+    /**
+     * SCIM Bearer token for {@code /v1/scim/v2}.
+     * @return SCIM token or null
+     */
+    public String getScimToken() {
+        return scimToken;
+    }
+
+    /**
+     * HRIS Bearer token for {@code /v1/hris/v1}.
+     * @return HRIS token or null
+     */
+    public String getHrisToken() {
+        return hrisToken;
     }
 
     /**
@@ -339,6 +563,174 @@ public class AuthdogClient implements AutoCloseable {
     }
 
     /**
+     * AuthZEN discovery and evaluation helpers.
+     * @return AuthZEN resource
+     */
+    public AuthzenResource authzen() {
+        return authzen;
+    }
+
+    /**
+     * SCIM 2.0 directory helpers.
+     * @return SCIM resource
+     */
+    public ScimResource scim() {
+        return scim;
+    }
+
+    /**
+     * HRIS directory helpers.
+     * @return HRIS resource
+     */
+    public HrisResource hris() {
+        return hris;
+    }
+
+    /**
+     * MCP runtime and trust-store helpers.
+     * @return MCP resource
+     */
+    public McpResource mcp() {
+        return mcp;
+    }
+
+    /**
+     * OpenTelemetry export helpers.
+     * @return OTEL resource
+     */
+    public OtelResource otel() {
+        return otel;
+    }
+
+    /**
+     * Environment OIDC client helpers.
+     * @return OIDC clients resource
+     */
+    public OidcClientsResource oidcClients() {
+        return oidcClients;
+    }
+
+    /**
+     * Environment action helpers.
+     * @return actions resource
+     */
+    public ActionsResource actions() {
+        return actions;
+    }
+
+    /**
+     * Environment addon helpers.
+     * @return addons resource
+     */
+    public AddonsResource addons() {
+        return addons;
+    }
+
+    /**
+     * Environment billing helpers.
+     * @return billing resource
+     */
+    public BillingResource billing() {
+        return billing;
+    }
+
+    /**
+     * Environment settings helpers.
+     * @return settings resource
+     */
+    public SettingsResource settings() {
+        return settings;
+    }
+
+    /**
+     * Privileged access elevate helpers.
+     * @return elevate resource
+     */
+    public ElevateResource elevate() {
+        return elevate;
+    }
+
+    /**
+     * Environment email provider helpers.
+     * @return email providers resource
+     */
+    public EmailProvidersResource emailProviders() {
+        return emailProviders;
+    }
+
+    /**
+     * Environment feature flag helpers.
+     * @return feature flags resource
+     */
+    public FeatureFlagsResource featureFlags() {
+        return featureFlags;
+    }
+
+    /**
+     * Environment form helpers.
+     * @return forms resource
+     */
+    public FormsResource forms() {
+        return forms;
+    }
+
+    /**
+     * SCIM and HRIS provisioning token helpers.
+     * @return provisioning tokens resource
+     */
+    public ProvisioningTokensResource provisioningTokens() {
+        return provisioningTokens;
+    }
+
+    /**
+     * Impersonation grant helpers.
+     * @return impersonation resource
+     */
+    public ImpersonationResource impersonation() {
+        return impersonation;
+    }
+
+    /**
+     * User portal helpers.
+     * @return portal resource
+     */
+    public PortalResource portal() {
+        return portal;
+    }
+
+    /**
+     * Environment security helpers.
+     * @return security resource
+     */
+    public SecurityResource security() {
+        return security;
+    }
+
+    /**
+     * Environment threat helpers.
+     * @return threats resource
+     */
+    public ThreatsResource threats() {
+        return threats;
+    }
+
+    /**
+     * Environment vanity domain helpers.
+     * @return vanity domains resource
+     */
+    public VanityDomainsResource vanityDomains() {
+        return vanityDomains;
+    }
+
+    /**
+     * Environment widget helpers.
+     * @return widgets resource
+     */
+    public WidgetsResource widgets() {
+        return widgets;
+    }
+
+    /**
      * Liveness probe. Public; works without a management credential.
      * @return probe result
      * @throws AuthenticationException when unauthorized
@@ -365,13 +757,59 @@ public class AuthdogClient implements AutoCloseable {
                          final Map<String, String> queryParam,
                          final Class<T> typeParam)
             throws AuthenticationException, ApiException {
+        return request(methodParam, pathParam, bodyParam, queryParam,
+                typeParam, null, false);
+    }
+
+    /**
+     * Send a JSON management request with a Bearer override.
+     * @param <T> response type
+     * @param methodParam HTTP method
+     * @param pathParam request path beginning with /
+     * @param bodyParam optional JSON body
+     * @param queryParam optional query parameters
+     * @param typeParam Jackson type
+     * @param accessTokenParam optional Bearer override
+     * @return parsed response
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public <T> T request(final String methodParam, final String pathParam,
+                         final Object bodyParam,
+                         final Map<String, String> queryParam,
+                         final Class<T> typeParam,
+                         final String accessTokenParam)
+            throws AuthenticationException, ApiException {
+        return request(methodParam, pathParam, bodyParam, queryParam,
+                typeParam, accessTokenParam, false);
+    }
+
+    /**
+     * Send a JSON management request with auth controls.
+     * @param <T> response type
+     * @param methodParam HTTP method
+     * @param pathParam request path beginning with /
+     * @param bodyParam optional JSON body
+     * @param queryParam optional query parameters
+     * @param typeParam Jackson type
+     * @param accessTokenParam optional Bearer override
+     * @param omitAuthParam when true, send no Authorization header
+     * @return parsed response
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public <T> T request(final String methodParam, final String pathParam,
+                         final Object bodyParam,
+                         final Map<String, String> queryParam,
+                         final Class<T> typeParam,
+                         final String accessTokenParam,
+                         final boolean omitAuthParam)
+            throws AuthenticationException, ApiException {
         final Request.Builder builder = new Request.Builder()
                 .url(buildUrl(pathParam, queryParam))
                 .addHeader("Content-Type", "application/json")
                 .addHeader("User-Agent", "authdog-java-sdk/0.1.0");
-        if (apiKey != null) {
-            builder.header("Authorization", "Bearer " + apiKey);
-        }
+        applyAuth(builder, accessTokenParam, omitAuthParam);
         applyMethod(builder, methodParam, encodeBody(bodyParam));
 
         try (Response response = httpClient.newCall(builder.build())
@@ -507,6 +945,25 @@ public class AuthdogClient implements AutoCloseable {
                     JSON_MEDIA);
         } catch (IOException e) {
             throw new ApiException("Request failed: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Apply Authorization unless omitted.
+     * @param builderParam request builder
+     * @param accessTokenParam optional Bearer override
+     * @param omitAuthParam when true, send no Authorization header
+     */
+    private void applyAuth(final Request.Builder builderParam,
+                           final String accessTokenParam,
+                           final boolean omitAuthParam) {
+        if (omitAuthParam) {
+            return;
+        }
+        final String token = accessTokenParam != null
+                ? accessTokenParam : apiKey;
+        if (token != null) {
+            builderParam.header("Authorization", "Bearer " + token);
         }
     }
 

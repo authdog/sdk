@@ -9,6 +9,7 @@ fn client_config(base_url: String) -> AuthdogClientConfig {
         base_url,
         api_key: Some("key-1".to_string()),
         timeout: Some(Duration::from_secs(10)),
+        ..Default::default()
     }
 }
 
@@ -90,6 +91,7 @@ async fn test_management_transport_error() {
         base_url: "http://127.0.0.1:1".to_string(),
         api_key: Some("key-1".to_string()),
         timeout: Some(Duration::from_millis(200)),
+        ..Default::default()
     };
     let client = AuthdogClient::new(config).unwrap();
     let error = client.tenants().list(None).await.unwrap_err();
@@ -1492,4 +1494,1803 @@ async fn test_wave2_audit_forwards_query_params() {
         request.url.query_pairs().into_owned().collect();
     assert_eq!(pairs.get("limit").map(String::as_str), Some("50"));
     assert_eq!(pairs.get("after").map(String::as_str), Some("cur_1"));
+}
+
+#[derive(Clone)]
+struct Wave3Case {
+    name: &'static str,
+    method: &'static str,
+    path: &'static str,
+    body: Option<Value>,
+}
+
+fn wave3_cases() -> Vec<Wave3Case> {
+    vec![
+        Wave3Case {
+            name: "authzen_configuration",
+            method: "GET",
+            path: "/.well-known/authzen-configuration",
+            body: None,
+        },
+        Wave3Case {
+            name: "authzen_evaluate",
+            method: "POST",
+            path: "/access/v1/evaluation",
+            body: Some(json!({ "subject": {} })),
+        },
+        Wave3Case {
+            name: "authzen_evaluate_batch",
+            method: "POST",
+            path: "/access/v1/evaluations",
+            body: Some(json!({ "evaluations": [] })),
+        },
+        Wave3Case {
+            name: "authzen_search_action",
+            method: "POST",
+            path: "/access/v1/search/action",
+            body: Some(json!({ "subject": {} })),
+        },
+        Wave3Case {
+            name: "authzen_search_resource",
+            method: "POST",
+            path: "/access/v1/search/resource",
+            body: Some(json!({ "subject": {} })),
+        },
+        Wave3Case {
+            name: "authzen_search_subject",
+            method: "POST",
+            path: "/access/v1/search/subject",
+            body: Some(json!({ "resource": {} })),
+        },
+        Wave3Case {
+            name: "users_revoke_session",
+            method: "DELETE",
+            path: "/v1/environments/env_1/sessions/sess_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "hris_list_departments",
+            method: "GET",
+            path: "/v1/hris/v1/Departments",
+            body: None,
+        },
+        Wave3Case {
+            name: "hris_create_department",
+            method: "POST",
+            path: "/v1/hris/v1/Departments",
+            body: Some(json!({ "name": "Eng" })),
+        },
+        Wave3Case {
+            name: "hris_get_department",
+            method: "GET",
+            path: "/v1/hris/v1/Departments/dep_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "hris_replace_department",
+            method: "PUT",
+            path: "/v1/hris/v1/Departments/dep_1",
+            body: Some(json!({ "name": "Eng" })),
+        },
+        Wave3Case {
+            name: "hris_patch_department",
+            method: "PATCH",
+            path: "/v1/hris/v1/Departments/dep_1",
+            body: Some(json!({ "name": "E" })),
+        },
+        Wave3Case {
+            name: "hris_delete_department",
+            method: "DELETE",
+            path: "/v1/hris/v1/Departments/dep_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "hris_list_employees",
+            method: "GET",
+            path: "/v1/hris/v1/Employees",
+            body: None,
+        },
+        Wave3Case {
+            name: "hris_create_employee",
+            method: "POST",
+            path: "/v1/hris/v1/Employees",
+            body: Some(json!({ "name": "Ada" })),
+        },
+        Wave3Case {
+            name: "hris_get_employee",
+            method: "GET",
+            path: "/v1/hris/v1/Employees/emp_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "hris_replace_employee",
+            method: "PUT",
+            path: "/v1/hris/v1/Employees/emp_1",
+            body: Some(json!({ "name": "Ada" })),
+        },
+        Wave3Case {
+            name: "hris_patch_employee",
+            method: "PATCH",
+            path: "/v1/hris/v1/Employees/emp_1",
+            body: Some(json!({ "name": "A" })),
+        },
+        Wave3Case {
+            name: "hris_delete_employee",
+            method: "DELETE",
+            path: "/v1/hris/v1/Employees/emp_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "hris_service_config",
+            method: "GET",
+            path: "/v1/hris/v1/ServiceConfig",
+            body: None,
+        },
+        Wave3Case {
+            name: "otel_export_logs",
+            method: "POST",
+            path: "/v1/logs",
+            body: Some(json!({ "resourceLogs": [] })),
+        },
+        Wave3Case {
+            name: "mcp_ingest_events",
+            method: "POST",
+            path: "/v1/mcp/events",
+            body: Some(json!({ "events": [] })),
+        },
+        Wave3Case {
+            name: "mcp_resolve",
+            method: "GET",
+            path: "/v1/mcp/trust-store/resolve",
+            body: None,
+        },
+        Wave3Case {
+            name: "otel_export_metrics",
+            method: "POST",
+            path: "/v1/metrics",
+            body: Some(json!({ "resourceMetrics": [] })),
+        },
+        Wave3Case {
+            name: "otel_export_logs_prefixed",
+            method: "POST",
+            path: "/v1/otel/v1/logs",
+            body: Some(json!({ "resourceLogs": [] })),
+        },
+        Wave3Case {
+            name: "otel_export_metrics_prefixed",
+            method: "POST",
+            path: "/v1/otel/v1/metrics",
+            body: Some(json!({ "resourceMetrics": [] })),
+        },
+        Wave3Case {
+            name: "otel_export_traces_prefixed",
+            method: "POST",
+            path: "/v1/otel/v1/traces",
+            body: Some(json!({ "resourceSpans": [] })),
+        },
+        Wave3Case {
+            name: "scim_list_groups",
+            method: "GET",
+            path: "/v1/scim/v2/Groups",
+            body: None,
+        },
+        Wave3Case {
+            name: "scim_create_group",
+            method: "POST",
+            path: "/v1/scim/v2/Groups",
+            body: Some(json!({ "displayName": "G" })),
+        },
+        Wave3Case {
+            name: "scim_get_group",
+            method: "GET",
+            path: "/v1/scim/v2/Groups/g_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "scim_replace_group",
+            method: "PUT",
+            path: "/v1/scim/v2/Groups/g_1",
+            body: Some(json!({ "displayName": "G" })),
+        },
+        Wave3Case {
+            name: "scim_patch_group",
+            method: "PATCH",
+            path: "/v1/scim/v2/Groups/g_1",
+            body: Some(json!({ "Operations": [] })),
+        },
+        Wave3Case {
+            name: "scim_delete_group",
+            method: "DELETE",
+            path: "/v1/scim/v2/Groups/g_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "scim_resource_types",
+            method: "GET",
+            path: "/v1/scim/v2/ResourceTypes",
+            body: None,
+        },
+        Wave3Case {
+            name: "scim_resource_type",
+            method: "GET",
+            path: "/v1/scim/v2/ResourceTypes/User",
+            body: None,
+        },
+        Wave3Case {
+            name: "scim_schemas",
+            method: "GET",
+            path: "/v1/scim/v2/Schemas",
+            body: None,
+        },
+        Wave3Case {
+            name: "scim_schema",
+            method: "GET",
+            path: "/v1/scim/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:User",
+            body: None,
+        },
+        Wave3Case {
+            name: "scim_service_provider_config",
+            method: "GET",
+            path: "/v1/scim/v2/ServiceProviderConfig",
+            body: None,
+        },
+        Wave3Case {
+            name: "scim_list_users",
+            method: "GET",
+            path: "/v1/scim/v2/Users",
+            body: None,
+        },
+        Wave3Case {
+            name: "scim_create_user",
+            method: "POST",
+            path: "/v1/scim/v2/Users",
+            body: Some(json!({ "userName": "ada" })),
+        },
+        Wave3Case {
+            name: "scim_get_user",
+            method: "GET",
+            path: "/v1/scim/v2/Users/u_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "scim_replace_user",
+            method: "PUT",
+            path: "/v1/scim/v2/Users/u_1",
+            body: Some(json!({ "userName": "ada" })),
+        },
+        Wave3Case {
+            name: "scim_patch_user",
+            method: "PATCH",
+            path: "/v1/scim/v2/Users/u_1",
+            body: Some(json!({ "Operations": [] })),
+        },
+        Wave3Case {
+            name: "scim_delete_user",
+            method: "DELETE",
+            path: "/v1/scim/v2/Users/u_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "env_list_connections",
+            method: "GET",
+            path: "/v1/tenants/ten_1/applications/app_1/environments/env_1/connections",
+            body: None,
+        },
+        Wave3Case {
+            name: "oidc_list",
+            method: "GET",
+            path: "/v1/tenants/ten_1/applications/app_1/environments/env_1/oidc-clients",
+            body: None,
+        },
+        Wave3Case {
+            name: "oidc_register",
+            method: "POST",
+            path: "/v1/tenants/ten_1/applications/app_1/environments/env_1/oidc-clients",
+            body: Some(json!({ "name": "cli" })),
+        },
+        Wave3Case {
+            name: "oidc_update",
+            method: "PATCH",
+            path: "/v1/tenants/ten_1/applications/app_1/environments/env_1/oidc-clients/cid_1",
+            body: Some(json!({ "name": "n" })),
+        },
+        Wave3Case {
+            name: "oidc_delete",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/applications/app_1/environments/env_1/oidc-clients/cid_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "env_list_redirect_uris",
+            method: "GET",
+            path: "/v1/tenants/ten_1/applications/app_1/environments/env_1/redirect-uris",
+            body: None,
+        },
+        Wave3Case {
+            name: "actions_list",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/actions",
+            body: None,
+        },
+        Wave3Case {
+            name: "actions_save",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/actions",
+            body: Some(json!({ "url": "https://ex" })),
+        },
+        Wave3Case {
+            name: "actions_executions",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/actions/executions",
+            body: None,
+        },
+        Wave3Case {
+            name: "actions_test",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/actions/test",
+            body: Some(json!({ "url": "https://ex" })),
+        },
+        Wave3Case {
+            name: "actions_delete",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/actions/act_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "addons_list",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/addons",
+            body: None,
+        },
+        Wave3Case {
+            name: "addons_save",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/addons",
+            body: Some(json!({ "provider": "slack" })),
+        },
+        Wave3Case {
+            name: "addons_delete",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/addons/slack",
+            body: None,
+        },
+        Wave3Case {
+            name: "billing_list_features",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/billing/features",
+            body: None,
+        },
+        Wave3Case {
+            name: "billing_save_feature",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/billing/features",
+            body: Some(json!({ "name": "pro" })),
+        },
+        Wave3Case {
+            name: "billing_delete_feature",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/billing/features/feat_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "billing_list_plans",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/billing/plans",
+            body: None,
+        },
+        Wave3Case {
+            name: "billing_save_plan",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/billing/plans",
+            body: Some(json!({ "name": "pro" })),
+        },
+        Wave3Case {
+            name: "billing_delete_plan",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/billing/plans/plan_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "billing_sync_stripe",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/billing/plans/plan_1/sync-stripe",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_get_bot_detection_policy",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/bot-detection-policy",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_update_bot_detection_policy",
+            method: "PUT",
+            path: "/v1/tenants/ten_1/environments/env_1/bot-detection-policy",
+            body: Some(json!({ "enabled": true })),
+        },
+        Wave3Case {
+            name: "settings_get_breached_password_policy",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/breached-password-policy",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_update_breached_password_policy",
+            method: "PUT",
+            path: "/v1/tenants/ten_1/environments/env_1/breached-password-policy",
+            body: Some(json!({ "enabled": true })),
+        },
+        Wave3Case {
+            name: "settings_get_brute_force_policy",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/brute-force-policy",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_update_brute_force_policy",
+            method: "PUT",
+            path: "/v1/tenants/ten_1/environments/env_1/brute-force-policy",
+            body: Some(json!({ "enabled": true })),
+        },
+        Wave3Case {
+            name: "env_save_connection",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/connections",
+            body: Some(json!({ "provider": "okta" })),
+        },
+        Wave3Case {
+            name: "env_resolve_saml_metadata",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/connections/resolve-saml-metadata",
+            body: Some(json!({ "url": "https://ex" })),
+        },
+        Wave3Case {
+            name: "env_get_sso_metadata",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/connections/sso-metadata",
+            body: None,
+        },
+        Wave3Case {
+            name: "env_delete_connection",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/connections/con_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_get_device_risk_policy",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/device-risk-policy",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_update_device_risk_policy",
+            method: "PUT",
+            path: "/v1/tenants/ten_1/environments/env_1/device-risk-policy",
+            body: Some(json!({ "enabled": true })),
+        },
+        Wave3Case {
+            name: "elevate_activate_grant",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/elevate/access-grants/gr_1/activate",
+            body: Some(json!({ "reason": "x" })),
+        },
+        Wave3Case {
+            name: "elevate_revoke_grant",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/elevate/access-grants/gr_1/revoke",
+            body: Some(json!({ "reason": "x" })),
+        },
+        Wave3Case {
+            name: "elevate_list_requests",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/elevate/access-requests",
+            body: None,
+        },
+        Wave3Case {
+            name: "elevate_create_request",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/elevate/access-requests",
+            body: Some(json!({ "reason": "x" })),
+        },
+        Wave3Case {
+            name: "elevate_get_request",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/elevate/access-requests/req_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "elevate_approve_request",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/elevate/access-requests/req_1/approve",
+            body: Some(json!({ "note": "ok" })),
+        },
+        Wave3Case {
+            name: "elevate_cancel_request",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/elevate/access-requests/req_1/cancel",
+            body: None,
+        },
+        Wave3Case {
+            name: "elevate_deny_request",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/elevate/access-requests/req_1/deny",
+            body: Some(json!({ "note": "no" })),
+        },
+        Wave3Case {
+            name: "elevate_get_policy",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/elevate/policy",
+            body: None,
+        },
+        Wave3Case {
+            name: "elevate_update_policy",
+            method: "PUT",
+            path: "/v1/tenants/ten_1/environments/env_1/elevate/policy",
+            body: Some(json!({ "enabled": true })),
+        },
+        Wave3Case {
+            name: "email_providers_list",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/email-providers",
+            body: None,
+        },
+        Wave3Case {
+            name: "email_providers_save",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/email-providers",
+            body: Some(json!({ "provider": "ses" })),
+        },
+        Wave3Case {
+            name: "email_providers_test",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/email-providers/test",
+            body: Some(json!({ "to": "a@b.c" })),
+        },
+        Wave3Case {
+            name: "email_providers_delete",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/email-providers/ses",
+            body: None,
+        },
+        Wave3Case {
+            name: "email_providers_activate",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/email-providers/ses/activate",
+            body: None,
+        },
+        Wave3Case {
+            name: "feature_flags_list",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/feature-flags",
+            body: None,
+        },
+        Wave3Case {
+            name: "feature_flags_save",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/feature-flags",
+            body: Some(json!({ "key": "x" })),
+        },
+        Wave3Case {
+            name: "feature_flags_delete",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/feature-flags/flag_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "forms_list_attachments",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/form-attachments",
+            body: None,
+        },
+        Wave3Case {
+            name: "forms_list",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/forms",
+            body: None,
+        },
+        Wave3Case {
+            name: "forms_save",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/forms",
+            body: Some(json!({ "name": "login" })),
+        },
+        Wave3Case {
+            name: "forms_delete",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/forms/form_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "provisioning_list_hris",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/hris-tokens",
+            body: None,
+        },
+        Wave3Case {
+            name: "provisioning_create_hris",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/hris-tokens",
+            body: Some(json!({ "name": "hr" })),
+        },
+        Wave3Case {
+            name: "provisioning_revoke_hris",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/hris-tokens/tok_1/revoke",
+            body: None,
+        },
+        Wave3Case {
+            name: "provisioning_rotate_hris",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/hris-tokens/tok_1/rotate",
+            body: None,
+        },
+        Wave3Case {
+            name: "impersonation_list",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/impersonation-grants",
+            body: None,
+        },
+        Wave3Case {
+            name: "impersonation_create",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/impersonation-grants",
+            body: Some(json!({ "userId": "usr_1" })),
+        },
+        Wave3Case {
+            name: "impersonation_revoke",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/impersonation-grants/gr_1/revoke",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_list_jwt_claim_mappings",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/jwt-claim-mappings",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_save_jwt_claim_mapping",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/jwt-claim-mappings",
+            body: Some(json!({ "claim": "role" })),
+        },
+        Wave3Case {
+            name: "settings_delete_jwt_claim_mapping",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/jwt-claim-mappings/map_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "mcp_list_entries",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/mcp/trust-store",
+            body: None,
+        },
+        Wave3Case {
+            name: "mcp_create_entry",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/mcp/trust-store",
+            body: Some(json!({ "subject": "a" })),
+        },
+        Wave3Case {
+            name: "mcp_get_entry",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "mcp_update_entry",
+            method: "PATCH",
+            path: "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1",
+            body: Some(json!({ "name": "n" })),
+        },
+        Wave3Case {
+            name: "mcp_delete_entry",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "mcp_add_key",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/keys",
+            body: Some(json!({ "jwk": {} })),
+        },
+        Wave3Case {
+            name: "mcp_revoke_key",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/keys/key_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "mcp_rotate_key",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/keys/key_1/rotate",
+            body: None,
+        },
+        Wave3Case {
+            name: "mcp_revoke_entry",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/revoke",
+            body: None,
+        },
+        Wave3Case {
+            name: "mcp_verify_entry",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify",
+            body: Some(json!({ "verified": true })),
+        },
+        Wave3Case {
+            name: "users_totp_status",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/me/mfa/totp",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_get_password_policy",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/password-policy",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_update_password_policy",
+            method: "PUT",
+            path: "/v1/tenants/ten_1/environments/env_1/password-policy",
+            body: Some(json!({ "minLength": 8 })),
+        },
+        Wave3Case {
+            name: "portal_generate_link",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/portal/generate-link",
+            body: Some(json!({ "email": "a@b.c" })),
+        },
+        Wave3Case {
+            name: "settings_get_rate_limit_policy",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/rate-limit-policy",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_update_rate_limit_policy",
+            method: "PUT",
+            path: "/v1/tenants/ten_1/environments/env_1/rate-limit-policy",
+            body: Some(json!({ "limit": 10 })),
+        },
+        Wave3Case {
+            name: "env_save_redirect_uris",
+            method: "PUT",
+            path: "/v1/tenants/ten_1/environments/env_1/redirect-uris",
+            body: Some(json!({ "uris": [] })),
+        },
+        Wave3Case {
+            name: "settings_get_restrictions",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/restrictions",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_update_restrictions",
+            method: "PUT",
+            path: "/v1/tenants/ten_1/environments/env_1/restrictions",
+            body: Some(json!({ "signup": false })),
+        },
+        Wave3Case {
+            name: "provisioning_list_scim",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/scim-tokens",
+            body: None,
+        },
+        Wave3Case {
+            name: "provisioning_create_scim",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/scim-tokens",
+            body: Some(json!({ "name": "scim" })),
+        },
+        Wave3Case {
+            name: "provisioning_revoke_scim",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/scim-tokens/tok_1/revoke",
+            body: None,
+        },
+        Wave3Case {
+            name: "provisioning_rotate_scim",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/scim-tokens/tok_1/rotate",
+            body: None,
+        },
+        Wave3Case {
+            name: "security_posture",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/security/posture",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_get_session_config",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/session-config",
+            body: None,
+        },
+        Wave3Case {
+            name: "settings_update_session_config",
+            method: "PUT",
+            path: "/v1/tenants/ten_1/environments/env_1/session-config",
+            body: Some(json!({ "ttl": 3600 })),
+        },
+        Wave3Case {
+            name: "threats_list",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/threats",
+            body: None,
+        },
+        Wave3Case {
+            name: "threats_create",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/threats",
+            body: Some(json!({ "type": "bot" })),
+        },
+        Wave3Case {
+            name: "threats_get",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/threats/th_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "threats_update",
+            method: "PATCH",
+            path: "/v1/tenants/ten_1/environments/env_1/threats/th_1",
+            body: Some(json!({ "status": "open" })),
+        },
+        Wave3Case {
+            name: "threats_delete",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/threats/th_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "threats_resolve",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/threats/th_1/resolve",
+            body: Some(json!({ "status": "resolved" })),
+        },
+        Wave3Case {
+            name: "users_bulk_delete",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/users/bulk/delete",
+            body: Some(json!({ "userIds": ["usr_1"] })),
+        },
+        Wave3Case {
+            name: "users_bulk_set_active",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/users/bulk/set-active",
+            body: Some(json!({ "userIds": ["usr_1"], "active": false })),
+        },
+        Wave3Case {
+            name: "users_import_users",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/users/import",
+            body: Some(json!({ "users": [] })),
+        },
+        Wave3Case {
+            name: "users_disable_mfa",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/users/usr_1/mfa",
+            body: None,
+        },
+        Wave3Case {
+            name: "users_list_sessions",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/users/usr_1/sessions",
+            body: None,
+        },
+        Wave3Case {
+            name: "vanity_domains_list",
+            method: "GET",
+            path: "/v1/tenants/ten_1/environments/env_1/vanity-domains",
+            body: None,
+        },
+        Wave3Case {
+            name: "vanity_domains_create",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/vanity-domains",
+            body: Some(json!({ "domain": "a.com" })),
+        },
+        Wave3Case {
+            name: "vanity_domains_delete",
+            method: "DELETE",
+            path: "/v1/tenants/ten_1/environments/env_1/vanity-domains/dom_1",
+            body: None,
+        },
+        Wave3Case {
+            name: "vanity_domains_check",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/vanity-domains/dom_1/check",
+            body: None,
+        },
+        Wave3Case {
+            name: "widgets_create_token",
+            method: "POST",
+            path: "/v1/tenants/ten_1/environments/env_1/widgets/token",
+            body: Some(json!({ "ttl": 60 })),
+        },
+        Wave3Case {
+            name: "otel_export_traces",
+            method: "POST",
+            path: "/v1/traces",
+            body: Some(json!({ "resourceSpans": [] })),
+        },
+    ]
+}
+
+async fn invoke_wave3(client: &AuthdogClient, case: &Wave3Case) -> Result<(), AuthdogError> {
+    let empty = json!({});
+    let body = case.body.as_ref().unwrap_or(&empty);
+    match case.name {
+        "authzen_configuration" => {
+            client.authzen().configuration().await?;
+        }
+        "authzen_evaluate" => {
+            client.authzen().evaluate(body, None).await?;
+        }
+        "authzen_evaluate_batch" => {
+            client.authzen().evaluate_batch(body, None).await?;
+        }
+        "authzen_search_action" => {
+            client.authzen().search_action(body, None).await?;
+        }
+        "authzen_search_resource" => {
+            client.authzen().search_resource(body, None).await?;
+        }
+        "authzen_search_subject" => {
+            client.authzen().search_subject(body, None).await?;
+        }
+        "users_revoke_session" => {
+            client.users().revoke_session("env_1", "sess_1").await?;
+        }
+        "hris_list_departments" => {
+            client.hris().list_departments(None).await?;
+        }
+        "hris_create_department" => {
+            client.hris().create_department(body, None).await?;
+        }
+        "hris_get_department" => {
+            client.hris().get_department("dep_1", None).await?;
+        }
+        "hris_replace_department" => {
+            client
+                .hris()
+                .replace_department("dep_1", body, None)
+                .await?;
+        }
+        "hris_patch_department" => {
+            client.hris().patch_department("dep_1", body, None).await?;
+        }
+        "hris_delete_department" => {
+            client.hris().delete_department("dep_1", None).await?;
+        }
+        "hris_list_employees" => {
+            client.hris().list_employees(None).await?;
+        }
+        "hris_create_employee" => {
+            client.hris().create_employee(body, None).await?;
+        }
+        "hris_get_employee" => {
+            client.hris().get_employee("emp_1", None).await?;
+        }
+        "hris_replace_employee" => {
+            client.hris().replace_employee("emp_1", body, None).await?;
+        }
+        "hris_patch_employee" => {
+            client.hris().patch_employee("emp_1", body, None).await?;
+        }
+        "hris_delete_employee" => {
+            client.hris().delete_employee("emp_1", None).await?;
+        }
+        "hris_service_config" => {
+            client.hris().service_config(None).await?;
+        }
+        "otel_export_logs" => {
+            client.otel().export_logs(body).await?;
+        }
+        "mcp_ingest_events" => {
+            client.mcp().ingest_events(body, None).await?;
+        }
+        "mcp_resolve" => {
+            client.mcp().resolve("agent-1", None).await?;
+        }
+        "otel_export_metrics" => {
+            client.otel().export_metrics(body).await?;
+        }
+        "otel_export_logs_prefixed" => {
+            client.otel().export_logs_prefixed(body).await?;
+        }
+        "otel_export_metrics_prefixed" => {
+            client.otel().export_metrics_prefixed(body).await?;
+        }
+        "otel_export_traces_prefixed" => {
+            client.otel().export_traces_prefixed(body).await?;
+        }
+        "scim_list_groups" => {
+            client.scim().list_groups(None).await?;
+        }
+        "scim_create_group" => {
+            client.scim().create_group(body, None).await?;
+        }
+        "scim_get_group" => {
+            client.scim().get_group("g_1", None).await?;
+        }
+        "scim_replace_group" => {
+            client.scim().replace_group("g_1", body, None).await?;
+        }
+        "scim_patch_group" => {
+            client.scim().patch_group("g_1", body, None).await?;
+        }
+        "scim_delete_group" => {
+            client.scim().delete_group("g_1", None).await?;
+        }
+        "scim_resource_types" => {
+            client.scim().resource_types(None).await?;
+        }
+        "scim_resource_type" => {
+            client.scim().resource_type("User", None).await?;
+        }
+        "scim_schemas" => {
+            client.scim().schemas(None).await?;
+        }
+        "scim_schema" => {
+            client
+                .scim()
+                .schema("urn:ietf:params:scim:schemas:core:2.0:User", None)
+                .await?;
+        }
+        "scim_service_provider_config" => {
+            client.scim().service_provider_config(None).await?;
+        }
+        "scim_list_users" => {
+            client.scim().list_users(None).await?;
+        }
+        "scim_create_user" => {
+            client.scim().create_user(body, None).await?;
+        }
+        "scim_get_user" => {
+            client.scim().get_user("u_1", None).await?;
+        }
+        "scim_replace_user" => {
+            client.scim().replace_user("u_1", body, None).await?;
+        }
+        "scim_patch_user" => {
+            client.scim().patch_user("u_1", body, None).await?;
+        }
+        "scim_delete_user" => {
+            client.scim().delete_user("u_1", None).await?;
+        }
+        "env_list_connections" => {
+            client
+                .environments()
+                .list_connections("ten_1", "app_1", "env_1")
+                .await?;
+        }
+        "oidc_list" => {
+            client
+                .oidc_clients()
+                .list("ten_1", "app_1", "env_1")
+                .await?;
+        }
+        "oidc_register" => {
+            client
+                .oidc_clients()
+                .register("ten_1", "app_1", "env_1", body)
+                .await?;
+        }
+        "oidc_update" => {
+            client
+                .oidc_clients()
+                .update("ten_1", "app_1", "env_1", "cid_1", body)
+                .await?;
+        }
+        "oidc_delete" => {
+            client
+                .oidc_clients()
+                .delete("ten_1", "app_1", "env_1", "cid_1")
+                .await?;
+        }
+        "env_list_redirect_uris" => {
+            client
+                .environments()
+                .list_redirect_uris("ten_1", "app_1", "env_1")
+                .await?;
+        }
+        "actions_list" => {
+            client.actions().list("ten_1", "env_1").await?;
+        }
+        "actions_save" => {
+            client.actions().save("ten_1", "env_1", body).await?;
+        }
+        "actions_executions" => {
+            client
+                .actions()
+                .executions("ten_1", "env_1", None, None)
+                .await?;
+        }
+        "actions_test" => {
+            client.actions().test("ten_1", "env_1", body).await?;
+        }
+        "actions_delete" => {
+            client.actions().delete("ten_1", "env_1", "act_1").await?;
+        }
+        "addons_list" => {
+            client.addons().list("ten_1", "env_1").await?;
+        }
+        "addons_save" => {
+            client.addons().save("ten_1", "env_1", body).await?;
+        }
+        "addons_delete" => {
+            client.addons().delete("ten_1", "env_1", "slack").await?;
+        }
+        "billing_list_features" => {
+            client.billing().list_features("ten_1", "env_1").await?;
+        }
+        "billing_save_feature" => {
+            client
+                .billing()
+                .save_feature("ten_1", "env_1", body)
+                .await?;
+        }
+        "billing_delete_feature" => {
+            client
+                .billing()
+                .delete_feature("ten_1", "env_1", "feat_1")
+                .await?;
+        }
+        "billing_list_plans" => {
+            client.billing().list_plans("ten_1", "env_1").await?;
+        }
+        "billing_save_plan" => {
+            client.billing().save_plan("ten_1", "env_1", body).await?;
+        }
+        "billing_delete_plan" => {
+            client
+                .billing()
+                .delete_plan("ten_1", "env_1", "plan_1")
+                .await?;
+        }
+        "billing_sync_stripe" => {
+            client
+                .billing()
+                .sync_stripe("ten_1", "env_1", "plan_1")
+                .await?;
+        }
+        "settings_get_bot_detection_policy" => {
+            client
+                .settings()
+                .get_bot_detection_policy("ten_1", "env_1")
+                .await?;
+        }
+        "settings_update_bot_detection_policy" => {
+            client
+                .settings()
+                .update_bot_detection_policy("ten_1", "env_1", body)
+                .await?;
+        }
+        "settings_get_breached_password_policy" => {
+            client
+                .settings()
+                .get_breached_password_policy("ten_1", "env_1")
+                .await?;
+        }
+        "settings_update_breached_password_policy" => {
+            client
+                .settings()
+                .update_breached_password_policy("ten_1", "env_1", body)
+                .await?;
+        }
+        "settings_get_brute_force_policy" => {
+            client
+                .settings()
+                .get_brute_force_policy("ten_1", "env_1")
+                .await?;
+        }
+        "settings_update_brute_force_policy" => {
+            client
+                .settings()
+                .update_brute_force_policy("ten_1", "env_1", body)
+                .await?;
+        }
+        "env_save_connection" => {
+            client
+                .environments()
+                .save_connection("ten_1", "env_1", body)
+                .await?;
+        }
+        "env_resolve_saml_metadata" => {
+            client
+                .environments()
+                .resolve_saml_metadata("ten_1", "env_1", body)
+                .await?;
+        }
+        "env_get_sso_metadata" => {
+            client
+                .environments()
+                .get_sso_metadata("ten_1", "env_1", None, None)
+                .await?;
+        }
+        "env_delete_connection" => {
+            client
+                .environments()
+                .delete_connection("ten_1", "env_1", "con_1")
+                .await?;
+        }
+        "settings_get_device_risk_policy" => {
+            client
+                .settings()
+                .get_device_risk_policy("ten_1", "env_1")
+                .await?;
+        }
+        "settings_update_device_risk_policy" => {
+            client
+                .settings()
+                .update_device_risk_policy("ten_1", "env_1", body)
+                .await?;
+        }
+        "elevate_activate_grant" => {
+            client
+                .elevate()
+                .activate_grant("ten_1", "env_1", "gr_1", body)
+                .await?;
+        }
+        "elevate_revoke_grant" => {
+            client
+                .elevate()
+                .revoke_grant("ten_1", "env_1", "gr_1", body)
+                .await?;
+        }
+        "elevate_list_requests" => {
+            client
+                .elevate()
+                .list_requests("ten_1", "env_1", None)
+                .await?;
+        }
+        "elevate_create_request" => {
+            client
+                .elevate()
+                .create_request("ten_1", "env_1", body)
+                .await?;
+        }
+        "elevate_get_request" => {
+            client
+                .elevate()
+                .get_request("ten_1", "env_1", "req_1")
+                .await?;
+        }
+        "elevate_approve_request" => {
+            client
+                .elevate()
+                .approve_request("ten_1", "env_1", "req_1", body)
+                .await?;
+        }
+        "elevate_cancel_request" => {
+            client
+                .elevate()
+                .cancel_request("ten_1", "env_1", "req_1")
+                .await?;
+        }
+        "elevate_deny_request" => {
+            client
+                .elevate()
+                .deny_request("ten_1", "env_1", "req_1", body)
+                .await?;
+        }
+        "elevate_get_policy" => {
+            client.elevate().get_policy("ten_1", "env_1").await?;
+        }
+        "elevate_update_policy" => {
+            client
+                .elevate()
+                .update_policy("ten_1", "env_1", body)
+                .await?;
+        }
+        "email_providers_list" => {
+            client.email_providers().list("ten_1", "env_1").await?;
+        }
+        "email_providers_save" => {
+            client
+                .email_providers()
+                .save("ten_1", "env_1", body)
+                .await?;
+        }
+        "email_providers_test" => {
+            client
+                .email_providers()
+                .test("ten_1", "env_1", body)
+                .await?;
+        }
+        "email_providers_delete" => {
+            client
+                .email_providers()
+                .delete("ten_1", "env_1", "ses")
+                .await?;
+        }
+        "email_providers_activate" => {
+            client
+                .email_providers()
+                .activate("ten_1", "env_1", "ses")
+                .await?;
+        }
+        "feature_flags_list" => {
+            client.feature_flags().list("ten_1", "env_1").await?;
+        }
+        "feature_flags_save" => {
+            client.feature_flags().save("ten_1", "env_1", body).await?;
+        }
+        "feature_flags_delete" => {
+            client
+                .feature_flags()
+                .delete("ten_1", "env_1", "flag_1")
+                .await?;
+        }
+        "forms_list_attachments" => {
+            client.forms().list_attachments("ten_1", "env_1").await?;
+        }
+        "forms_list" => {
+            client.forms().list("ten_1", "env_1").await?;
+        }
+        "forms_save" => {
+            client.forms().save("ten_1", "env_1", body).await?;
+        }
+        "forms_delete" => {
+            client.forms().delete("ten_1", "env_1", "form_1").await?;
+        }
+        "provisioning_list_hris" => {
+            client
+                .provisioning_tokens()
+                .list_hris("ten_1", "env_1")
+                .await?;
+        }
+        "provisioning_create_hris" => {
+            client
+                .provisioning_tokens()
+                .create_hris("ten_1", "env_1", body)
+                .await?;
+        }
+        "provisioning_revoke_hris" => {
+            client
+                .provisioning_tokens()
+                .revoke_hris("ten_1", "env_1", "tok_1")
+                .await?;
+        }
+        "provisioning_rotate_hris" => {
+            client
+                .provisioning_tokens()
+                .rotate_hris("ten_1", "env_1", "tok_1")
+                .await?;
+        }
+        "impersonation_list" => {
+            client.impersonation().list("ten_1", "env_1").await?;
+        }
+        "impersonation_create" => {
+            client
+                .impersonation()
+                .create("ten_1", "env_1", body)
+                .await?;
+        }
+        "impersonation_revoke" => {
+            client
+                .impersonation()
+                .revoke("ten_1", "env_1", "gr_1")
+                .await?;
+        }
+        "settings_list_jwt_claim_mappings" => {
+            client
+                .settings()
+                .list_jwt_claim_mappings("ten_1", "env_1")
+                .await?;
+        }
+        "settings_save_jwt_claim_mapping" => {
+            client
+                .settings()
+                .save_jwt_claim_mapping("ten_1", "env_1", body)
+                .await?;
+        }
+        "settings_delete_jwt_claim_mapping" => {
+            client
+                .settings()
+                .delete_jwt_claim_mapping("ten_1", "env_1", "map_1")
+                .await?;
+        }
+        "mcp_list_entries" => {
+            client.mcp().list_entries("ten_1", "env_1").await?;
+        }
+        "mcp_create_entry" => {
+            client.mcp().create_entry("ten_1", "env_1", body).await?;
+        }
+        "mcp_get_entry" => {
+            client.mcp().get_entry("ten_1", "env_1", "ent_1").await?;
+        }
+        "mcp_update_entry" => {
+            client
+                .mcp()
+                .update_entry("ten_1", "env_1", "ent_1", body)
+                .await?;
+        }
+        "mcp_delete_entry" => {
+            client.mcp().delete_entry("ten_1", "env_1", "ent_1").await?;
+        }
+        "mcp_add_key" => {
+            client
+                .mcp()
+                .add_key("ten_1", "env_1", "ent_1", body)
+                .await?;
+        }
+        "mcp_revoke_key" => {
+            client
+                .mcp()
+                .revoke_key("ten_1", "env_1", "ent_1", "key_1")
+                .await?;
+        }
+        "mcp_rotate_key" => {
+            client
+                .mcp()
+                .rotate_key("ten_1", "env_1", "ent_1", "key_1", None)
+                .await?;
+        }
+        "mcp_revoke_entry" => {
+            client.mcp().revoke_entry("ten_1", "env_1", "ent_1").await?;
+        }
+        "mcp_verify_entry" => {
+            client
+                .mcp()
+                .verify_entry("ten_1", "env_1", "ent_1", body)
+                .await?;
+        }
+        "users_totp_status" => {
+            client.users().totp_status("ten_1", "env_1").await?;
+        }
+        "settings_get_password_policy" => {
+            client
+                .settings()
+                .get_password_policy("ten_1", "env_1")
+                .await?;
+        }
+        "settings_update_password_policy" => {
+            client
+                .settings()
+                .update_password_policy("ten_1", "env_1", body)
+                .await?;
+        }
+        "portal_generate_link" => {
+            client
+                .portal()
+                .generate_link("ten_1", "env_1", body)
+                .await?;
+        }
+        "settings_get_rate_limit_policy" => {
+            client
+                .settings()
+                .get_rate_limit_policy("ten_1", "env_1")
+                .await?;
+        }
+        "settings_update_rate_limit_policy" => {
+            client
+                .settings()
+                .update_rate_limit_policy("ten_1", "env_1", body)
+                .await?;
+        }
+        "env_save_redirect_uris" => {
+            client
+                .environments()
+                .save_redirect_uris("ten_1", "env_1", body)
+                .await?;
+        }
+        "settings_get_restrictions" => {
+            client.settings().get_restrictions("ten_1", "env_1").await?;
+        }
+        "settings_update_restrictions" => {
+            client
+                .settings()
+                .update_restrictions("ten_1", "env_1", body)
+                .await?;
+        }
+        "provisioning_list_scim" => {
+            client
+                .provisioning_tokens()
+                .list_scim("ten_1", "env_1")
+                .await?;
+        }
+        "provisioning_create_scim" => {
+            client
+                .provisioning_tokens()
+                .create_scim("ten_1", "env_1", body)
+                .await?;
+        }
+        "provisioning_revoke_scim" => {
+            client
+                .provisioning_tokens()
+                .revoke_scim("ten_1", "env_1", "tok_1")
+                .await?;
+        }
+        "provisioning_rotate_scim" => {
+            client
+                .provisioning_tokens()
+                .rotate_scim("ten_1", "env_1", "tok_1")
+                .await?;
+        }
+        "security_posture" => {
+            client.security().posture("ten_1", "env_1").await?;
+        }
+        "settings_get_session_config" => {
+            client
+                .settings()
+                .get_session_config("ten_1", "env_1")
+                .await?;
+        }
+        "settings_update_session_config" => {
+            client
+                .settings()
+                .update_session_config("ten_1", "env_1", body)
+                .await?;
+        }
+        "threats_list" => {
+            client.threats().list("ten_1", "env_1", None).await?;
+        }
+        "threats_create" => {
+            client.threats().create("ten_1", "env_1", body).await?;
+        }
+        "threats_get" => {
+            client.threats().get("ten_1", "env_1", "th_1").await?;
+        }
+        "threats_update" => {
+            client
+                .threats()
+                .update("ten_1", "env_1", "th_1", body)
+                .await?;
+        }
+        "threats_delete" => {
+            client.threats().delete("ten_1", "env_1", "th_1").await?;
+        }
+        "threats_resolve" => {
+            client
+                .threats()
+                .resolve("ten_1", "env_1", "th_1", body)
+                .await?;
+        }
+        "users_bulk_delete" => {
+            client.users().bulk_delete("ten_1", "env_1", body).await?;
+        }
+        "users_bulk_set_active" => {
+            client
+                .users()
+                .bulk_set_active("ten_1", "env_1", body)
+                .await?;
+        }
+        "users_import_users" => {
+            client.users().import_users("ten_1", "env_1", body).await?;
+        }
+        "users_disable_mfa" => {
+            client
+                .users()
+                .disable_mfa("ten_1", "env_1", "usr_1")
+                .await?;
+        }
+        "users_list_sessions" => {
+            client
+                .users()
+                .list_sessions("ten_1", "env_1", "usr_1")
+                .await?;
+        }
+        "vanity_domains_list" => {
+            client.vanity_domains().list("ten_1", "env_1").await?;
+        }
+        "vanity_domains_create" => {
+            client
+                .vanity_domains()
+                .create("ten_1", "env_1", body)
+                .await?;
+        }
+        "vanity_domains_delete" => {
+            client
+                .vanity_domains()
+                .delete("ten_1", "env_1", "dom_1")
+                .await?;
+        }
+        "vanity_domains_check" => {
+            client
+                .vanity_domains()
+                .check("ten_1", "env_1", "dom_1")
+                .await?;
+        }
+        "widgets_create_token" => {
+            client
+                .widgets()
+                .create_token("ten_1", "env_1", body)
+                .await?;
+        }
+        "otel_export_traces" => {
+            client.otel().export_traces(body).await?;
+        }
+        other => panic!("unknown case {other}"),
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_wave3_method_and_path() {
+    let cases = wave3_cases();
+    assert_eq!(cases.len(), 152, "expected all 152 Wave 3 paths");
+    for case in cases {
+        let mock_server = MockServer::start().await;
+        Mock::given(method(case.method))
+            .and(path(case.path))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({})))
+            .expect(1)
+            .mount(&mock_server)
+            .await;
+
+        let client = client_against(&mock_server).await;
+        invoke_wave3(&client, &case)
+            .await
+            .unwrap_or_else(|err| panic!("{} failed: {err}", case.name));
+
+        let requests = mock_server.received_requests().await.unwrap();
+        assert_eq!(requests.len(), 1, "{}", case.name);
+        let request = &requests[0];
+        assert_eq!(request.method.as_str(), case.method, "{}", case.name);
+        assert_eq!(request.url.path(), case.path, "{}", case.name);
+        if let Some(expected) = &case.body {
+            let actual: Value = serde_json::from_slice(&request.body).unwrap_or(Value::Null);
+            assert_eq!(&actual, expected, "body mismatch for {}", case.name);
+        }
+    }
+}
+
+#[tokio::test]
+async fn test_wave3_authzen_discovery_omits_bearer() {
+    let mock_server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/.well-known/authzen-configuration"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({})))
+        .mount(&mock_server)
+        .await;
+
+    let client = client_against(&mock_server).await;
+    client.authzen().configuration().await.unwrap();
+
+    let requests = mock_server.received_requests().await.unwrap();
+    assert_eq!(requests.len(), 1);
+    assert_eq!(requests[0].url.path(), "/.well-known/authzen-configuration");
+    assert!(
+        !requests[0].headers.contains_key("authorization"),
+        "AuthZEN discovery must send no Authorization header"
+    );
+}
+
+#[tokio::test]
+async fn test_wave3_authzen_evaluate_uses_environment_secret() {
+    let mock_server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/access/v1/evaluation"))
+        .and(header("Authorization", "Bearer adenv_secret"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({ "decision": "Permit" })))
+        .expect(1)
+        .mount(&mock_server)
+        .await;
+
+    let config = AuthdogClientConfig {
+        base_url: mock_server.uri(),
+        api_key: Some("key-1".to_string()),
+        environment_secret: Some("adenv_secret".to_string()),
+        timeout: Some(Duration::from_secs(10)),
+        ..Default::default()
+    };
+    let client = AuthdogClient::new(config).unwrap();
+    let result = client
+        .authzen()
+        .evaluate(json!({ "subject": { "id": "u" } }), None)
+        .await
+        .unwrap();
+    assert_eq!(
+        result.get("decision").and_then(Value::as_str),
+        Some("Permit")
+    );
+}
+
+#[tokio::test]
+async fn test_wave3_scim_and_hris_use_specialized_tokens() {
+    let mock_server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/v1/scim/v2/Users"))
+        .and(header("Authorization", "Bearer adscim_token"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({})))
+        .expect(1)
+        .mount(&mock_server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/v1/hris/v1/Employees"))
+        .and(header("Authorization", "Bearer adhris_token"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({})))
+        .expect(1)
+        .mount(&mock_server)
+        .await;
+
+    let config = AuthdogClientConfig {
+        base_url: mock_server.uri(),
+        api_key: Some("key-1".to_string()),
+        scim_token: Some("adscim_token".to_string()),
+        hris_token: Some("adhris_token".to_string()),
+        timeout: Some(Duration::from_secs(10)),
+        ..Default::default()
+    };
+    let client = AuthdogClient::new(config).unwrap();
+    client.scim().list_users(None).await.unwrap();
+    client.hris().list_employees(None).await.unwrap();
+}
+
+#[tokio::test]
+async fn test_wave3_create_scim_token_exposes_one_time_secret() {
+    let mock_server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/v1/tenants/ten_1/environments/env_1/scim-tokens"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "token": "adscim_once",
+            "id": "tok_1"
+        })))
+        .mount(&mock_server)
+        .await;
+
+    let client = client_against(&mock_server).await;
+    let created = client
+        .provisioning_tokens()
+        .create_scim("ten_1", "env_1", json!({ "name": "scim" }))
+        .await
+        .unwrap();
+    assert_eq!(
+        created.get("token").and_then(Value::as_str),
+        Some("adscim_once")
+    );
+}
+
+#[tokio::test]
+async fn test_wave3_query_params_forwarded() {
+    let mock_server = MockServer::start().await;
+    Mock::given(wiremock::matchers::any())
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({})))
+        .mount(&mock_server)
+        .await;
+
+    let client = client_against(&mock_server).await;
+    client.mcp().resolve("agent-1", None).await.unwrap();
+    client
+        .threats()
+        .list(
+            "ten_1",
+            "env_1",
+            Some(&json!({ "status": "open", "limit": 10 })),
+        )
+        .await
+        .unwrap();
+    client
+        .elevate()
+        .list_requests("ten_1", "env_1", Some("pending"))
+        .await
+        .unwrap();
+
+    let requests = mock_server.received_requests().await.unwrap();
+    assert_eq!(requests.len(), 3);
+    assert_eq!(requests[0].url.path(), "/v1/mcp/trust-store/resolve");
+    let resolve_pairs: std::collections::HashMap<String, String> =
+        requests[0].url.query_pairs().into_owned().collect();
+    assert_eq!(
+        resolve_pairs.get("subject").map(String::as_str),
+        Some("agent-1")
+    );
+
+    let threat_pairs: std::collections::HashMap<String, String> =
+        requests[1].url.query_pairs().into_owned().collect();
+    assert_eq!(threat_pairs.get("status").map(String::as_str), Some("open"));
+    assert_eq!(threat_pairs.get("limit").map(String::as_str), Some("10"));
+
+    let elevate_pairs: std::collections::HashMap<String, String> =
+        requests[2].url.query_pairs().into_owned().collect();
+    assert_eq!(
+        elevate_pairs.get("status").map(String::as_str),
+        Some("pending")
+    );
 }

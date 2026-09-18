@@ -76,6 +76,9 @@ new AuthdogClient(config: AuthdogClientConfig)
 - `baseUrl` (string): The base URL of the Authdog API
 - `apiKey` (string, optional): Management Bearer credential (userinfo still uses the access token)
 - `timeout` (number, optional): Request timeout in milliseconds (default: 10000)
+- `environmentSecret` (string, optional): `adenv_` secret for AuthZEN and MCP runtime
+- `scimToken` (string, optional): `adscim_` token for `/v1/scim/v2`
+- `hrisToken` (string, optional): `adhris_` token for `/v1/hris/v1`
 
 #### Methods
 
@@ -88,12 +91,19 @@ new AuthdogClient(config: AuthdogClientConfig)
 `organizations`, `tenants`, `projects`, `environments`, `users`,
 `groups`, `rbac`, `audit`, `events`, `webhooks`,
 `notificationChannels`, `serviceAccounts`, `personalAccessTokens`,
-and `apiSecrets` wrap Waves 1–2 of the public API
-(`specs/004-api-parity/`).
+`apiSecrets`, `authzen`, `scim`, `hris`, `mcp`, `otel`,
+`oidcClients`, `actions`, `addons`, `billing`, `settings`,
+`elevate`, `emailProviders`, `featureFlags`, `forms`,
+`provisioningTokens`, `impersonation`, `portal`, `security`,
+`threats`, `vanityDomains`, and `widgets` wrap Waves 1–3 of the
+public API (`specs/004-api-parity/`). AuthZEN discovery is
+unauthenticated; evaluate/search and MCP runtime use
+`environmentSecret`. SCIM uses `scimToken`; HRIS uses `hrisToken`.
 
 ```typescript
 const orgs = await client.organizations.list();
 const users = await client.users.list('ten_123', 'env_456');
+const decision = await client.authzen.evaluate({ subject: { id: 'usr_1' } });
 ```
 
 ##### `getUserInfo(accessToken: string): Promise<UserInfoResponse>`

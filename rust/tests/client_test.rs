@@ -10,6 +10,7 @@ async fn test_client_constructor_with_base_url() {
         base_url: "https://api.authdog.com".to_string(),
         api_key: None,
         timeout: Some(Duration::from_secs(10)),
+        ..Default::default()
     };
 
     let client = AuthdogClient::new(config);
@@ -22,6 +23,7 @@ async fn test_client_constructor_with_trailing_slash() {
         base_url: "https://api.authdog.com/".to_string(),
         api_key: None,
         timeout: Some(Duration::from_secs(10)),
+        ..Default::default()
     };
 
     let client = AuthdogClient::new(config);
@@ -34,6 +36,7 @@ async fn test_client_constructor_with_api_key() {
         base_url: "https://api.authdog.com".to_string(),
         api_key: Some("test-api-key".to_string()),
         timeout: Some(Duration::from_secs(10)),
+        ..Default::default()
     };
 
     let client = AuthdogClient::new(config);
@@ -46,6 +49,7 @@ async fn test_client_constructor_with_timeout() {
         base_url: "https://api.authdog.com".to_string(),
         api_key: None,
         timeout: Some(Duration::from_secs(30)),
+        ..Default::default()
     };
 
     let client = AuthdogClient::new(config);
@@ -58,6 +62,7 @@ async fn test_client_constructor_without_timeout() {
         base_url: "https://api.authdog.com".to_string(),
         api_key: None,
         timeout: None,
+        ..Default::default()
     };
 
     let client = AuthdogClient::new(config);
@@ -140,6 +145,7 @@ async fn test_get_user_info_with_valid_token() {
         base_url: mock_server.uri(),
         api_key: None,
         timeout: Some(Duration::from_secs(10)),
+        ..Default::default()
     };
 
     let client = AuthdogClient::new(config).unwrap();
@@ -168,6 +174,7 @@ async fn test_get_user_info_with_unauthorized_response() {
         base_url: mock_server.uri(),
         api_key: None,
         timeout: Some(Duration::from_secs(10)),
+        ..Default::default()
     };
 
     let client = AuthdogClient::new(config).unwrap();
@@ -198,6 +205,7 @@ async fn test_get_user_info_with_graphql_error() {
         base_url: mock_server.uri(),
         api_key: None,
         timeout: Some(Duration::from_secs(10)),
+        ..Default::default()
     };
 
     let client = AuthdogClient::new(config).unwrap();
@@ -228,6 +236,7 @@ async fn test_get_user_info_with_fetch_error() {
         base_url: mock_server.uri(),
         api_key: None,
         timeout: Some(Duration::from_secs(10)),
+        ..Default::default()
     };
 
     let client = AuthdogClient::new(config).unwrap();
@@ -252,6 +261,7 @@ async fn test_get_user_info_with_non_success_status_code() {
         base_url: mock_server.uri(),
         api_key: None,
         timeout: Some(Duration::from_secs(10)),
+        ..Default::default()
     };
 
     let client = AuthdogClient::new(config).unwrap();
@@ -276,6 +286,7 @@ async fn test_get_user_info_with_invalid_json() {
         base_url: mock_server.uri(),
         api_key: None,
         timeout: Some(Duration::from_secs(10)),
+        ..Default::default()
     };
 
     let client = AuthdogClient::new(config).unwrap();
@@ -339,6 +350,7 @@ async fn test_get_user_info_prefers_access_token() {
         base_url: mock_server.uri(),
         api_key: Some("test-api-key".to_string()),
         timeout: Some(Duration::from_secs(10)),
+        ..Default::default()
     };
 
     let client = AuthdogClient::new(config).unwrap();

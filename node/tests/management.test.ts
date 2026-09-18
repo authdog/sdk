@@ -289,3 +289,290 @@ describe('Wave 2 management', () => {
     );
   });
 });
+
+describe('Wave 3 management', () => {
+  let client: AuthdogClient;
+  let mockAxiosInstance: any;
+
+  beforeEach(() => {
+    mockAxiosInstance = {
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      patch: vi.fn(),
+      delete: vi.fn(),
+      request: vi.fn(),
+    };
+    mockedAxios.create.mockReturnValue(mockAxiosInstance);
+    mockedAxios.isAxiosError.mockReturnValue(false);
+    client = new AuthdogClient({
+      baseUrl: 'https://api.authdog.com',
+      apiKey: 'key-1',
+    });
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const wave3Cases: Array<[string, () => Promise<unknown>, string, string, unknown]> = [
+    ['authzen configuration', () => client.authzen.configuration(), 'GET', '/.well-known/authzen-configuration', undefined],
+    ['authzen evaluate', () => client.authzen.evaluate({ subject: {} }), 'POST', '/access/v1/evaluation', { subject: {} }],
+    ['authzen evaluate batch', () => client.authzen.evaluateBatch({ evaluations: [] }), 'POST', '/access/v1/evaluations', { evaluations: [] }],
+    ['authzen search action', () => client.authzen.searchAction({ subject: {} }), 'POST', '/access/v1/search/action', { subject: {} }],
+    ['authzen search resource', () => client.authzen.searchResource({ subject: {} }), 'POST', '/access/v1/search/resource', { subject: {} }],
+    ['authzen search subject', () => client.authzen.searchSubject({ resource: {} }), 'POST', '/access/v1/search/subject', { resource: {} }],
+    ['users revoke session', () => client.users.revokeSession('env_1', 'sess_1'), 'DELETE', '/v1/environments/env_1/sessions/sess_1', undefined],
+    ['hris list departments', () => client.hris.listDepartments(), 'GET', '/v1/hris/v1/Departments', undefined],
+    ['hris create department', () => client.hris.createDepartment({ name: 'Eng' }), 'POST', '/v1/hris/v1/Departments', { name: 'Eng' }],
+    ['hris get department', () => client.hris.getDepartment('dep_1'), 'GET', '/v1/hris/v1/Departments/dep_1', undefined],
+    ['hris replace department', () => client.hris.replaceDepartment('dep_1', { name: 'Eng' }), 'PUT', '/v1/hris/v1/Departments/dep_1', { name: 'Eng' }],
+    ['hris patch department', () => client.hris.patchDepartment('dep_1', { name: 'E' }), 'PATCH', '/v1/hris/v1/Departments/dep_1', { name: 'E' }],
+    ['hris delete department', () => client.hris.deleteDepartment('dep_1'), 'DELETE', '/v1/hris/v1/Departments/dep_1', undefined],
+    ['hris list employees', () => client.hris.listEmployees(), 'GET', '/v1/hris/v1/Employees', undefined],
+    ['hris create employee', () => client.hris.createEmployee({ name: 'Ada' }), 'POST', '/v1/hris/v1/Employees', { name: 'Ada' }],
+    ['hris get employee', () => client.hris.getEmployee('emp_1'), 'GET', '/v1/hris/v1/Employees/emp_1', undefined],
+    ['hris replace employee', () => client.hris.replaceEmployee('emp_1', { name: 'Ada' }), 'PUT', '/v1/hris/v1/Employees/emp_1', { name: 'Ada' }],
+    ['hris patch employee', () => client.hris.patchEmployee('emp_1', { name: 'A' }), 'PATCH', '/v1/hris/v1/Employees/emp_1', { name: 'A' }],
+    ['hris delete employee', () => client.hris.deleteEmployee('emp_1'), 'DELETE', '/v1/hris/v1/Employees/emp_1', undefined],
+    ['hris service config', () => client.hris.serviceConfig(), 'GET', '/v1/hris/v1/ServiceConfig', undefined],
+    ['otel export logs', () => client.otel.exportLogs({ resourceLogs: [] }), 'POST', '/v1/logs', { resourceLogs: [] }],
+    ['mcp ingest events', () => client.mcp.ingestEvents({ events: [] }), 'POST', '/v1/mcp/events', { events: [] }],
+    ['mcp resolve', () => client.mcp.resolve('agent-1'), 'GET', '/v1/mcp/trust-store/resolve', undefined],
+    ['otel export metrics', () => client.otel.exportMetrics({ resourceMetrics: [] }), 'POST', '/v1/metrics', { resourceMetrics: [] }],
+    ['otel export logs prefixed', () => client.otel.exportLogsPrefixed({ resourceLogs: [] }), 'POST', '/v1/otel/v1/logs', { resourceLogs: [] }],
+    ['otel export metrics prefixed', () => client.otel.exportMetricsPrefixed({ resourceMetrics: [] }), 'POST', '/v1/otel/v1/metrics', { resourceMetrics: [] }],
+    ['otel export traces prefixed', () => client.otel.exportTracesPrefixed({ resourceSpans: [] }), 'POST', '/v1/otel/v1/traces', { resourceSpans: [] }],
+    ['scim list groups', () => client.scim.listGroups(), 'GET', '/v1/scim/v2/Groups', undefined],
+    ['scim create group', () => client.scim.createGroup({ displayName: 'G' }), 'POST', '/v1/scim/v2/Groups', { displayName: 'G' }],
+    ['scim get group', () => client.scim.getGroup('g_1'), 'GET', '/v1/scim/v2/Groups/g_1', undefined],
+    ['scim replace group', () => client.scim.replaceGroup('g_1', { displayName: 'G' }), 'PUT', '/v1/scim/v2/Groups/g_1', { displayName: 'G' }],
+    ['scim patch group', () => client.scim.patchGroup('g_1', { Operations: [] }), 'PATCH', '/v1/scim/v2/Groups/g_1', { Operations: [] }],
+    ['scim delete group', () => client.scim.deleteGroup('g_1'), 'DELETE', '/v1/scim/v2/Groups/g_1', undefined],
+    ['scim resource types', () => client.scim.resourceTypes(), 'GET', '/v1/scim/v2/ResourceTypes', undefined],
+    ['scim resource type', () => client.scim.resourceType('User'), 'GET', '/v1/scim/v2/ResourceTypes/User', undefined],
+    ['scim schemas', () => client.scim.schemas(), 'GET', '/v1/scim/v2/Schemas', undefined],
+    ['scim schema', () => client.scim.schema('urn:ietf:params:scim:schemas:core:2.0:User'), 'GET', '/v1/scim/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:User', undefined],
+    ['scim service provider config', () => client.scim.serviceProviderConfig(), 'GET', '/v1/scim/v2/ServiceProviderConfig', undefined],
+    ['scim list users', () => client.scim.listUsers(), 'GET', '/v1/scim/v2/Users', undefined],
+    ['scim create user', () => client.scim.createUser({ userName: 'ada' }), 'POST', '/v1/scim/v2/Users', { userName: 'ada' }],
+    ['scim get user', () => client.scim.getUser('u_1'), 'GET', '/v1/scim/v2/Users/u_1', undefined],
+    ['scim replace user', () => client.scim.replaceUser('u_1', { userName: 'ada' }), 'PUT', '/v1/scim/v2/Users/u_1', { userName: 'ada' }],
+    ['scim patch user', () => client.scim.patchUser('u_1', { Operations: [] }), 'PATCH', '/v1/scim/v2/Users/u_1', { Operations: [] }],
+    ['scim delete user', () => client.scim.deleteUser('u_1'), 'DELETE', '/v1/scim/v2/Users/u_1', undefined],
+    ['envs list connections', () => client.environments.listConnections('ten_1', 'app_1', 'env_1'), 'GET', '/v1/tenants/ten_1/applications/app_1/environments/env_1/connections', undefined],
+    ['oidc clients list', () => client.oidcClients.list('ten_1', 'app_1', 'env_1'), 'GET', '/v1/tenants/ten_1/applications/app_1/environments/env_1/oidc-clients', undefined],
+    ['oidc clients register', () => client.oidcClients.register('ten_1', 'app_1', 'env_1', { name: 'cli' }), 'POST', '/v1/tenants/ten_1/applications/app_1/environments/env_1/oidc-clients', { name: 'cli' }],
+    ['oidc clients update', () => client.oidcClients.update('ten_1', 'app_1', 'env_1', 'cid_1', { name: 'n' }), 'PATCH', '/v1/tenants/ten_1/applications/app_1/environments/env_1/oidc-clients/cid_1', { name: 'n' }],
+    ['oidc clients delete', () => client.oidcClients.delete('ten_1', 'app_1', 'env_1', 'cid_1'), 'DELETE', '/v1/tenants/ten_1/applications/app_1/environments/env_1/oidc-clients/cid_1', undefined],
+    ['envs list redirect uris', () => client.environments.listRedirectUris('ten_1', 'app_1', 'env_1'), 'GET', '/v1/tenants/ten_1/applications/app_1/environments/env_1/redirect-uris', undefined],
+    ['actions list', () => client.actions.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/actions', undefined],
+    ['actions save', () => client.actions.save('ten_1', 'env_1', { url: 'https://ex' }), 'POST', '/v1/tenants/ten_1/environments/env_1/actions', { url: 'https://ex' }],
+    ['actions executions', () => client.actions.executions('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/actions/executions', undefined],
+    ['actions test', () => client.actions.test('ten_1', 'env_1', { url: 'https://ex' }), 'POST', '/v1/tenants/ten_1/environments/env_1/actions/test', { url: 'https://ex' }],
+    ['actions delete', () => client.actions.delete('ten_1', 'env_1', 'act_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/actions/act_1', undefined],
+    ['addons list', () => client.addons.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/addons', undefined],
+    ['addons save', () => client.addons.save('ten_1', 'env_1', { provider: 'slack' }), 'POST', '/v1/tenants/ten_1/environments/env_1/addons', { provider: 'slack' }],
+    ['addons delete', () => client.addons.delete('ten_1', 'env_1', 'slack'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/addons/slack', undefined],
+    ['billing list features', () => client.billing.listFeatures('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/billing/features', undefined],
+    ['billing save feature', () => client.billing.saveFeature('ten_1', 'env_1', { name: 'pro' }), 'POST', '/v1/tenants/ten_1/environments/env_1/billing/features', { name: 'pro' }],
+    ['billing delete feature', () => client.billing.deleteFeature('ten_1', 'env_1', 'feat_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/billing/features/feat_1', undefined],
+    ['billing list plans', () => client.billing.listPlans('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/billing/plans', undefined],
+    ['billing save plan', () => client.billing.savePlan('ten_1', 'env_1', { name: 'pro' }), 'POST', '/v1/tenants/ten_1/environments/env_1/billing/plans', { name: 'pro' }],
+    ['billing delete plan', () => client.billing.deletePlan('ten_1', 'env_1', 'plan_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/billing/plans/plan_1', undefined],
+    ['billing sync stripe', () => client.billing.syncStripe('ten_1', 'env_1', 'plan_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/billing/plans/plan_1/sync-stripe', undefined],
+    ['settings get bot detection policy', () => client.settings.getBotDetectionPolicy('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/bot-detection-policy', undefined],
+    ['settings update bot detection policy', () => client.settings.updateBotDetectionPolicy('ten_1', 'env_1', { enabled: true }), 'PUT', '/v1/tenants/ten_1/environments/env_1/bot-detection-policy', { enabled: true }],
+    ['settings get breached password policy', () => client.settings.getBreachedPasswordPolicy('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/breached-password-policy', undefined],
+    ['settings update breached password policy', () => client.settings.updateBreachedPasswordPolicy('ten_1', 'env_1', { enabled: true }), 'PUT', '/v1/tenants/ten_1/environments/env_1/breached-password-policy', { enabled: true }],
+    ['settings get brute force policy', () => client.settings.getBruteForcePolicy('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/brute-force-policy', undefined],
+    ['settings update brute force policy', () => client.settings.updateBruteForcePolicy('ten_1', 'env_1', { enabled: true }), 'PUT', '/v1/tenants/ten_1/environments/env_1/brute-force-policy', { enabled: true }],
+    ['envs save connection', () => client.environments.saveConnection('ten_1', 'env_1', { provider: 'okta' }), 'POST', '/v1/tenants/ten_1/environments/env_1/connections', { provider: 'okta' }],
+    ['envs resolve saml metadata', () => client.environments.resolveSamlMetadata('ten_1', 'env_1', { url: 'https://ex' }), 'POST', '/v1/tenants/ten_1/environments/env_1/connections/resolve-saml-metadata', { url: 'https://ex' }],
+    ['envs get sso metadata', () => client.environments.getSsoMetadata('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/connections/sso-metadata', undefined],
+    ['envs delete connection', () => client.environments.deleteConnection('ten_1', 'env_1', 'con_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/connections/con_1', undefined],
+    ['settings get device risk policy', () => client.settings.getDeviceRiskPolicy('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/device-risk-policy', undefined],
+    ['settings update device risk policy', () => client.settings.updateDeviceRiskPolicy('ten_1', 'env_1', { enabled: true }), 'PUT', '/v1/tenants/ten_1/environments/env_1/device-risk-policy', { enabled: true }],
+    ['elevate activate grant', () => client.elevate.activateGrant('ten_1', 'env_1', 'gr_1', { reason: 'x' }), 'POST', '/v1/tenants/ten_1/environments/env_1/elevate/access-grants/gr_1/activate', { reason: 'x' }],
+    ['elevate revoke grant', () => client.elevate.revokeGrant('ten_1', 'env_1', 'gr_1', { reason: 'x' }), 'POST', '/v1/tenants/ten_1/environments/env_1/elevate/access-grants/gr_1/revoke', { reason: 'x' }],
+    ['elevate list requests', () => client.elevate.listRequests('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/elevate/access-requests', undefined],
+    ['elevate create request', () => client.elevate.createRequest('ten_1', 'env_1', { reason: 'x' }), 'POST', '/v1/tenants/ten_1/environments/env_1/elevate/access-requests', { reason: 'x' }],
+    ['elevate get request', () => client.elevate.getRequest('ten_1', 'env_1', 'req_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/elevate/access-requests/req_1', undefined],
+    ['elevate approve request', () => client.elevate.approveRequest('ten_1', 'env_1', 'req_1', { note: 'ok' }), 'POST', '/v1/tenants/ten_1/environments/env_1/elevate/access-requests/req_1/approve', { note: 'ok' }],
+    ['elevate cancel request', () => client.elevate.cancelRequest('ten_1', 'env_1', 'req_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/elevate/access-requests/req_1/cancel', undefined],
+    ['elevate deny request', () => client.elevate.denyRequest('ten_1', 'env_1', 'req_1', { note: 'no' }), 'POST', '/v1/tenants/ten_1/environments/env_1/elevate/access-requests/req_1/deny', { note: 'no' }],
+    ['elevate get policy', () => client.elevate.getPolicy('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/elevate/policy', undefined],
+    ['elevate update policy', () => client.elevate.updatePolicy('ten_1', 'env_1', { enabled: true }), 'PUT', '/v1/tenants/ten_1/environments/env_1/elevate/policy', { enabled: true }],
+    ['email providers list', () => client.emailProviders.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/email-providers', undefined],
+    ['email providers save', () => client.emailProviders.save('ten_1', 'env_1', { provider: 'ses' }), 'POST', '/v1/tenants/ten_1/environments/env_1/email-providers', { provider: 'ses' }],
+    ['email providers test', () => client.emailProviders.test('ten_1', 'env_1', { to: 'a@b.c' }), 'POST', '/v1/tenants/ten_1/environments/env_1/email-providers/test', { to: 'a@b.c' }],
+    ['email providers delete', () => client.emailProviders.delete('ten_1', 'env_1', 'ses'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/email-providers/ses', undefined],
+    ['email providers activate', () => client.emailProviders.activate('ten_1', 'env_1', 'ses'), 'POST', '/v1/tenants/ten_1/environments/env_1/email-providers/ses/activate', undefined],
+    ['feature flags list', () => client.featureFlags.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/feature-flags', undefined],
+    ['feature flags save', () => client.featureFlags.save('ten_1', 'env_1', { key: 'x' }), 'POST', '/v1/tenants/ten_1/environments/env_1/feature-flags', { key: 'x' }],
+    ['feature flags delete', () => client.featureFlags.delete('ten_1', 'env_1', 'flag_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/feature-flags/flag_1', undefined],
+    ['forms list attachments', () => client.forms.listAttachments('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/form-attachments', undefined],
+    ['forms list', () => client.forms.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/forms', undefined],
+    ['forms save', () => client.forms.save('ten_1', 'env_1', { name: 'login' }), 'POST', '/v1/tenants/ten_1/environments/env_1/forms', { name: 'login' }],
+    ['forms delete', () => client.forms.delete('ten_1', 'env_1', 'form_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/forms/form_1', undefined],
+    ['provisioning tokens list hris', () => client.provisioningTokens.listHris('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/hris-tokens', undefined],
+    ['provisioning tokens create hris', () => client.provisioningTokens.createHris('ten_1', 'env_1', { name: 'hr' }), 'POST', '/v1/tenants/ten_1/environments/env_1/hris-tokens', { name: 'hr' }],
+    ['provisioning tokens revoke hris', () => client.provisioningTokens.revokeHris('ten_1', 'env_1', 'tok_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/hris-tokens/tok_1/revoke', undefined],
+    ['provisioning tokens rotate hris', () => client.provisioningTokens.rotateHris('ten_1', 'env_1', 'tok_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/hris-tokens/tok_1/rotate', undefined],
+    ['impersonation list', () => client.impersonation.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/impersonation-grants', undefined],
+    ['impersonation create', () => client.impersonation.create('ten_1', 'env_1', { userId: 'usr_1' }), 'POST', '/v1/tenants/ten_1/environments/env_1/impersonation-grants', { userId: 'usr_1' }],
+    ['impersonation revoke', () => client.impersonation.revoke('ten_1', 'env_1', 'gr_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/impersonation-grants/gr_1/revoke', undefined],
+    ['settings list jwt claim mappings', () => client.settings.listJwtClaimMappings('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/jwt-claim-mappings', undefined],
+    ['settings save jwt claim mapping', () => client.settings.saveJwtClaimMapping('ten_1', 'env_1', { claim: 'role' }), 'POST', '/v1/tenants/ten_1/environments/env_1/jwt-claim-mappings', { claim: 'role' }],
+    ['settings delete jwt claim mapping', () => client.settings.deleteJwtClaimMapping('ten_1', 'env_1', 'map_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/jwt-claim-mappings/map_1', undefined],
+    ['mcp list entries', () => client.mcp.listEntries('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/mcp/trust-store', undefined],
+    ['mcp create entry', () => client.mcp.createEntry('ten_1', 'env_1', { subject: 'a' }), 'POST', '/v1/tenants/ten_1/environments/env_1/mcp/trust-store', { subject: 'a' }],
+    ['mcp get entry', () => client.mcp.getEntry('ten_1', 'env_1', 'ent_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1', undefined],
+    ['mcp update entry', () => client.mcp.updateEntry('ten_1', 'env_1', 'ent_1', { name: 'n' }), 'PATCH', '/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1', { name: 'n' }],
+    ['mcp delete entry', () => client.mcp.deleteEntry('ten_1', 'env_1', 'ent_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1', undefined],
+    ['mcp add key', () => client.mcp.addKey('ten_1', 'env_1', 'ent_1', { jwk: {} }), 'POST', '/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/keys', { jwk: {} }],
+    ['mcp revoke key', () => client.mcp.revokeKey('ten_1', 'env_1', 'ent_1', 'key_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/keys/key_1', undefined],
+    ['mcp rotate key', () => client.mcp.rotateKey('ten_1', 'env_1', 'ent_1', 'key_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/keys/key_1/rotate', undefined],
+    ['mcp revoke entry', () => client.mcp.revokeEntry('ten_1', 'env_1', 'ent_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/revoke', undefined],
+    ['mcp verify entry', () => client.mcp.verifyEntry('ten_1', 'env_1', 'ent_1', { verified: true }), 'POST', '/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify', { verified: true }],
+    ['users totp status', () => client.users.totpStatus('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/me/mfa/totp', undefined],
+    ['settings get password policy', () => client.settings.getPasswordPolicy('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/password-policy', undefined],
+    ['settings update password policy', () => client.settings.updatePasswordPolicy('ten_1', 'env_1', { minLength: 8 }), 'PUT', '/v1/tenants/ten_1/environments/env_1/password-policy', { minLength: 8 }],
+    ['portal generate link', () => client.portal.generateLink('ten_1', 'env_1', { email: 'a@b.c' }), 'POST', '/v1/tenants/ten_1/environments/env_1/portal/generate-link', { email: 'a@b.c' }],
+    ['settings get rate limit policy', () => client.settings.getRateLimitPolicy('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/rate-limit-policy', undefined],
+    ['settings update rate limit policy', () => client.settings.updateRateLimitPolicy('ten_1', 'env_1', { limit: 10 }), 'PUT', '/v1/tenants/ten_1/environments/env_1/rate-limit-policy', { limit: 10 }],
+    ['envs save redirect uris', () => client.environments.saveRedirectUris('ten_1', 'env_1', { uris: [] }), 'PUT', '/v1/tenants/ten_1/environments/env_1/redirect-uris', { uris: [] }],
+    ['settings get restrictions', () => client.settings.getRestrictions('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/restrictions', undefined],
+    ['settings update restrictions', () => client.settings.updateRestrictions('ten_1', 'env_1', { signup: false }), 'PUT', '/v1/tenants/ten_1/environments/env_1/restrictions', { signup: false }],
+    ['provisioning tokens list scim', () => client.provisioningTokens.listScim('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/scim-tokens', undefined],
+    ['provisioning tokens create scim', () => client.provisioningTokens.createScim('ten_1', 'env_1', { name: 'scim' }), 'POST', '/v1/tenants/ten_1/environments/env_1/scim-tokens', { name: 'scim' }],
+    ['provisioning tokens revoke scim', () => client.provisioningTokens.revokeScim('ten_1', 'env_1', 'tok_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/scim-tokens/tok_1/revoke', undefined],
+    ['provisioning tokens rotate scim', () => client.provisioningTokens.rotateScim('ten_1', 'env_1', 'tok_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/scim-tokens/tok_1/rotate', undefined],
+    ['security posture', () => client.security.posture('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/security/posture', undefined],
+    ['settings get session config', () => client.settings.getSessionConfig('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/session-config', undefined],
+    ['settings update session config', () => client.settings.updateSessionConfig('ten_1', 'env_1', { ttl: 3600 }), 'PUT', '/v1/tenants/ten_1/environments/env_1/session-config', { ttl: 3600 }],
+    ['threats list', () => client.threats.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/threats', undefined],
+    ['threats create', () => client.threats.create('ten_1', 'env_1', { type: 'bot' }), 'POST', '/v1/tenants/ten_1/environments/env_1/threats', { type: 'bot' }],
+    ['threats get', () => client.threats.get('ten_1', 'env_1', 'th_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/threats/th_1', undefined],
+    ['threats update', () => client.threats.update('ten_1', 'env_1', 'th_1', { status: 'open' }), 'PATCH', '/v1/tenants/ten_1/environments/env_1/threats/th_1', { status: 'open' }],
+    ['threats delete', () => client.threats.delete('ten_1', 'env_1', 'th_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/threats/th_1', undefined],
+    ['threats resolve', () => client.threats.resolve('ten_1', 'env_1', 'th_1', { status: 'resolved' }), 'POST', '/v1/tenants/ten_1/environments/env_1/threats/th_1/resolve', { status: 'resolved' }],
+    ['users bulk delete', () => client.users.bulkDelete('ten_1', 'env_1', { userIds: ['usr_1'] }), 'POST', '/v1/tenants/ten_1/environments/env_1/users/bulk/delete', { userIds: ['usr_1'] }],
+    ['users bulk set active', () => client.users.bulkSetActive('ten_1', 'env_1', { userIds: ['usr_1'], active: false }), 'POST', '/v1/tenants/ten_1/environments/env_1/users/bulk/set-active', { userIds: ['usr_1'], active: false }],
+    ['users import', () => client.users.importUsers('ten_1', 'env_1', { users: [] }), 'POST', '/v1/tenants/ten_1/environments/env_1/users/import', { users: [] }],
+    ['users disable mfa', () => client.users.disableMfa('ten_1', 'env_1', 'usr_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/users/usr_1/mfa', undefined],
+    ['users list sessions', () => client.users.listSessions('ten_1', 'env_1', 'usr_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/users/usr_1/sessions', undefined],
+    ['vanity domains list', () => client.vanityDomains.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/vanity-domains', undefined],
+    ['vanity domains create', () => client.vanityDomains.create('ten_1', 'env_1', { domain: 'a.com' }), 'POST', '/v1/tenants/ten_1/environments/env_1/vanity-domains', { domain: 'a.com' }],
+    ['vanity domains delete', () => client.vanityDomains.delete('ten_1', 'env_1', 'dom_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/vanity-domains/dom_1', undefined],
+    ['vanity domains check', () => client.vanityDomains.check('ten_1', 'env_1', 'dom_1'), 'POST', '/v1/tenants/ten_1/environments/env_1/vanity-domains/dom_1/check', undefined],
+    ['widgets create token', () => client.widgets.createToken('ten_1', 'env_1', { ttl: 60 }), 'POST', '/v1/tenants/ten_1/environments/env_1/widgets/token', { ttl: 60 }],
+    ['otel export traces', () => client.otel.exportTraces({ resourceSpans: [] }), 'POST', '/v1/traces', { resourceSpans: [] }],
+  ];
+
+  it('covers all inventory operations', () => {
+    expect(wave3Cases).toHaveLength(152);
+  });
+
+  it.each(wave3Cases)('%s hits %s %s', async (_name, call, method, url, data) => {
+    mockAxiosInstance.request.mockResolvedValue({ data: {} });
+    await call();
+    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method,
+        url,
+        ...(data !== undefined ? { data } : {}),
+      })
+    );
+  });
+
+  it('authzen discovery omits bearer', async () => {
+    mockAxiosInstance.request.mockResolvedValue({ data: {} });
+    await client.authzen.configuration();
+    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        url: '/.well-known/authzen-configuration',
+        headers: expect.objectContaining({ Authorization: '' }),
+      })
+    );
+  });
+
+  it('authzen evaluate uses environmentSecret', async () => {
+    const secretClient = new AuthdogClient({
+      baseUrl: 'https://api.authdog.com',
+      apiKey: 'key-1',
+      environmentSecret: 'adenv_secret',
+    });
+    mockAxiosInstance.request.mockResolvedValue({ data: { decision: 'Permit' } });
+    const result = await secretClient.authzen.evaluate({ subject: { id: 'u' } });
+    expect(result.decision).toBe('Permit');
+    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'POST',
+        url: '/access/v1/evaluation',
+        headers: expect.objectContaining({ Authorization: 'Bearer adenv_secret' }),
+      })
+    );
+  });
+
+  it('scim and hris use specialized tokens', async () => {
+    const tokenClient = new AuthdogClient({
+      baseUrl: 'https://api.authdog.com',
+      apiKey: 'key-1',
+      scimToken: 'adscim_token',
+      hrisToken: 'adhris_token',
+    });
+    mockAxiosInstance.request.mockResolvedValue({ data: {} });
+    await tokenClient.scim.listUsers();
+    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: '/v1/scim/v2/Users',
+        headers: expect.objectContaining({ Authorization: 'Bearer adscim_token' }),
+      })
+    );
+    await tokenClient.hris.listEmployees();
+    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: '/v1/hris/v1/Employees',
+        headers: expect.objectContaining({ Authorization: 'Bearer adhris_token' }),
+      })
+    );
+  });
+
+  it('createScim token response exposes one-time token', async () => {
+    mockAxiosInstance.request.mockResolvedValue({
+      data: { token: 'adscim_once', id: 'tok_1' },
+    });
+    const created = await client.provisioningTokens.createScim('ten_1', 'env_1', { name: 'scim' });
+    expect(created.token).toBe('adscim_once');
+  });
+
+  it('forwards query params', async () => {
+    mockAxiosInstance.request.mockResolvedValue({ data: {} });
+    await client.mcp.resolve('agent-1');
+    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        url: '/v1/mcp/trust-store/resolve',
+        params: { subject: 'agent-1' },
+      })
+    );
+    await client.threats.list('ten_1', 'env_1', { status: 'open', limit: 10 });
+    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        url: '/v1/tenants/ten_1/environments/env_1/threats',
+        params: { status: 'open', limit: 10 },
+      })
+    );
+    await client.elevate.listRequests('ten_1', 'env_1', 'pending');
+    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        url: '/v1/tenants/ten_1/environments/env_1/elevate/access-requests',
+        params: { status: 'pending' },
+      })
+    );
+  });
+});

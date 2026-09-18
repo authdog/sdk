@@ -26,6 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         base_url: "https://api.authdog.com".to_string(),
         api_key: Some("your-api-key".to_string()), // Optional
         timeout: Some(Duration::from_secs(10)), // Optional, defaults to 10 seconds
+        ..Default::default()
     };
     
     let client = AuthdogClient::new(config)?;
@@ -102,12 +103,18 @@ Creates a new Authdog client.
 - `base_url` (String): The base URL of the Authdog API
 - `api_key` (Option<String>): Optional management Bearer credential (userinfo still uses the access token)
 - `timeout` (Option<Duration>): Request timeout (default: 10 seconds)
+- `environment_secret`, `scim_token`, `hris_token`: optional specialized Bearers for AuthZEN/MCP runtime, SCIM, and HRIS
 
 `health()`, `organizations()`, `tenants()`, `projects()`, `environments()`,
 `users()`, `groups()`, `rbac()`, `audit()`, `events()`, `webhooks()`,
 `notification_channels()`, `service_accounts()`,
-`personal_access_tokens()`, and `api_secrets()` wrap Waves 1–2 of the
-public API. See `specs/004-api-parity/`.
+`personal_access_tokens()`, `api_secrets()`, `authzen()`, `scim()`,
+`hris()`, `mcp()`, `otel()`, `oidc_clients()`, `actions()`, `addons()`,
+`billing()`, `settings()`, `elevate()`, `email_providers()`,
+`feature_flags()`, `forms()`, `provisioning_tokens()`, `impersonation()`,
+`portal()`, `security()`, `threats()`, `vanity_domains()`, and
+`widgets()` wrap Waves 1–3 of the public API. AuthZEN discovery is
+unauthenticated. See `specs/004-api-parity/`.
 
 #### Methods
 

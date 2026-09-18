@@ -244,4 +244,133 @@ public final class UsersResource {
                         + "/groups",
                 null, null, JsonNode.class);
     }
+
+    /**
+     * Revoke a session in an environment.
+     * @param environmentId environment ID
+     * @param sessionId session ID
+     * @return revoke envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode revokeSession(final String environmentId,
+                                  final String sessionId)
+            throws AuthenticationException, ApiException {
+        return client.request("DELETE",
+                "/v1/environments/" + environmentId
+                        + "/sessions/" + sessionId,
+                null, null, JsonNode.class);
+    }
+
+    /**
+     * Get TOTP MFA status for the current principal.
+     * @param tenantId tenant ID
+     * @param environmentId environment ID
+     * @return TOTP status envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode totpStatus(final String tenantId,
+                               final String environmentId)
+            throws AuthenticationException, ApiException {
+        return client.request("GET",
+                EnvPaths.prefix(tenantId, environmentId)
+                        + "/me/mfa/totp",
+                null, null, JsonNode.class);
+    }
+
+    /**
+     * Bulk-delete users in an environment.
+     * @param tenantId tenant ID
+     * @param environmentId environment ID
+     * @param body request body
+     * @return delete envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode bulkDelete(final String tenantId,
+                               final String environmentId,
+                               final Object body)
+            throws AuthenticationException, ApiException {
+        return client.request("POST",
+                EnvPaths.prefix(tenantId, environmentId)
+                        + "/users/bulk/delete",
+                body, null, JsonNode.class);
+    }
+
+    /**
+     * Bulk enable or disable users in an environment.
+     * @param tenantId tenant ID
+     * @param environmentId environment ID
+     * @param body request body
+     * @return update envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode bulkSetActive(final String tenantId,
+                                  final String environmentId,
+                                  final Object body)
+            throws AuthenticationException, ApiException {
+        return client.request("POST",
+                EnvPaths.prefix(tenantId, environmentId)
+                        + "/users/bulk/set-active",
+                body, null, JsonNode.class);
+    }
+
+    /**
+     * Import users into an environment.
+     * @param tenantId tenant ID
+     * @param environmentId environment ID
+     * @param body request body
+     * @return import envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode importUsers(final String tenantId,
+                                final String environmentId,
+                                final Object body)
+            throws AuthenticationException, ApiException {
+        return client.request("POST",
+                EnvPaths.prefix(tenantId, environmentId)
+                        + "/users/import",
+                body, null, JsonNode.class);
+    }
+
+    /**
+     * Disable MFA for a user.
+     * @param tenantId tenant ID
+     * @param environmentId environment ID
+     * @param userId user ID
+     * @return delete envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode disableMfa(final String tenantId,
+                               final String environmentId,
+                               final String userId)
+            throws AuthenticationException, ApiException {
+        return client.request("DELETE",
+                EnvPaths.prefix(tenantId, environmentId)
+                        + "/users/" + userId + "/mfa",
+                null, null, JsonNode.class);
+    }
+
+    /**
+     * List sessions for a user.
+     * @param tenantId tenant ID
+     * @param environmentId environment ID
+     * @param userId user ID
+     * @return sessions envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode listSessions(final String tenantId,
+                                 final String environmentId,
+                                 final String userId)
+            throws AuthenticationException, ApiException {
+        return client.request("GET",
+                EnvPaths.prefix(tenantId, environmentId)
+                        + "/users/" + userId + "/sessions",
+                null, null, JsonNode.class);
+    }
 }

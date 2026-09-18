@@ -44,6 +44,27 @@ pub const NotificationChannelsResource = @import("client.zig").NotificationChann
 pub const ServiceAccountsResource = @import("client.zig").ServiceAccountsResource;
 pub const PersonalAccessTokensResource = @import("client.zig").PersonalAccessTokensResource;
 pub const ApiSecretsResource = @import("client.zig").ApiSecretsResource;
+pub const AuthzenResource = @import("client.zig").AuthzenResource;
+pub const ScimResource = @import("client.zig").ScimResource;
+pub const HrisResource = @import("client.zig").HrisResource;
+pub const McpResource = @import("client.zig").McpResource;
+pub const OtelResource = @import("client.zig").OtelResource;
+pub const OidcClientsResource = @import("client.zig").OidcClientsResource;
+pub const ActionsResource = @import("client.zig").ActionsResource;
+pub const AddonsResource = @import("client.zig").AddonsResource;
+pub const BillingResource = @import("client.zig").BillingResource;
+pub const SettingsResource = @import("client.zig").SettingsResource;
+pub const ElevateResource = @import("client.zig").ElevateResource;
+pub const EmailProvidersResource = @import("client.zig").EmailProvidersResource;
+pub const FeatureFlagsResource = @import("client.zig").FeatureFlagsResource;
+pub const FormsResource = @import("client.zig").FormsResource;
+pub const ProvisioningTokensResource = @import("client.zig").ProvisioningTokensResource;
+pub const ImpersonationResource = @import("client.zig").ImpersonationResource;
+pub const PortalResource = @import("client.zig").PortalResource;
+pub const SecurityResource = @import("client.zig").SecurityResource;
+pub const ThreatsResource = @import("client.zig").ThreatsResource;
+pub const VanityDomainsResource = @import("client.zig").VanityDomainsResource;
+pub const WidgetsResource = @import("client.zig").WidgetsResource;
 
 test {
     std.testing.refAllDecls(@This());

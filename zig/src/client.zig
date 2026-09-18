@@ -12,6 +12,12 @@ pub const AuthdogClientConfig = struct {
     base_url: []const u8,
     api_key: ?[]const u8 = null,
     timeout_ms: u32 = 10_000,
+    /// Optional `adenv_` secret for AuthZEN evaluate/search and MCP runtime.
+    environment_secret: ?[]const u8 = null,
+    /// Optional `adscim_` token for `/v1/scim/v2`.
+    scim_token: ?[]const u8 = null,
+    /// Optional `adhris_` token for `/v1/hris/v1`.
+    hris_token: ?[]const u8 = null,
     /// Optional caller-owned I/O implementation. When omitted, the client
     /// creates and owns a threaded I/O runtime.
     io: ?std.Io = null,
@@ -21,6 +27,9 @@ pub const AuthdogClient = struct {
     allocator: std.mem.Allocator,
     base_url: []u8,
     api_key: ?[]u8,
+    environment_secret: ?[]u8,
+    scim_token: ?[]u8,
+    hris_token: ?[]u8,
     timeout_ms: u32,
     owned_io: ?*std.Io.Threaded,
     io: std.Io,
@@ -35,6 +44,15 @@ pub const AuthdogClient = struct {
         const api_key = if (config.api_key) |key| try allocator.dupe(u8, key) else null;
         errdefer if (api_key) |key| allocator.free(key);
 
+        const environment_secret = if (config.environment_secret) |value| try allocator.dupe(u8, value) else null;
+        errdefer if (environment_secret) |value| allocator.free(value);
+
+        const scim_token = if (config.scim_token) |value| try allocator.dupe(u8, value) else null;
+        errdefer if (scim_token) |value| allocator.free(value);
+
+        const hris_token = if (config.hris_token) |value| try allocator.dupe(u8, value) else null;
+        errdefer if (hris_token) |value| allocator.free(value);
+
         var owned_io: ?*std.Io.Threaded = null;
         const io = config.io orelse blk: {
             const runtime = try allocator.create(std.Io.Threaded);
@@ -47,6 +65,9 @@ pub const AuthdogClient = struct {
             .allocator = allocator,
             .base_url = base_url,
             .api_key = api_key,
+            .environment_secret = environment_secret,
+            .scim_token = scim_token,
+            .hris_token = hris_token,
             .timeout_ms = config.timeout_ms,
             .owned_io = owned_io,
             .io = io,
@@ -57,6 +78,9 @@ pub const AuthdogClient = struct {
     pub fn deinit(self: *Self) void {
         self.allocator.free(self.base_url);
         if (self.api_key) |key| self.allocator.free(key);
+        if (self.environment_secret) |value| self.allocator.free(value);
+        if (self.scim_token) |value| self.allocator.free(value);
+        if (self.hris_token) |value| self.allocator.free(value);
         if (self.last_error_message) |msg| self.allocator.free(msg);
         if (self.owned_io) |runtime| {
             runtime.deinit();
@@ -72,6 +96,13 @@ pub const AuthdogClient = struct {
     pub const QueryParam = struct {
         name: []const u8,
         value: ?[]const u8 = null,
+    };
+
+    pub const RequestAuth = struct {
+        /// When set, Authorization is this Bearer token (wins over `api_key`).
+        access_token: ?[]const u8 = null,
+        /// When true and `access_token` is null, send constructor `api_key` if present.
+        use_api_key: bool = true,
     };
 
     const ExchangeOptions = struct {
@@ -202,12 +233,25 @@ pub const AuthdogClient = struct {
         query: []const QueryParam,
         payload: ?[]const u8,
     ) AuthdogError![]u8 {
+        return self.requestAuth(method, path, query, payload, .{});
+    }
+
+    /// Management JSON request with explicit Authorization routing.
+    pub fn requestAuth(
+        self: *Self,
+        method: std.http.Method,
+        path: []const u8,
+        query: []const QueryParam,
+        payload: ?[]const u8,
+        auth: RequestAuth,
+    ) AuthdogError![]u8 {
         const result = try self.exchange(.{
             .method = method,
             .path = path,
             .query = query,
             .payload = payload,
-            .use_api_key = true,
+            .access_token = auth.access_token,
+            .use_api_key = auth.use_api_key,
         });
         const body = result.body;
 
@@ -235,7 +279,18 @@ pub const AuthdogClient = struct {
         query: []const QueryParam,
         payload: ?[]const u8,
     ) AuthdogError!std.json.Parsed(std.json.Value) {
-        const body = try self.request(method, path, query, payload);
+        return self.requestValueAuth(method, path, query, payload, .{});
+    }
+
+    fn requestValueAuth(
+        self: *Self,
+        method: std.http.Method,
+        path: []const u8,
+        query: []const QueryParam,
+        payload: ?[]const u8,
+        auth: RequestAuth,
+    ) AuthdogError!std.json.Parsed(std.json.Value) {
+        const body = try self.requestAuth(method, path, query, payload, auth);
         defer self.allocator.free(body);
         return std.json.parseFromSlice(std.json.Value, self.allocator, body, .{
             .ignore_unknown_fields = true,
@@ -267,11 +322,23 @@ pub const AuthdogClient = struct {
         query: []const QueryParam,
         payload: ?[]const u8,
     ) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.requestValuePathAuth(method, path_fmt, path_args, query, payload, .{});
+    }
+
+    fn requestValuePathAuth(
+        self: *Self,
+        method: std.http.Method,
+        comptime path_fmt: []const u8,
+        path_args: anytype,
+        query: []const QueryParam,
+        payload: ?[]const u8,
+        auth: RequestAuth,
+    ) AuthdogError!std.json.Parsed(std.json.Value) {
         const path = std.fmt.allocPrint(self.allocator, path_fmt, path_args) catch {
             return self.fail(error.ApiError, errors.request_failed_message);
         };
         defer self.allocator.free(path);
-        return self.requestValue(method, path, query, payload);
+        return self.requestValueAuth(method, path, query, payload, auth);
     }
 
     fn requestParsePath(
@@ -372,6 +439,90 @@ pub const AuthdogClient = struct {
     }
 
     pub fn apiSecrets(self: *Self) ApiSecretsResource {
+        return .{ .client = self };
+    }
+
+    pub fn authzen(self: *Self) AuthzenResource {
+        return .{ .client = self };
+    }
+
+    pub fn scim(self: *Self) ScimResource {
+        return .{ .client = self };
+    }
+
+    pub fn hris(self: *Self) HrisResource {
+        return .{ .client = self };
+    }
+
+    pub fn mcp(self: *Self) McpResource {
+        return .{ .client = self };
+    }
+
+    pub fn otel(self: *Self) OtelResource {
+        return .{ .client = self };
+    }
+
+    pub fn oidcClients(self: *Self) OidcClientsResource {
+        return .{ .client = self };
+    }
+
+    pub fn actions(self: *Self) ActionsResource {
+        return .{ .client = self };
+    }
+
+    pub fn addons(self: *Self) AddonsResource {
+        return .{ .client = self };
+    }
+
+    pub fn billing(self: *Self) BillingResource {
+        return .{ .client = self };
+    }
+
+    pub fn settings(self: *Self) SettingsResource {
+        return .{ .client = self };
+    }
+
+    pub fn elevate(self: *Self) ElevateResource {
+        return .{ .client = self };
+    }
+
+    pub fn emailProviders(self: *Self) EmailProvidersResource {
+        return .{ .client = self };
+    }
+
+    pub fn featureFlags(self: *Self) FeatureFlagsResource {
+        return .{ .client = self };
+    }
+
+    pub fn forms(self: *Self) FormsResource {
+        return .{ .client = self };
+    }
+
+    pub fn provisioningTokens(self: *Self) ProvisioningTokensResource {
+        return .{ .client = self };
+    }
+
+    pub fn impersonation(self: *Self) ImpersonationResource {
+        return .{ .client = self };
+    }
+
+    pub fn portal(self: *Self) PortalResource {
+        return .{ .client = self };
+    }
+
+    pub fn security(self: *Self) SecurityResource {
+        return .{ .client = self };
+    }
+
+    pub fn threats(self: *Self) ThreatsResource {
+        return .{ .client = self };
+    }
+
+    pub fn vanityDomains(self: *Self) VanityDomainsResource {
+        return .{ .client = self };
+    }
+
+    pub fn widgets(self: *Self) WidgetsResource {
         return .{ .client = self };
     }
 
@@ -614,6 +765,34 @@ pub const EnvironmentsResource = struct {
     pub fn delete(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
         return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}", .{ tenant_id, environment_id }, &.{}, null);
     }
+
+    pub fn listConnections(self: @This(), tenant_id: []const u8, application_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/applications/{s}/environments/{s}/connections", .{ tenant_id, application_id, environment_id }, &.{}, null);
+    }
+
+    pub fn listRedirectUris(self: @This(), tenant_id: []const u8, application_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/applications/{s}/environments/{s}/redirect-uris", .{ tenant_id, application_id, environment_id }, &.{}, null);
+    }
+
+    pub fn saveConnection(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/connections", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn resolveSamlMetadata(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/connections/resolve-saml-metadata", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn getSsoMetadata(self: @This(), tenant_id: []const u8, environment_id: []const u8, query: []const AuthdogClient.QueryParam) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/connections/sso-metadata", .{ tenant_id, environment_id }, query, null);
+    }
+
+    pub fn deleteConnection(self: @This(), tenant_id: []const u8, environment_id: []const u8, connection_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/connections/{s}", .{ tenant_id, environment_id, connection_id }, &.{}, null);
+    }
+
+    pub fn saveRedirectUris(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.PUT, "/v1/tenants/{s}/environments/{s}/redirect-uris", .{ tenant_id, environment_id }, &.{}, body);
+    }
 };
 
 pub const UsersResource = struct {
@@ -743,6 +922,34 @@ pub const UsersResource = struct {
 
     pub fn listGroups(self: @This(), tenant_id: []const u8, environment_id: []const u8, user_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
         return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/users/{s}/groups", .{ tenant_id, environment_id, user_id }, &.{}, null);
+    }
+
+    pub fn revokeSession(self: @This(), environment_id: []const u8, session_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/environments/{s}/sessions/{s}", .{ environment_id, session_id }, &.{}, null);
+    }
+
+    pub fn totpStatus(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/me/mfa/totp", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn bulkDelete(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/users/bulk/delete", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn bulkSetActive(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/users/bulk/set-active", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn importUsers(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/users/import", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn disableMfa(self: @This(), tenant_id: []const u8, environment_id: []const u8, user_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/users/{s}/mfa", .{ tenant_id, environment_id, user_id }, &.{}, null);
+    }
+
+    pub fn listSessions(self: @This(), tenant_id: []const u8, environment_id: []const u8, user_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/users/{s}/sessions", .{ tenant_id, environment_id, user_id }, &.{}, null);
     }
 };
 
@@ -1022,6 +1229,677 @@ pub const ApiSecretsResource = struct {
     }
 };
 
+fn tokenOr(override: ?[]const u8, stored: ?[]const u8) ?[]const u8 {
+    return override orelse stored;
+}
+
+fn specializedAuth(override: ?[]const u8, stored: ?[]const u8) AuthdogClient.RequestAuth {
+    return .{
+        .access_token = tokenOr(override, stored),
+        .use_api_key = tokenOr(override, stored) == null,
+    };
+}
+
+pub const AuthzenResource = struct {
+    client: *AuthdogClient,
+
+    pub fn configuration(self: @This()) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.GET, "/.well-known/authzen-configuration", &.{}, null, .{
+            .use_api_key = false,
+        });
+    }
+
+    pub fn evaluate(self: @This(), body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.POST, "/access/v1/evaluation", &.{}, body, specializedAuth(token, self.client.environment_secret));
+    }
+
+    pub fn evaluateBatch(self: @This(), body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.POST, "/access/v1/evaluations", &.{}, body, specializedAuth(token, self.client.environment_secret));
+    }
+
+    pub fn searchAction(self: @This(), body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.POST, "/access/v1/search/action", &.{}, body, specializedAuth(token, self.client.environment_secret));
+    }
+
+    pub fn searchResource(self: @This(), body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.POST, "/access/v1/search/resource", &.{}, body, specializedAuth(token, self.client.environment_secret));
+    }
+
+    pub fn searchSubject(self: @This(), body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.POST, "/access/v1/search/subject", &.{}, body, specializedAuth(token, self.client.environment_secret));
+    }
+};
+
+pub const ScimResource = struct {
+    client: *AuthdogClient,
+
+    fn auth(self: @This(), token: ?[]const u8) AuthdogClient.RequestAuth {
+        return specializedAuth(token, self.client.scim_token);
+    }
+
+    pub fn listUsers(self: @This(), token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.GET, "/v1/scim/v2/Users", &.{}, null, self.auth(token));
+    }
+
+    pub fn createUser(self: @This(), body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.POST, "/v1/scim/v2/Users", &.{}, body, self.auth(token));
+    }
+
+    pub fn getUser(self: @This(), user_id: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.GET, "/v1/scim/v2/Users/{s}", .{user_id}, &.{}, null, self.auth(token));
+    }
+
+    pub fn replaceUser(self: @This(), user_id: []const u8, body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.PUT, "/v1/scim/v2/Users/{s}", .{user_id}, &.{}, body, self.auth(token));
+    }
+
+    pub fn patchUser(self: @This(), user_id: []const u8, body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.PATCH, "/v1/scim/v2/Users/{s}", .{user_id}, &.{}, body, self.auth(token));
+    }
+
+    pub fn deleteUser(self: @This(), user_id: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.DELETE, "/v1/scim/v2/Users/{s}", .{user_id}, &.{}, null, self.auth(token));
+    }
+
+    pub fn listGroups(self: @This(), token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.GET, "/v1/scim/v2/Groups", &.{}, null, self.auth(token));
+    }
+
+    pub fn createGroup(self: @This(), body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.POST, "/v1/scim/v2/Groups", &.{}, body, self.auth(token));
+    }
+
+    pub fn getGroup(self: @This(), group_id: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.GET, "/v1/scim/v2/Groups/{s}", .{group_id}, &.{}, null, self.auth(token));
+    }
+
+    pub fn replaceGroup(self: @This(), group_id: []const u8, body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.PUT, "/v1/scim/v2/Groups/{s}", .{group_id}, &.{}, body, self.auth(token));
+    }
+
+    pub fn patchGroup(self: @This(), group_id: []const u8, body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.PATCH, "/v1/scim/v2/Groups/{s}", .{group_id}, &.{}, body, self.auth(token));
+    }
+
+    pub fn deleteGroup(self: @This(), group_id: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.DELETE, "/v1/scim/v2/Groups/{s}", .{group_id}, &.{}, null, self.auth(token));
+    }
+
+    pub fn resourceTypes(self: @This(), token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.GET, "/v1/scim/v2/ResourceTypes", &.{}, null, self.auth(token));
+    }
+
+    pub fn resourceType(self: @This(), type_id: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.GET, "/v1/scim/v2/ResourceTypes/{s}", .{type_id}, &.{}, null, self.auth(token));
+    }
+
+    pub fn schemas(self: @This(), token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.GET, "/v1/scim/v2/Schemas", &.{}, null, self.auth(token));
+    }
+
+    pub fn schema(self: @This(), schema_id: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.GET, "/v1/scim/v2/Schemas/{s}", .{schema_id}, &.{}, null, self.auth(token));
+    }
+
+    pub fn serviceProviderConfig(self: @This(), token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.GET, "/v1/scim/v2/ServiceProviderConfig", &.{}, null, self.auth(token));
+    }
+};
+
+pub const HrisResource = struct {
+    client: *AuthdogClient,
+
+    fn auth(self: @This(), token: ?[]const u8) AuthdogClient.RequestAuth {
+        return specializedAuth(token, self.client.hris_token);
+    }
+
+    pub fn listDepartments(self: @This(), token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.GET, "/v1/hris/v1/Departments", &.{}, null, self.auth(token));
+    }
+
+    pub fn createDepartment(self: @This(), body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.POST, "/v1/hris/v1/Departments", &.{}, body, self.auth(token));
+    }
+
+    pub fn getDepartment(self: @This(), department_id: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.GET, "/v1/hris/v1/Departments/{s}", .{department_id}, &.{}, null, self.auth(token));
+    }
+
+    pub fn replaceDepartment(self: @This(), department_id: []const u8, body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.PUT, "/v1/hris/v1/Departments/{s}", .{department_id}, &.{}, body, self.auth(token));
+    }
+
+    pub fn patchDepartment(self: @This(), department_id: []const u8, body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.PATCH, "/v1/hris/v1/Departments/{s}", .{department_id}, &.{}, body, self.auth(token));
+    }
+
+    pub fn deleteDepartment(self: @This(), department_id: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.DELETE, "/v1/hris/v1/Departments/{s}", .{department_id}, &.{}, null, self.auth(token));
+    }
+
+    pub fn listEmployees(self: @This(), token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.GET, "/v1/hris/v1/Employees", &.{}, null, self.auth(token));
+    }
+
+    pub fn createEmployee(self: @This(), body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.POST, "/v1/hris/v1/Employees", &.{}, body, self.auth(token));
+    }
+
+    pub fn getEmployee(self: @This(), employee_id: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.GET, "/v1/hris/v1/Employees/{s}", .{employee_id}, &.{}, null, self.auth(token));
+    }
+
+    pub fn replaceEmployee(self: @This(), employee_id: []const u8, body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.PUT, "/v1/hris/v1/Employees/{s}", .{employee_id}, &.{}, body, self.auth(token));
+    }
+
+    pub fn patchEmployee(self: @This(), employee_id: []const u8, body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.PATCH, "/v1/hris/v1/Employees/{s}", .{employee_id}, &.{}, body, self.auth(token));
+    }
+
+    pub fn deleteEmployee(self: @This(), employee_id: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePathAuth(.DELETE, "/v1/hris/v1/Employees/{s}", .{employee_id}, &.{}, null, self.auth(token));
+    }
+
+    pub fn serviceConfig(self: @This(), token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.GET, "/v1/hris/v1/ServiceConfig", &.{}, null, self.auth(token));
+    }
+};
+
+pub const McpResource = struct {
+    client: *AuthdogClient,
+
+    fn runtimeAuth(self: @This(), token: ?[]const u8) AuthdogClient.RequestAuth {
+        return specializedAuth(token, self.client.environment_secret);
+    }
+
+    pub fn ingestEvents(self: @This(), body: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValueAuth(.POST, "/v1/mcp/events", &.{}, body, self.runtimeAuth(token));
+    }
+
+    pub fn resolve(self: @This(), subject: []const u8, token: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        const query = [_]AuthdogClient.QueryParam{.{ .name = "subject", .value = subject }};
+        return self.client.requestValueAuth(.GET, "/v1/mcp/trust-store/resolve", &query, null, self.runtimeAuth(token));
+    }
+
+    pub fn listEntries(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/mcp/trust-store", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn createEntry(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/mcp/trust-store", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn getEntry(self: @This(), tenant_id: []const u8, environment_id: []const u8, entry_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/mcp/trust-store/{s}", .{ tenant_id, environment_id, entry_id }, &.{}, null);
+    }
+
+    pub fn updateEntry(self: @This(), tenant_id: []const u8, environment_id: []const u8, entry_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.PATCH, "/v1/tenants/{s}/environments/{s}/mcp/trust-store/{s}", .{ tenant_id, environment_id, entry_id }, &.{}, body);
+    }
+
+    pub fn deleteEntry(self: @This(), tenant_id: []const u8, environment_id: []const u8, entry_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/mcp/trust-store/{s}", .{ tenant_id, environment_id, entry_id }, &.{}, null);
+    }
+
+    pub fn addKey(self: @This(), tenant_id: []const u8, environment_id: []const u8, entry_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/mcp/trust-store/{s}/keys", .{ tenant_id, environment_id, entry_id }, &.{}, body);
+    }
+
+    pub fn revokeKey(self: @This(), tenant_id: []const u8, environment_id: []const u8, entry_id: []const u8, key_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/mcp/trust-store/{s}/keys/{s}", .{ tenant_id, environment_id, entry_id, key_id }, &.{}, null);
+    }
+
+    pub fn rotateKey(self: @This(), tenant_id: []const u8, environment_id: []const u8, entry_id: []const u8, key_id: []const u8, body: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/mcp/trust-store/{s}/keys/{s}/rotate", .{ tenant_id, environment_id, entry_id, key_id }, &.{}, body);
+    }
+
+    pub fn revokeEntry(self: @This(), tenant_id: []const u8, environment_id: []const u8, entry_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/mcp/trust-store/{s}/revoke", .{ tenant_id, environment_id, entry_id }, &.{}, null);
+    }
+
+    pub fn verifyEntry(self: @This(), tenant_id: []const u8, environment_id: []const u8, entry_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/mcp/trust-store/{s}/verify", .{ tenant_id, environment_id, entry_id }, &.{}, body);
+    }
+};
+
+pub const OtelResource = struct {
+    client: *AuthdogClient,
+
+    pub fn exportLogs(self: @This(), body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValue(.POST, "/v1/logs", &.{}, body);
+    }
+
+    pub fn exportMetrics(self: @This(), body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValue(.POST, "/v1/metrics", &.{}, body);
+    }
+
+    pub fn exportTraces(self: @This(), body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValue(.POST, "/v1/traces", &.{}, body);
+    }
+
+    pub fn exportLogsPrefixed(self: @This(), body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValue(.POST, "/v1/otel/v1/logs", &.{}, body);
+    }
+
+    pub fn exportMetricsPrefixed(self: @This(), body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValue(.POST, "/v1/otel/v1/metrics", &.{}, body);
+    }
+
+    pub fn exportTracesPrefixed(self: @This(), body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValue(.POST, "/v1/otel/v1/traces", &.{}, body);
+    }
+};
+
+pub const OidcClientsResource = struct {
+    client: *AuthdogClient,
+
+    pub fn list(self: @This(), tenant_id: []const u8, application_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/applications/{s}/environments/{s}/oidc-clients", .{ tenant_id, application_id, environment_id }, &.{}, null);
+    }
+
+    pub fn register(self: @This(), tenant_id: []const u8, application_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/applications/{s}/environments/{s}/oidc-clients", .{ tenant_id, application_id, environment_id }, &.{}, body);
+    }
+
+    pub fn update(self: @This(), tenant_id: []const u8, application_id: []const u8, environment_id: []const u8, client_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.PATCH, "/v1/tenants/{s}/applications/{s}/environments/{s}/oidc-clients/{s}", .{ tenant_id, application_id, environment_id, client_id }, &.{}, body);
+    }
+
+    pub fn delete(self: @This(), tenant_id: []const u8, application_id: []const u8, environment_id: []const u8, client_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/applications/{s}/environments/{s}/oidc-clients/{s}", .{ tenant_id, application_id, environment_id, client_id }, &.{}, null);
+    }
+};
+
+pub const ActionsResource = struct {
+    client: *AuthdogClient,
+
+    pub fn list(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/actions", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn save(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/actions", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn executions(self: @This(), tenant_id: []const u8, environment_id: []const u8, query: []const AuthdogClient.QueryParam) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/actions/executions", .{ tenant_id, environment_id }, query, null);
+    }
+
+    pub fn @"test"(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/actions/test", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn delete(self: @This(), tenant_id: []const u8, environment_id: []const u8, action_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/actions/{s}", .{ tenant_id, environment_id, action_id }, &.{}, null);
+    }
+};
+
+pub const AddonsResource = struct {
+    client: *AuthdogClient,
+
+    pub fn list(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/addons", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn save(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/addons", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn delete(self: @This(), tenant_id: []const u8, environment_id: []const u8, provider: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/addons/{s}", .{ tenant_id, environment_id, provider }, &.{}, null);
+    }
+};
+
+pub const BillingResource = struct {
+    client: *AuthdogClient,
+
+    pub fn listFeatures(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/billing/features", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn saveFeature(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/billing/features", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn deleteFeature(self: @This(), tenant_id: []const u8, environment_id: []const u8, feature_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/billing/features/{s}", .{ tenant_id, environment_id, feature_id }, &.{}, null);
+    }
+
+    pub fn listPlans(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/billing/plans", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn savePlan(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/billing/plans", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn deletePlan(self: @This(), tenant_id: []const u8, environment_id: []const u8, plan_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/billing/plans/{s}", .{ tenant_id, environment_id, plan_id }, &.{}, null);
+    }
+
+    pub fn syncStripe(self: @This(), tenant_id: []const u8, environment_id: []const u8, plan_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/billing/plans/{s}/sync-stripe", .{ tenant_id, environment_id, plan_id }, &.{}, null);
+    }
+};
+
+pub const SettingsResource = struct {
+    client: *AuthdogClient,
+
+    fn getPolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8, comptime suffix: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/" ++ suffix, .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    fn putPolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8, comptime suffix: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.PUT, "/v1/tenants/{s}/environments/{s}/" ++ suffix, .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn getBotDetectionPolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.getPolicy(tenant_id, environment_id, "bot-detection-policy");
+    }
+
+    pub fn updateBotDetectionPolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.putPolicy(tenant_id, environment_id, "bot-detection-policy", body);
+    }
+
+    pub fn getBreachedPasswordPolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.getPolicy(tenant_id, environment_id, "breached-password-policy");
+    }
+
+    pub fn updateBreachedPasswordPolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.putPolicy(tenant_id, environment_id, "breached-password-policy", body);
+    }
+
+    pub fn getBruteForcePolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.getPolicy(tenant_id, environment_id, "brute-force-policy");
+    }
+
+    pub fn updateBruteForcePolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.putPolicy(tenant_id, environment_id, "brute-force-policy", body);
+    }
+
+    pub fn getDeviceRiskPolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.getPolicy(tenant_id, environment_id, "device-risk-policy");
+    }
+
+    pub fn updateDeviceRiskPolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.putPolicy(tenant_id, environment_id, "device-risk-policy", body);
+    }
+
+    pub fn listJwtClaimMappings(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.getPolicy(tenant_id, environment_id, "jwt-claim-mappings");
+    }
+
+    pub fn saveJwtClaimMapping(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/jwt-claim-mappings", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn deleteJwtClaimMapping(self: @This(), tenant_id: []const u8, environment_id: []const u8, mapping_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/jwt-claim-mappings/{s}", .{ tenant_id, environment_id, mapping_id }, &.{}, null);
+    }
+
+    pub fn getPasswordPolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.getPolicy(tenant_id, environment_id, "password-policy");
+    }
+
+    pub fn updatePasswordPolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.putPolicy(tenant_id, environment_id, "password-policy", body);
+    }
+
+    pub fn getRateLimitPolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.getPolicy(tenant_id, environment_id, "rate-limit-policy");
+    }
+
+    pub fn updateRateLimitPolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.putPolicy(tenant_id, environment_id, "rate-limit-policy", body);
+    }
+
+    pub fn getRestrictions(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.getPolicy(tenant_id, environment_id, "restrictions");
+    }
+
+    pub fn updateRestrictions(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.putPolicy(tenant_id, environment_id, "restrictions", body);
+    }
+
+    pub fn getSessionConfig(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.getPolicy(tenant_id, environment_id, "session-config");
+    }
+
+    pub fn updateSessionConfig(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.putPolicy(tenant_id, environment_id, "session-config", body);
+    }
+};
+
+pub const ElevateResource = struct {
+    client: *AuthdogClient,
+
+    pub fn activateGrant(self: @This(), tenant_id: []const u8, environment_id: []const u8, grant_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/elevate/access-grants/{s}/activate", .{ tenant_id, environment_id, grant_id }, &.{}, body);
+    }
+
+    pub fn revokeGrant(self: @This(), tenant_id: []const u8, environment_id: []const u8, grant_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/elevate/access-grants/{s}/revoke", .{ tenant_id, environment_id, grant_id }, &.{}, body);
+    }
+
+    pub fn listRequests(self: @This(), tenant_id: []const u8, environment_id: []const u8, status: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        const query = [_]AuthdogClient.QueryParam{.{ .name = "status", .value = status }};
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/elevate/access-requests", .{ tenant_id, environment_id }, &query, null);
+    }
+
+    pub fn createRequest(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/elevate/access-requests", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn getRequest(self: @This(), tenant_id: []const u8, environment_id: []const u8, request_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/elevate/access-requests/{s}", .{ tenant_id, environment_id, request_id }, &.{}, null);
+    }
+
+    pub fn approveRequest(self: @This(), tenant_id: []const u8, environment_id: []const u8, request_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/elevate/access-requests/{s}/approve", .{ tenant_id, environment_id, request_id }, &.{}, body);
+    }
+
+    pub fn cancelRequest(self: @This(), tenant_id: []const u8, environment_id: []const u8, request_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/elevate/access-requests/{s}/cancel", .{ tenant_id, environment_id, request_id }, &.{}, null);
+    }
+
+    pub fn denyRequest(self: @This(), tenant_id: []const u8, environment_id: []const u8, request_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/elevate/access-requests/{s}/deny", .{ tenant_id, environment_id, request_id }, &.{}, body);
+    }
+
+    pub fn getPolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/elevate/policy", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn updatePolicy(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.PUT, "/v1/tenants/{s}/environments/{s}/elevate/policy", .{ tenant_id, environment_id }, &.{}, body);
+    }
+};
+
+pub const EmailProvidersResource = struct {
+    client: *AuthdogClient,
+
+    pub fn list(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/email-providers", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn save(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/email-providers", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn @"test"(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/email-providers/test", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn delete(self: @This(), tenant_id: []const u8, environment_id: []const u8, provider: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/email-providers/{s}", .{ tenant_id, environment_id, provider }, &.{}, null);
+    }
+
+    pub fn activate(self: @This(), tenant_id: []const u8, environment_id: []const u8, provider: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/email-providers/{s}/activate", .{ tenant_id, environment_id, provider }, &.{}, null);
+    }
+};
+
+pub const FeatureFlagsResource = struct {
+    client: *AuthdogClient,
+
+    pub fn list(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/feature-flags", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn save(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/feature-flags", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn delete(self: @This(), tenant_id: []const u8, environment_id: []const u8, flag_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/feature-flags/{s}", .{ tenant_id, environment_id, flag_id }, &.{}, null);
+    }
+};
+
+pub const FormsResource = struct {
+    client: *AuthdogClient,
+
+    pub fn listAttachments(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/form-attachments", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn list(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/forms", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn save(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/forms", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn delete(self: @This(), tenant_id: []const u8, environment_id: []const u8, form_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/forms/{s}", .{ tenant_id, environment_id, form_id }, &.{}, null);
+    }
+};
+
+pub const ProvisioningTokensResource = struct {
+    client: *AuthdogClient,
+
+    pub fn listHris(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/hris-tokens", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn createHris(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/hris-tokens", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn revokeHris(self: @This(), tenant_id: []const u8, environment_id: []const u8, token_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/hris-tokens/{s}/revoke", .{ tenant_id, environment_id, token_id }, &.{}, null);
+    }
+
+    pub fn rotateHris(self: @This(), tenant_id: []const u8, environment_id: []const u8, token_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/hris-tokens/{s}/rotate", .{ tenant_id, environment_id, token_id }, &.{}, null);
+    }
+
+    pub fn listScim(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/scim-tokens", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn createScim(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/scim-tokens", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn revokeScim(self: @This(), tenant_id: []const u8, environment_id: []const u8, token_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/scim-tokens/{s}/revoke", .{ tenant_id, environment_id, token_id }, &.{}, null);
+    }
+
+    pub fn rotateScim(self: @This(), tenant_id: []const u8, environment_id: []const u8, token_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/scim-tokens/{s}/rotate", .{ tenant_id, environment_id, token_id }, &.{}, null);
+    }
+};
+
+pub const ImpersonationResource = struct {
+    client: *AuthdogClient,
+
+    pub fn list(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/impersonation-grants", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn create(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/impersonation-grants", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn revoke(self: @This(), tenant_id: []const u8, environment_id: []const u8, grant_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/impersonation-grants/{s}/revoke", .{ tenant_id, environment_id, grant_id }, &.{}, null);
+    }
+};
+
+pub const PortalResource = struct {
+    client: *AuthdogClient,
+
+    pub fn generateLink(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/portal/generate-link", .{ tenant_id, environment_id }, &.{}, body);
+    }
+};
+
+pub const SecurityResource = struct {
+    client: *AuthdogClient,
+
+    pub fn posture(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/security/posture", .{ tenant_id, environment_id }, &.{}, null);
+    }
+};
+
+pub const ThreatsResource = struct {
+    client: *AuthdogClient,
+
+    pub fn list(self: @This(), tenant_id: []const u8, environment_id: []const u8, query: []const AuthdogClient.QueryParam) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/threats", .{ tenant_id, environment_id }, query, null);
+    }
+
+    pub fn create(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/threats", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn get(self: @This(), tenant_id: []const u8, environment_id: []const u8, threat_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/threats/{s}", .{ tenant_id, environment_id, threat_id }, &.{}, null);
+    }
+
+    pub fn update(self: @This(), tenant_id: []const u8, environment_id: []const u8, threat_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.PATCH, "/v1/tenants/{s}/environments/{s}/threats/{s}", .{ tenant_id, environment_id, threat_id }, &.{}, body);
+    }
+
+    pub fn delete(self: @This(), tenant_id: []const u8, environment_id: []const u8, threat_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/threats/{s}", .{ tenant_id, environment_id, threat_id }, &.{}, null);
+    }
+
+    pub fn resolve(self: @This(), tenant_id: []const u8, environment_id: []const u8, threat_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/threats/{s}/resolve", .{ tenant_id, environment_id, threat_id }, &.{}, body);
+    }
+};
+
+pub const VanityDomainsResource = struct {
+    client: *AuthdogClient,
+
+    pub fn list(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/vanity-domains", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn create(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/vanity-domains", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn delete(self: @This(), tenant_id: []const u8, environment_id: []const u8, domain_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/vanity-domains/{s}", .{ tenant_id, environment_id, domain_id }, &.{}, null);
+    }
+
+    pub fn check(self: @This(), tenant_id: []const u8, environment_id: []const u8, domain_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/vanity-domains/{s}/check", .{ tenant_id, environment_id, domain_id }, &.{}, null);
+    }
+};
+
+pub const WidgetsResource = struct {
+    client: *AuthdogClient,
+
+    pub fn createToken(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/widgets/token", .{ tenant_id, environment_id }, &.{}, body);
+    }
+};
+
 const success_payload =
     \\{
     \\  "meta": { "code": 200, "message": "Success" },
@@ -1188,6 +2066,9 @@ test "client constructor defaults timeout to 10 seconds" {
 
     try std.testing.expectEqualStrings("https://api.authdog.com/", client.base_url);
     try std.testing.expectEqual(@as(?[]u8, null), client.api_key);
+    try std.testing.expectEqual(@as(?[]u8, null), client.environment_secret);
+    try std.testing.expectEqual(@as(?[]u8, null), client.scim_token);
+    try std.testing.expectEqual(@as(?[]u8, null), client.hris_token);
     try std.testing.expectEqual(@as(u32, 10_000), client.timeout_ms);
 }
 

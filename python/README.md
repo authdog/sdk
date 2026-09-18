@@ -49,13 +49,16 @@ with AuthdogClient("https://api.authdog.com") as client:
 
 ### AuthdogClient
 
-#### `__init__(base_url: str, api_key: Optional[str] = None, timeout: float = 10.0)`
+#### `__init__(base_url: str, api_key: Optional[str] = None, timeout: float = 10.0, environment_secret: Optional[str] = None, scim_token: Optional[str] = None, hris_token: Optional[str] = None)`
 
 Initialize the Authdog client.
 
 - `base_url`: The base URL of the Authdog API
 - `api_key`: Optional management Bearer credential (userinfo still uses the access token)
 - `timeout`: Request timeout in seconds (default 10)
+- `environment_secret`: Optional `adenv_` secret for AuthZEN and MCP runtime
+- `scim_token`: Optional `adscim_` token for `/v1/scim/v2`
+- `hris_token`: Optional `adhris_` token for `/v1/hris/v1`
 
 #### `health() -> Probe`
 
@@ -66,16 +69,24 @@ Initialize the Authdog client.
 `organizations`, `tenants`, `projects`, `environments`, `users`,
 `groups`, `rbac`, `audit`, `events`, `webhooks`,
 `notification_channels`, `service_accounts`,
-`personal_access_tokens`, and `api_secrets` wrap Waves 1–2 of the
+`personal_access_tokens`, `api_secrets`, `authzen`, `scim`, `hris`,
+`mcp`, `otel`, `oidc_clients`, `actions`, `addons`, `billing`,
+`settings`, `elevate`, `email_providers`, `feature_flags`, `forms`,
+`provisioning_tokens`, `impersonation`, `portal`, `security`,
+`threats`, `vanity_domains`, and `widgets` wrap Waves 1–3 of the
 public API. Example:
 
 ```python
 with AuthdogClient("https://api.authdog.com", api_key="ad_...") as client:
     orgs = client.organizations.list()
     users = client.users.list("ten_123", "env_456")
+    decision = client.authzen.evaluate({"subject": {"id": "usr_1"}})
 ```
 
-See `specs/004-api-parity/` for the full catalog.
+AuthZEN discovery (`authzen.configuration()`) is unauthenticated.
+AuthZEN evaluate/search and MCP runtime use `environment_secret`.
+SCIM uses `scim_token`; HRIS uses `hris_token`. See
+`specs/004-api-parity/` for the full catalog.
 
 #### `get_userinfo(access_token: str) -> UserInfoResponse`
 
