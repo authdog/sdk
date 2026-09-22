@@ -1,15 +1,16 @@
 # Platform API operation inventory
 
-**Source**: `openapi.snapshot.json` (Authdog API 1.0.0, fetched 2026-09-17 from `https://api.authdog.com/v1/openapi`)
+**Source**: `openapi.snapshot.json` (Authdog API 1.0.0, refreshed 2026-09-22 from `https://api.authdog.com/v1/openapi`; original snapshot 2026-09-17)
 
-Wave assignment follows `spec.md` FR-004–FR-006. Environment connections/redirects and directory bulk/MFA/session ops are Wave 3 even though they share a tag with Wave 1 families.
+Wave assignment follows `spec.md` FR-004–FR-006. Environment connections/redirects and directory bulk/MFA/session ops are Wave 3 even though they share a tag with Wave 1 families. Wave 4 is catalog growth after the original snapshot.
 
 | Wave | Operations |
 |------|------------|
 | 1 | 56 |
 | 2 | 58 |
 | 3 | 152 |
-| **Total** | **266** |
+| 4 | 2 |
+| **Total** | **268** |
 
 ## Wave 1
 
@@ -258,6 +259,15 @@ Wave assignment follows `spec.md` FR-004–FR-006. Environment connections/redir
 | MCP Trust Store | POST | `/v1/tenants/{tenantId}/environments/{environmentId}/mcp/trust-store/{entryId}/keys/{keyId}/rotate` | `mcpTrustStoreKeyRotate` | Rotate a key with an optional overlap window |
 | MCP Trust Store | POST | `/v1/tenants/{tenantId}/environments/{environmentId}/mcp/trust-store/{entryId}/revoke` | `mcpTrustStoreEntryRevoke` | Revoke (distrust) a trust store entry |
 | MCP Trust Store | POST | `/v1/tenants/{tenantId}/environments/{environmentId}/mcp/trust-store/{entryId}/verify` | `mcpTrustStoreEntryVerify` | Verify or unverify a trust store entry |
+
+## Wave 4
+
+Catalog growth after the 2026-09-17 snapshot. Management credential (`apiKey`).
+
+| Tag | Method | Path | operationId | Summary |
+|-----|--------|------|-------------|---------|
+| MCP Trust Store | POST | `/v1/tenants/{tenantId}/environments/{environmentId}/mcp/trust-store/{entryId}/verify-key` | `mcpTrustStoreKeyChallenge` | Verify an entry by proving possession of a registered key |
+| MCP Trust Store | POST | `/v1/tenants/{tenantId}/environments/{environmentId}/mcp/trust-store/{entryId}/verify-svid` | `mcpTrustStoreSvid` | Verify an entry with a SPIFFE JWT-SVID |
 | Directory | GET | `/v1/tenants/{tenantId}/environments/{environmentId}/me/mfa/totp` | `myTotpStatus` | Get the caller's TOTP status |
 | Environment settings | GET | `/v1/tenants/{tenantId}/environments/{environmentId}/password-policy` | `passwordPolicyGet` | Get password policy |
 | Environment settings | PUT | `/v1/tenants/{tenantId}/environments/{environmentId}/password-policy` | `passwordPolicyUpdate` | Update password policy |

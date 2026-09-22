@@ -100,7 +100,7 @@ class AuthdogClientTest {
         assertEquals("/v1/userinfo", request.getPath());
         assertEquals("Bearer test-token", request.getHeader("Authorization"));
         assertEquals("application/json", request.getHeader("Content-Type"));
-        assertEquals("authdog-java-sdk/0.1.0", request.getHeader("User-Agent"));
+        assertEquals("authdog-java-sdk/0.2.0", request.getHeader("User-Agent"));
     }
 
     @Test
@@ -276,7 +276,7 @@ class AuthdogClientTest {
         assertEquals("GET", request.getMethod());
         assertEquals("/v1/health", request.getPath());
         assertEquals("application/json", request.getHeader("Content-Type"));
-        assertEquals("authdog-java-sdk/0.1.0", request.getHeader("User-Agent"));
+        assertEquals("authdog-java-sdk/0.2.0", request.getHeader("User-Agent"));
         assertNull(request.getHeader("Authorization"));
     }
 

@@ -1222,6 +1222,22 @@ export class McpResource {
       { data: body }
     );
   }
+
+  verifyKey(tenantId: string, environmentId: string, entryId: string, body: Json): Promise<Json> {
+    return this.client.request(
+      'POST',
+      `${envPath(tenantId, environmentId)}/mcp/trust-store/${entryId}/verify-key`,
+      { data: body }
+    );
+  }
+
+  verifySvid(tenantId: string, environmentId: string, entryId: string, body: Json): Promise<Json> {
+    return this.client.request(
+      'POST',
+      `${envPath(tenantId, environmentId)}/mcp/trust-store/${entryId}/verify-svid`,
+      { data: body }
+    );
+  }
 }
 
 export class OtelResource {

@@ -1477,6 +1477,28 @@ class McpResource:
             )
         )
 
+    def verify_key(
+        self, tenant_id: str, environment_id: str, entry_id: str, body: Dict[str, Any]
+    ) -> JsonMap:
+        return JsonMap.from_dict(
+            self._client.request(
+                "POST",
+                f"{_env(tenant_id, environment_id)}/mcp/trust-store/{entry_id}/verify-key",
+                json=body,
+            )
+        )
+
+    def verify_svid(
+        self, tenant_id: str, environment_id: str, entry_id: str, body: Dict[str, Any]
+    ) -> JsonMap:
+        return JsonMap.from_dict(
+            self._client.request(
+                "POST",
+                f"{_env(tenant_id, environment_id)}/mcp/trust-store/{entry_id}/verify-svid",
+                json=body,
+            )
+        )
+
 
 class OtelResource:
     def __init__(self, client: "AuthdogClient") -> None:

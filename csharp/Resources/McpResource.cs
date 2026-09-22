@@ -132,5 +132,23 @@ namespace Authdog
 
         public JObject VerifyEntry(string tenantId, string environmentId, string entryId, object body) =>
             VerifyEntryAsync(tenantId, environmentId, entryId, body).GetAwaiter().GetResult();
+
+        public Task<JObject> VerifyKeyAsync(string tenantId, string environmentId, string entryId, object body) =>
+            _client.RequestAsync<JObject>(
+                HttpMethod.Post,
+                $"{AuthdogClient.Env(tenantId, environmentId)}/mcp/trust-store/{entryId}/verify-key",
+                body);
+
+        public JObject VerifyKey(string tenantId, string environmentId, string entryId, object body) =>
+            VerifyKeyAsync(tenantId, environmentId, entryId, body).GetAwaiter().GetResult();
+
+        public Task<JObject> VerifySvidAsync(string tenantId, string environmentId, string entryId, object body) =>
+            _client.RequestAsync<JObject>(
+                HttpMethod.Post,
+                $"{AuthdogClient.Env(tenantId, environmentId)}/mcp/trust-store/{entryId}/verify-svid",
+                body);
+
+        public JObject VerifySvid(string tenantId, string environmentId, string entryId, object body) =>
+            VerifySvidAsync(tenantId, environmentId, entryId, body).GetAwaiter().GetResult();
     }
 }

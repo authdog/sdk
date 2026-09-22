@@ -162,7 +162,7 @@ func (c *Client) request(ctx context.Context, method, path string, body interfac
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "authdog-go-sdk/0.1.0")
+	req.Header.Set("User-Agent", "authdog-go-sdk/0.2.0")
 	if !omitAuth {
 		if auth := c.authorization(accessToken); auth != "" {
 			req.Header.Set("Authorization", auth)
@@ -277,7 +277,7 @@ func (c *Client) GetUserInfo(ctx context.Context, accessToken string) (*UserInfo
 
 	// Set headers
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "authdog-go-sdk/0.1.0")
+	req.Header.Set("User-Agent", "authdog-go-sdk/0.2.0")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
 
 	resp, err := c.httpClient.Do(req)

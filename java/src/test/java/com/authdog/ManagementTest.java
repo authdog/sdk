@@ -66,7 +66,7 @@ class ManagementTest {
         assertEquals("/v1/organizations", request.getPath());
         assertEquals("Bearer key-1", request.getHeader("Authorization"));
         assertEquals("application/json", request.getHeader("Content-Type"));
-        assertEquals("authdog-java-sdk/0.1.0", request.getHeader("User-Agent"));
+        assertEquals("authdog-java-sdk/0.2.0", request.getHeader("User-Agent"));
     }
 
     @Test
@@ -234,6 +234,29 @@ class ManagementTest {
     @Test
     void testWave3CoversAllInventoryOperations() {
         assertEquals(152, wave3Cases().count());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("wave4Cases")
+    void testWave4MethodAndPath(final String name,
+                                final Consumer<AuthdogClient> call,
+                                final String method,
+                                final String path,
+                                final String body) throws Exception {
+        enqueueJson(200, "{}");
+        client = newClient();
+        call.accept(client);
+
+        RecordedRequest request = mockServer.takeRequest();
+        assertEquals(method, request.getMethod());
+        assertEquals(path, request.getPath());
+        assertJsonBody(body, request.getBody().readUtf8());
+        assertEquals("Bearer key-1", request.getHeader("Authorization"));
+    }
+
+    @Test
+    void testWave4CoversAllInventoryOperations() {
+        assertEquals(2, wave4Cases().count());
     }
 
     @Test
@@ -2085,6 +2108,31 @@ class ManagementTest {
                         "POST",
                         "/v1/traces",
                         "{\"resourceSpans\":[]}")
+        );
+    }
+
+    static Stream<Arguments> wave4Cases() {
+        return Stream.of(
+                caseOf("mcp verify key",
+                        c -> c.mcp().verifyKey(
+                                "ten_1",
+                                "env_1",
+                                "ent_1",
+                                mapOf("message", "nonce", "signature", "sig")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/mcp/trust-store/ent_1/verify-key",
+                        "{\"message\":\"nonce\",\"signature\":\"sig\"}"),
+                caseOf("mcp verify svid",
+                        c -> c.mcp().verifySvid(
+                                "ten_1",
+                                "env_1",
+                                "ent_1",
+                                mapOf("svid", "jwt-svid")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/mcp/trust-store/ent_1/verify-svid",
+                        "{\"svid\":\"jwt-svid\"}")
         );
     }
 

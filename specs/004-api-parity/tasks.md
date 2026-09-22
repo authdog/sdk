@@ -149,7 +149,7 @@ No story methods until this exists.
 - [x] T065 [P] Document Wave 1 usage in `java/README.md`
 - [x] T066 [P] Document Wave 1 usage in `csharp/README.md`
 - [x] T067 [P] Document Wave 1 usage in `zig/README.md`
-- [ ] T068 Bump published cores and User-Agent strings to `0.2.0`
+- [x] T068 Bump published cores and User-Agent strings to `0.2.0`
 - [x] T069 Run `specs/004-api-parity/quickstart.md` inventory gate and `moon run :test`
 
 ---
@@ -223,3 +223,21 @@ Wave 1 is the MVP for this feature. Wave 2 follows below.
 - [x] T085 [P] [US5] Implement Wave 3 in `csharp/` with tests in `csharp/Tests/ManagementTests.cs`
 - [x] T086 [P] [US5] Implement Wave 3 in `zig/` with tests in `zig/src/management_test.zig`
 - [x] T087 [US5] Document Wave 3 namespaces and specialized credentials in core READMEs and `specs/README.md`
+
+---
+
+## Phase 9: Wave 4 - MCP trust-store verify extensions
+
+**Goal**: Catalog growth after Wave 3 — 2 operations: key-possession challenge and SPIFFE JWT-SVID verify on an MCP trust-store entry
+
+**Independent Test**: Table-driven path/method tests; both calls use the constructor management credential; request bodies are forwarded unchanged
+
+- [x] T088 Refresh `specs/004-api-parity/contracts/openapi.snapshot.json` and assign the two new MCP verify operations in `specs/004-api-parity/contracts/operation-inventory.md`
+- [x] T089 Add `mcp.verify_key` / `mcp.verify_svid` and Wave 4 path tests in `python/authdog/resources.py` and `python/tests/test_management.py`
+- [x] T090 [P] Implement Wave 4 in `node/src/resources.ts` with tests in `node/tests/management.test.ts`
+- [x] T091 [P] Implement Wave 4 in `go/resources_wave3.go` with tests in `go/management_test.go`
+- [x] T092 [P] Implement Wave 4 in `rust/src/resources.rs` with tests in `rust/tests/management_test.rs`
+- [x] T093 [P] Implement Wave 4 in `java/src/main/java/com/authdog/resources/McpResource.java` with tests in `java/src/test/java/com/authdog/ManagementTest.java`
+- [x] T094 [P] Implement Wave 4 in `csharp/Resources/McpResource.cs` with tests in `csharp/Tests/ManagementTests.cs`
+- [x] T095 [P] Implement Wave 4 in `zig/src/client.zig` with tests in `zig/src/management_test.zig`
+- [x] T096 Document Wave 4 MCP verify methods in core READMEs, `specs/README.md`, and `specs/004-api-parity/quickstart.md`

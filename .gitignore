@@ -17,3 +17,10 @@ __pycache__/
 build/
 dist/
 
+# Node
+node_modules/
+
+# Logs and local secrets
+*.log
+.env*
+

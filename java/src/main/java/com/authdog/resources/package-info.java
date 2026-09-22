@@ -5,6 +5,6 @@
  * the Wave 1, Wave 2, and Wave 3 contracts.</p>
  *
  * @author Authdog Team
- * @version 0.1.0
+ * @version 0.2.0
  */
 package com.authdog.resources;

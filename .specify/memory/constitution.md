@@ -73,7 +73,7 @@ error-type splits, required new constructor args, payload field type
 changes) require a MAJOR bump coordinated across published core SDKs.
 Optional fields and new endpoints are MINOR. Bug fixes that restore
 documented behavior without changing the public type surface are PATCH.
-All core SDKs are currently `0.1.0`; while on 0.x, MINOR MAY include
+All core SDKs are currently `0.2.0`; while on 0.x, MINOR MAY include
 breaks if the spec and changelog say so explicitly.
 
 Rationale: published packages already document a contract.
@@ -121,7 +121,7 @@ Incomplete trees at the repo root (for example leftover `c/` or
   first.
 - Default timeout is 10 seconds where the language client supports it.
 - User-Agent MUST be `authdog-<language>-sdk/<version>` (for example
-  `authdog-python-sdk/0.1.0`).
+  `authdog-python-sdk/0.2.0`).
 
 ## Development Workflow
 

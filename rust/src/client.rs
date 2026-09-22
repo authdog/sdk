@@ -49,7 +49,7 @@ pub struct AuthdogClient {
 impl AuthdogClient {
     /// Create a new Authdog client
     pub fn new(config: AuthdogClientConfig) -> Result<Self, AuthdogError> {
-        let mut client_builder = Client::builder().user_agent("authdog-rust-sdk/0.1.0");
+        let mut client_builder = Client::builder().user_agent("authdog-rust-sdk/0.2.0");
 
         if let Some(timeout) = config.timeout {
             client_builder = client_builder.timeout(timeout);

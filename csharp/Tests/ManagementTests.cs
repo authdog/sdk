@@ -266,6 +266,34 @@ namespace Authdog.Sdk.Tests
             Wave3Cases().Should().HaveCount(152);
         }
 
+        [Theory]
+        [MemberData(nameof(Wave4Cases))]
+        public async Task Wave4_MethodAndPath(Func<AuthdogClient, Task> call, string method, string path, object? body)
+        {
+            var (client, captured, _) = ClientFor(JsonResponse(new { }));
+
+            await call(client);
+
+            captured().Should().NotBeNull();
+            captured()!.Method.Method.Should().Be(method);
+            captured()!.RequestUri!.AbsolutePath.Should().Be(path);
+            if (body == null)
+            {
+                captured()!.Content.Should().BeNull();
+            }
+            else
+            {
+                var sent = await captured()!.Content!.ReadAsStringAsync();
+                JToken.DeepEquals(JObject.FromObject(body), JObject.Parse(sent)).Should().BeTrue();
+            }
+        }
+
+        [Fact]
+        public void Wave4_CoversAllInventoryOperations()
+        {
+            Wave4Cases().Should().HaveCount(2);
+        }
+
         [Fact]
         public async Task Wave3_AuthzenDiscovery_OmitsBearer()
         {
@@ -572,6 +600,12 @@ namespace Authdog.Sdk.Tests
             yield return Case(c => c.VanityDomains.CheckAsync("ten_1", "env_1", "dom_1"), "POST", "/v1/tenants/ten_1/environments/env_1/vanity-domains/dom_1/check", null);
             yield return Case(c => c.Widgets.CreateTokenAsync("ten_1", "env_1", new Dictionary<string, object> { ["ttl"] = 60 }), "POST", "/v1/tenants/ten_1/environments/env_1/widgets/token", new Dictionary<string, object> { ["ttl"] = 60 });
             yield return Case(c => c.Otel.ExportTracesAsync(new Dictionary<string, object> { ["resourceSpans"] = Array.Empty<object>() }), "POST", "/v1/traces", new Dictionary<string, object> { ["resourceSpans"] = Array.Empty<object>() });
+        }
+
+        public static IEnumerable<object[]> Wave4Cases()
+        {
+            yield return Case(c => c.Mcp.VerifyKeyAsync("ten_1", "env_1", "ent_1", new Dictionary<string, object> { ["message"] = "nonce", ["signature"] = "sig" }), "POST", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-key", new Dictionary<string, object> { ["message"] = "nonce", ["signature"] = "sig" });
+            yield return Case(c => c.Mcp.VerifySvidAsync("ten_1", "env_1", "ent_1", new Dictionary<string, object> { ["svid"] = "jwt-svid" }), "POST", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-svid", new Dictionary<string, object> { ["svid"] = "jwt-svid" });
         }
 
         private static IEnumerable<object[]> OrgTenantCases()

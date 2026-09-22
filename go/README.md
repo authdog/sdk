@@ -101,7 +101,7 @@ Creates a new Authdog client.
 `OidcClients`, `Actions`, `Addons`, `Billing`, `Settings`,
 `Elevate`, `EmailProviders`, `FeatureFlags`, `Forms`,
 `ProvisioningTokens`, `Impersonation`, `Portal`, `Security`,
-`Threats`, `VanityDomains`, and `Widgets` wrap Waves 1–3 of the
+`Threats`, `VanityDomains`, and `Widgets` wrap Waves 1–4 of the
 public API. AuthZEN discovery is unauthenticated. See
 `specs/004-api-parity/`.
 

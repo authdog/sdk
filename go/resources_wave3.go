@@ -314,6 +314,14 @@ func (s *McpService) VerifyEntry(ctx context.Context, tenantID, environmentID, e
 	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/mcp/trust-store/"+entryID+"/verify", body, nil)
 }
 
+func (s *McpService) VerifyKey(ctx context.Context, tenantID, environmentID, entryID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/mcp/trust-store/"+entryID+"/verify-key", body, nil)
+}
+
+func (s *McpService) VerifySvid(ctx context.Context, tenantID, environmentID, entryID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/mcp/trust-store/"+entryID+"/verify-svid", body, nil)
+}
+
 // OtelService is the OpenTelemetry export namespace.
 type OtelService struct {
 	client *Client

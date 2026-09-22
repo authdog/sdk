@@ -2,7 +2,7 @@ const std = @import("std");
 const errors = @import("error.zig");
 const types = @import("types.zig");
 
-pub const version = "0.1.0";
+pub const version = "0.2.0";
 pub const user_agent = "authdog-zig-sdk/" ++ version;
 
 const AuthdogError = errors.AuthdogError;
@@ -1460,6 +1460,14 @@ pub const McpResource = struct {
 
     pub fn verifyEntry(self: @This(), tenant_id: []const u8, environment_id: []const u8, entry_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
         return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/mcp/trust-store/{s}/verify", .{ tenant_id, environment_id, entry_id }, &.{}, body);
+    }
+
+    pub fn verifyKey(self: @This(), tenant_id: []const u8, environment_id: []const u8, entry_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/mcp/trust-store/{s}/verify-key", .{ tenant_id, environment_id, entry_id }, &.{}, body);
+    }
+
+    pub fn verifySvid(self: @This(), tenant_id: []const u8, environment_id: []const u8, entry_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/mcp/trust-store/{s}/verify-svid", .{ tenant_id, environment_id, entry_id }, &.{}, body);
     }
 };
 

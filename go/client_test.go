@@ -101,8 +101,8 @@ func TestClient_GetUserInfo_Success(t *testing.T) {
 		if r.Header.Get("Content-Type") != "application/json" {
 			t.Errorf("Expected Content-Type application/json, got %s", r.Header.Get("Content-Type"))
 		}
-		if r.Header.Get("User-Agent") != "authdog-go-sdk/0.1.0" {
-			t.Errorf("Expected User-Agent authdog-go-sdk/0.1.0, got %s", r.Header.Get("User-Agent"))
+		if r.Header.Get("User-Agent") != "authdog-go-sdk/0.2.0" {
+			t.Errorf("Expected User-Agent authdog-go-sdk/0.2.0, got %s", r.Header.Get("User-Agent"))
 		}
 		if r.Header.Get("Authorization") != "Bearer test-token" {
 			t.Errorf("Expected Authorization Bearer test-token, got %s", r.Header.Get("Authorization"))

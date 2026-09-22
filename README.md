@@ -6,13 +6,13 @@ Official SDKs for the Authdog authentication and user management platform.
 
 | Package | Version | Description | CI |
 |---------|---------|-------------|-----|
-| [`authdog`](./python/) | [![PyPI](https://img.shields.io/badge/pypi-v0.1.1-orange)](./python/) | Python SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/python-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/python-test.yml) |
-| [`@authdog/node-sdk`](./node/) | [![npm](https://img.shields.io/badge/npm-v0.1.0-orange)](./node/) | Node.js / TypeScript SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/node-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/node-test.yml) |
-| [`github.com/authdog/go-sdk`](./go/) | [![Go](https://img.shields.io/badge/go-v0.1.0-00ADD8)](./go/) | Go SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/go-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/go-test.yml) |
-| [`authdog`](./rust/) | [![crates.io](https://img.shields.io/badge/crates.io-v0.1.0-orange)](./rust/) | Rust SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/rust-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/rust-test.yml) |
-| [`com.authdog:authdog-java-sdk`](./java/) | [![Maven](https://img.shields.io/badge/maven-v0.1.0-orange)](./java/) | Java SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/java-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/java-test.yml) |
-| [`Authdog.Sdk`](./csharp/) | [![NuGet](https://img.shields.io/badge/nuget-v0.1.0-orange)](./csharp/) | C# / .NET SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml) |
-| [`authdog`](./zig/) | [![Zig](https://img.shields.io/badge/zig-v0.1.0-f7a41d)](./zig/) | Zig SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/zig-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/zig-test.yml) |
+| [`authdog`](./python/) | [![PyPI](https://img.shields.io/badge/pypi-v0.2.0-orange)](./python/) | Python SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/python-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/python-test.yml) |
+| [`@authdog/node-sdk`](./node/) | [![npm](https://img.shields.io/badge/npm-v0.2.0-orange)](./node/) | Node.js / TypeScript SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/node-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/node-test.yml) |
+| [`github.com/authdog/go-sdk`](./go/) | [![Go](https://img.shields.io/badge/go-v0.2.0-00ADD8)](./go/) | Go SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/go-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/go-test.yml) |
+| [`authdog`](./rust/) | [![crates.io](https://img.shields.io/badge/crates.io-v0.2.0-orange)](./rust/) | Rust SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/rust-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/rust-test.yml) |
+| [`com.authdog:authdog-java-sdk`](./java/) | [![Maven](https://img.shields.io/badge/maven-v0.2.0-orange)](./java/) | Java SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/java-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/java-test.yml) |
+| [`Authdog.Sdk`](./csharp/) | [![NuGet](https://img.shields.io/badge/nuget-v0.2.0-orange)](./csharp/) | C# / .NET SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/csharp-test.yml) |
+| [`authdog`](./zig/) | [![Zig](https://img.shields.io/badge/zig-v0.2.0-f7a41d)](./zig/) | Zig SDK | [![CI](https://github.com/authdog/sdk/actions/workflows/zig-test.yml/badge.svg)](https://github.com/authdog/sdk/actions/workflows/zig-test.yml) |
 
 ## Planned SDKs
 
@@ -41,10 +41,11 @@ GET /v1/userinfo
 Authorization: Bearer <access-token>
 ```
 
-Waves 1–3 cover the dated public catalog: health, organizations,
+Waves 1–4 cover the dated public catalog: health, organizations,
 tenants, projects, environments, directory, RBAC, audit, events,
 webhooks, machine credentials, AuthZEN, SCIM, HRIS, MCP, OTEL,
-elevate, and environment configuration. See
+elevate, and environment configuration. Wave 4 adds MCP trust-store
+key-challenge and SPIFFE JWT-SVID verify. See
 [`specs/004-api-parity/`](./specs/004-api-parity/).
 
 See individual SDK READMEs for language-specific usage.
@@ -57,7 +58,7 @@ to describe what the SDKs already do and to drive changes.
 - Constitution: [`.specify/memory/constitution.md`](./.specify/memory/constitution.md)
 - Baseline (as-is): [`specs/001-userinfo-sdk/`](./specs/001-userinfo-sdk/)
 - Cross-SDK hardening: [`specs/002-cross-sdk-parity/`](./specs/002-cross-sdk-parity/)
-- Platform API parity (Waves 1–3 shipped): [`specs/004-api-parity/`](./specs/004-api-parity/)
+- Platform API parity (Waves 1–4 shipped): [`specs/004-api-parity/`](./specs/004-api-parity/)
 - How to iterate: [`specs/README.md`](./specs/README.md)
 
 In Cursor: `/speckit-specify` → `/speckit-plan` → `/speckit-tasks` →

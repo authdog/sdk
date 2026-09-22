@@ -370,6 +370,9 @@ method and path; AuthZEN discovery remains unauthenticated.
   catalog; they MAY be executed as later task batches or follow-on
   specs that reference this inventory without changing Wave 1
   behavior.
+- Catalog growth after the 2026-09-17 snapshot is assigned to Wave
+  4 (MCP trust-store key challenge and SPIFFE JWT-SVID verify)
+  without changing Waves 1–3.
 - Constructor `apiKey` is the management credential. No new required
   constructor argument is added in Wave 1.
 - Default base URL stays caller-supplied. Documentation examples use

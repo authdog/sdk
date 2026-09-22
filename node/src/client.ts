@@ -101,7 +101,7 @@ export class AuthdogClient {
       timeout: config.timeout || 10000,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'authdog-node-sdk/0.1.0',
+        'User-Agent': 'authdog-node-sdk/0.2.0',
         ...(config.apiKey && { 'Authorization': `Bearer ${config.apiKey}` }),
       },
     });

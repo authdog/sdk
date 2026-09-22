@@ -149,7 +149,7 @@ namespace Authdog
 
             if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
             {
-                _httpClient.DefaultRequestHeaders.Add("User-Agent", "authdog-csharp-sdk/0.1.0");
+                _httpClient.DefaultRequestHeaders.Add("User-Agent", "authdog-csharp-sdk/0.2.0");
             }
 
             Organizations = new OrganizationsResource(this);

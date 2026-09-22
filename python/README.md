@@ -73,8 +73,8 @@ Initialize the Authdog client.
 `mcp`, `otel`, `oidc_clients`, `actions`, `addons`, `billing`,
 `settings`, `elevate`, `email_providers`, `feature_flags`, `forms`,
 `provisioning_tokens`, `impersonation`, `portal`, `security`,
-`threats`, `vanity_domains`, and `widgets` wrap Waves 1–3 of the
-public API. Example:
+`threats`, `vanity_domains`, and `widgets` wrap Waves 1–4 of the
+public API. MCP also includes `verify_key` / `verify_svid`. Example:
 
 ```python
 with AuthdogClient("https://api.authdog.com", api_key="ad_...") as client:

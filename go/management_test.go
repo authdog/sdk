@@ -1525,6 +1525,19 @@ func wave3Cases() []wave3Case {
 	}
 }
 
+func wave4Cases() []wave3Case {
+	return []wave3Case{
+		{"mcp.verify_key", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.VerifyKey(ctx, "ten_1", "env_1", "ent_1", map[string]interface{}{"message": "nonce", "signature": "sig"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-key", map[string]interface{}{"message": "nonce", "signature": "sig"}},
+		{"mcp.verify_svid", func(ctx context.Context, c *Client) error {
+			_, err := c.Mcp.VerifySvid(ctx, "ten_1", "env_1", "ent_1", map[string]interface{}{"svid": "jwt-svid"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-svid", map[string]interface{}{"svid": "jwt-svid"}},
+	}
+}
+
 func TestWave3MethodAndPath(t *testing.T) {
 	cases := wave3Cases()
 	if len(cases) != 152 {
@@ -1568,6 +1581,47 @@ func TestWave3MethodAndPath(t *testing.T) {
 					t.Errorf("body = %#v, want nil", gotBody)
 				}
 			} else if !reflect.DeepEqual(gotBody, tt.body) {
+				t.Errorf("body = %#v, want %#v", gotBody, tt.body)
+			}
+		})
+	}
+}
+
+func TestWave4MethodAndPath(t *testing.T) {
+	cases := wave4Cases()
+	if len(cases) != 2 {
+		t.Fatalf("wave4 resource cases = %d, want 2", len(cases))
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			var gotMethod, gotPath, gotAuth string
+			var gotBody map[string]interface{}
+			client := managementClient(t, func(w http.ResponseWriter, r *http.Request) {
+				gotMethod = r.Method
+				gotPath = r.URL.Path
+				gotAuth = r.Header.Get("Authorization")
+				if r.Body != nil {
+					if err := json.NewDecoder(r.Body).Decode(&gotBody); err != nil && err != io.EOF {
+						t.Errorf("decode body: %v", err)
+					}
+				}
+				writeJSON(t, w, http.StatusOK, map[string]interface{}{})
+			})
+
+			if err := tt.call(context.Background(), client); err != nil {
+				t.Fatalf("call error = %v", err)
+			}
+			if gotAuth != "Bearer key-1" {
+				t.Errorf("Authorization = %q, want Bearer key-1", gotAuth)
+			}
+			if gotMethod != tt.method {
+				t.Errorf("method = %s, want %s", gotMethod, tt.method)
+			}
+			if gotPath != tt.path {
+				t.Errorf("path = %s, want %s", gotPath, tt.path)
+			}
+			if !reflect.DeepEqual(gotBody, tt.body) {
 				t.Errorf("body = %#v, want %#v", gotBody, tt.body)
 			}
 		})

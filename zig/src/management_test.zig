@@ -3090,6 +3090,31 @@ const wave3_cases = [_]Wave1Case{
     },
 };
 
+const wave4_cases = [_]Wave1Case{
+    .{
+        .name = "mcp.verifyKey",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-key",
+        .body = "{\"message\":\"nonce\",\"signature\":\"sig\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.mcp().verifyKey("ten_1", "env_1", "ent_1", "{\"message\":\"nonce\",\"signature\":\"sig\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "mcp.verifySvid",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-svid",
+        .body = "{\"svid\":\"jwt-svid\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.mcp().verifySvid("ten_1", "env_1", "ent_1", "{\"svid\":\"jwt-svid\"}")).deinit();
+            }
+        }.f,
+    },
+};
+
 test "wave3 method and path" {
     try std.testing.expectEqual(@as(usize, 152), wave3_cases.len);
     for (wave3_cases) |case| {
@@ -3121,6 +3146,32 @@ test "wave3 method and path" {
         } else {
             try std.testing.expectEqual(@as(?[]u8, null), mock.seen_body);
         }
+    }
+}
+
+test "wave4 method and path" {
+    try std.testing.expectEqual(@as(usize, 2), wave4_cases.len);
+    for (wave4_cases) |case| {
+        const mock = try MockHttp.start(std.testing.allocator, .ok, case.response, case.expected_authorization);
+        defer mock.deinit();
+
+        var started = try startClient(mock, "key-1");
+        defer std.testing.allocator.free(started.url);
+        defer started.client.deinit();
+
+        case.invoke(&started.client) catch |err| {
+            std.debug.print("wave4 case {s} failed: {s} ({s})\n", .{
+                case.name,
+                @errorName(err),
+                started.client.lastErrorMessage(),
+            });
+            return err;
+        };
+
+        try std.testing.expectEqual(case.method, mock.seen_method.?);
+        try std.testing.expectEqualStrings(case.path, mock.seen_target.?);
+        try std.testing.expectEqualStrings(case.expected_authorization.?, mock.seen_authorization.?);
+        try std.testing.expectEqualStrings(case.body.?, mock.seen_body.?);
     }
 }
 

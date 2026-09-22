@@ -299,6 +299,48 @@ public final class McpResource {
     }
 
     /**
+     * Verify an entry by proving possession of a registered key.
+     * @param tenantId tenant ID
+     * @param environmentId environment ID
+     * @param entryId entry ID
+     * @param body request body
+     * @return verify envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode verifyKey(final String tenantId,
+                              final String environmentId,
+                              final String entryId,
+                              final Object body)
+            throws AuthenticationException, ApiException {
+        return client.request("POST",
+                EnvPaths.prefix(tenantId, environmentId)
+                        + "/mcp/trust-store/" + entryId + "/verify-key",
+                body, null, JsonNode.class);
+    }
+
+    /**
+     * Verify an entry with a SPIFFE JWT-SVID.
+     * @param tenantId tenant ID
+     * @param environmentId environment ID
+     * @param entryId entry ID
+     * @param body request body
+     * @return verify envelope
+     * @throws AuthenticationException when unauthorized
+     * @throws ApiException when the request fails
+     */
+    public JsonNode verifySvid(final String tenantId,
+                               final String environmentId,
+                               final String entryId,
+                               final Object body)
+            throws AuthenticationException, ApiException {
+        return client.request("POST",
+                EnvPaths.prefix(tenantId, environmentId)
+                        + "/mcp/trust-store/" + entryId + "/verify-svid",
+                body, null, JsonNode.class);
+    }
+
+    /**
      * Resolve the MCP runtime Bearer token.
      * @param token optional override
      * @return token or environment secret

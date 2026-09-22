@@ -470,11 +470,45 @@ describe('Wave 3 management', () => {
     ['otel export traces', () => client.otel.exportTraces({ resourceSpans: [] }), 'POST', '/v1/traces', { resourceSpans: [] }],
   ];
 
+  const wave4Cases: Array<[string, () => Promise<unknown>, string, string, unknown]> = [
+    [
+      'mcp verify key',
+      () =>
+        client.mcp.verifyKey('ten_1', 'env_1', 'ent_1', {
+          message: 'nonce',
+          signature: 'sig',
+        }),
+      'POST',
+      '/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-key',
+      { message: 'nonce', signature: 'sig' },
+    ],
+    [
+      'mcp verify svid',
+      () => client.mcp.verifySvid('ten_1', 'env_1', 'ent_1', { svid: 'jwt-svid' }),
+      'POST',
+      '/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-svid',
+      { svid: 'jwt-svid' },
+    ],
+  ];
+
   it('covers all inventory operations', () => {
     expect(wave3Cases).toHaveLength(152);
+    expect(wave4Cases).toHaveLength(2);
   });
 
   it.each(wave3Cases)('%s hits %s %s', async (_name, call, method, url, data) => {
+    mockAxiosInstance.request.mockResolvedValue({ data: {} });
+    await call();
+    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method,
+        url,
+        ...(data !== undefined ? { data } : {}),
+      })
+    );
+  });
+
+  it.each(wave4Cases)('%s hits %s %s', async (_name, call, method, url, data) => {
     mockAxiosInstance.request.mockResolvedValue({ data: {} });
     await call();
     expect(mockAxiosInstance.request).toHaveBeenCalledWith(

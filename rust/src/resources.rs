@@ -2984,6 +2984,50 @@ impl<'a> McpResource<'a> {
             )
             .await
     }
+
+    pub async fn verify_key(
+        &self,
+        tenant_id: &str,
+        environment_id: &str,
+        entry_id: &str,
+        body: impl Serialize,
+    ) -> Result<Value, AuthdogError> {
+        let body = to_value(body)?;
+        self.client
+            .request(
+                "POST",
+                &format!(
+                    "{}/mcp/trust-store/{}/verify-key",
+                    env(tenant_id, environment_id),
+                    entry_id
+                ),
+                Some(&body),
+                &[],
+            )
+            .await
+    }
+
+    pub async fn verify_svid(
+        &self,
+        tenant_id: &str,
+        environment_id: &str,
+        entry_id: &str,
+        body: impl Serialize,
+    ) -> Result<Value, AuthdogError> {
+        let body = to_value(body)?;
+        self.client
+            .request(
+                "POST",
+                &format!(
+                    "{}/mcp/trust-store/{}/verify-svid",
+                    env(tenant_id, environment_id),
+                    entry_id
+                ),
+                Some(&body),
+                &[],
+            )
+            .await
+    }
 }
 
 /// OpenTelemetry export namespace.

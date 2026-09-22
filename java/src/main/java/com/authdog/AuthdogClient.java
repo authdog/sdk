@@ -808,7 +808,7 @@ public class AuthdogClient implements AutoCloseable {
         final Request.Builder builder = new Request.Builder()
                 .url(buildUrl(pathParam, queryParam))
                 .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "authdog-java-sdk/0.1.0");
+                .addHeader("User-Agent", "authdog-java-sdk/0.2.0");
         applyAuth(builder, accessTokenParam, omitAuthParam);
         applyMethod(builder, methodParam, encodeBody(bodyParam));
 
@@ -845,7 +845,7 @@ public class AuthdogClient implements AutoCloseable {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(url)
                 .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "authdog-java-sdk/0.1.0")
+                .addHeader("User-Agent", "authdog-java-sdk/0.2.0")
                 .header("Authorization", "Bearer " + accessTokenParam);
 
         Request request = requestBuilder.build();

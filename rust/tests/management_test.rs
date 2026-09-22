@@ -3142,6 +3142,57 @@ async fn test_wave3_method_and_path() {
 }
 
 #[tokio::test]
+async fn test_wave4_mcp_verify_key_and_svid() {
+    let cases = [
+        (
+            "mcp_verify_key",
+            "POST",
+            "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-key",
+            json!({ "message": "nonce", "signature": "sig" }),
+        ),
+        (
+            "mcp_verify_svid",
+            "POST",
+            "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-svid",
+            json!({ "svid": "jwt-svid" }),
+        ),
+    ];
+    assert_eq!(cases.len(), 2);
+
+    for (name, expected_method, expected_path, body) in cases {
+        let mock_server = MockServer::start().await;
+        Mock::given(method(expected_method))
+            .and(path(expected_path))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({})))
+            .expect(1)
+            .mount(&mock_server)
+            .await;
+
+        let client = client_against(&mock_server).await;
+        match name {
+            "mcp_verify_key" => client
+                .mcp()
+                .verify_key("ten_1", "env_1", "ent_1", &body)
+                .await
+                .unwrap(),
+            "mcp_verify_svid" => client
+                .mcp()
+                .verify_svid("ten_1", "env_1", "ent_1", &body)
+                .await
+                .unwrap(),
+            other => panic!("unknown case {other}"),
+        };
+
+        let requests = mock_server.received_requests().await.unwrap();
+        assert_eq!(requests.len(), 1, "{name}");
+        assert_eq!(requests[0].method.as_str(), expected_method, "{name}");
+        assert_eq!(requests[0].url.path(), expected_path, "{name}");
+        let actual: Value = serde_json::from_slice(&requests[0].body).unwrap_or(Value::Null);
+        assert_eq!(actual, body, "body mismatch for {name}");
+    }
+}
+
+#[tokio::test]
 async fn test_wave3_authzen_discovery_omits_bearer() {
     let mock_server = MockServer::start().await;
     Mock::given(method("GET"))

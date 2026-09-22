@@ -447,13 +447,46 @@ WAVE3_CASES = [
 ]
 
 
+WAVE4_CASES = [
+    (
+        lambda c: c.mcp.verify_key(
+            "ten_1", "env_1", "ent_1", {"message": "nonce", "signature": "sig"}
+        ),
+        "POST",
+        "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-key",
+        {"message": "nonce", "signature": "sig"},
+    ),
+    (
+        lambda c: c.mcp.verify_svid("ten_1", "env_1", "ent_1", {"svid": "jwt-svid"}),
+        "POST",
+        "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-svid",
+        {"svid": "jwt-svid"},
+    ),
+]
+
+
 def test_wave3_covers_all_inventory_operations():
     assert len(WAVE3_CASES) == 152
+
+
+def test_wave4_covers_all_inventory_operations():
+    assert len(WAVE4_CASES) == 2
 
 
 @pytest.mark.parametrize("call,method,path,body", WAVE3_CASES)
 @patch("httpx.Client")
 def test_wave3_method_and_path(mock_client_class, call, method, path, body):
+    client, mock_http = _client_with_request(mock_client_class, _json_response({}))
+    call(client)
+    args, kwargs = mock_http.request.call_args
+    assert args[0] == method
+    assert args[1] == path
+    assert kwargs.get("json") == body
+
+
+@pytest.mark.parametrize("call,method,path,body", WAVE4_CASES)
+@patch("httpx.Client")
+def test_wave4_method_and_path(mock_client_class, call, method, path, body):
     client, mock_http = _client_with_request(mock_client_class, _json_response({}))
     call(client)
     args, kwargs = mock_http.request.call_args

@@ -45,7 +45,7 @@ describe('AuthdogClient', () => {
         timeout: 5000,
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'authdog-node-sdk/0.1.0',
+          'User-Agent': 'authdog-node-sdk/0.2.0',
           'Authorization': 'Bearer test-api-key',
         },
       });
@@ -62,7 +62,7 @@ describe('AuthdogClient', () => {
         timeout: 10000,
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'authdog-node-sdk/0.1.0',
+          'User-Agent': 'authdog-node-sdk/0.2.0',
         },
       });
     });
@@ -77,7 +77,7 @@ describe('AuthdogClient', () => {
         timeout: 10000,
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'authdog-node-sdk/0.1.0',
+          'User-Agent': 'authdog-node-sdk/0.2.0',
         },
       });
     });
