@@ -118,3 +118,7 @@ uv run isort authdog/
 # Type checking
 uv run mypy authdog/
 ```
+
+## License
+
+MIT License - see [LICENSE](../LICENSE) for details.

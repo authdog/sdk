@@ -215,3 +215,7 @@ This SDK is written in TypeScript and provides full type definitions. Import typ
 ```typescript
 import { UserInfoResponse, AuthdogClientConfig } from '@authdog/node-sdk';
 ```
+
+## License
+
+MIT License - see [LICENSE](../LICENSE) for details.

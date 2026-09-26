@@ -196,3 +196,7 @@ golangci-lint run
 ## Dependencies
 
 This SDK has no external dependencies and uses only the Go standard library.
+
+## License
+
+MIT License - see [LICENSE](../LICENSE) for details.

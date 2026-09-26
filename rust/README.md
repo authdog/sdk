@@ -234,3 +234,7 @@ See the `examples/` directory for more usage examples:
 
 - `basic.rs` - Basic usage example
 - `error_handling.rs` - Error handling example
+
+## License
+
+MIT License - see [LICENSE](../LICENSE) for details.

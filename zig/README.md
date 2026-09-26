@@ -97,3 +97,7 @@ zig fmt --check src/ examples/
 ```
 
 Or from the repo root: `moon run zig:test`.
+
+## License
+
+MIT License - see [LICENSE](../LICENSE) for details.
