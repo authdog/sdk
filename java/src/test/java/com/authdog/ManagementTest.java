@@ -284,6 +284,29 @@ class ManagementTest {
         assertEquals(2, wave4Cases().count());
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("wave5Cases")
+    void testWave5MethodAndPath(final String name,
+                                final Consumer<AuthdogClient> call,
+                                final String method,
+                                final String path,
+                                final String body) throws Exception {
+        enqueueJson(200, "{}");
+        client = newClient();
+        call.accept(client);
+
+        RecordedRequest request = mockServer.takeRequest();
+        assertEquals(method, request.getMethod());
+        assertEquals(path, request.getPath());
+        assertJsonBody(body, request.getBody().readUtf8());
+        assertEquals("Bearer key-1", request.getHeader("Authorization"));
+    }
+
+    @Test
+    void testWave5CoversAllInventoryOperations() {
+        assertEquals(9, wave5Cases().count());
+    }
+
     @Test
     void testWave3AuthzenDiscoveryOmitsBearer() throws Exception {
         enqueueJson(200, "{}");
@@ -372,6 +395,13 @@ class ManagementTest {
         assertEquals("/v1/tenants/ten_1/environments/env_1"
                 + "/elevate/access-requests?status=pending",
                 elevate.getPath());
+
+        enqueueJson(200, "{}");
+        client.connectedApps().list("ten_1", "env_1", "usr_1", "cli_1");
+        RecordedRequest apps = mockServer.takeRequest();
+        assertEquals("/v1/tenants/ten_1/environments/env_1"
+                + "/connected-apps?userId=usr_1&clientId=cli_1",
+                apps.getPath());
     }
 
     static Stream<Arguments> wave1Cases() {
@@ -2158,6 +2188,84 @@ class ManagementTest {
                         "/v1/tenants/ten_1/environments/env_1"
                                 + "/mcp/trust-store/ent_1/verify-svid",
                         "{\"svid\":\"jwt-svid\"}")
+        );
+    }
+
+    static Stream<Arguments> wave5Cases() {
+        return Stream.of(
+                caseOf("sms providers list",
+                        c -> c.smsProviders().list("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/sms-providers",
+                        null),
+                caseOf("sms providers save",
+                        c -> c.smsProviders().save("ten_1", "env_1", mapOf(
+                                "provider",
+                                "twilio")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/sms-providers",
+                        "{\"provider\":\"twilio\"}"),
+                caseOf("sms providers test",
+                        c -> c.smsProviders().test("ten_1", "env_1", mapOf(
+                                "recipient",
+                                "+15551212")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/sms-providers/test",
+                        "{\"recipient\":\"+15551212\"}"),
+                caseOf("sms providers delete",
+                        c -> c.smsProviders().delete(
+                                "ten_1",
+                                "env_1",
+                                "twilio"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/sms-providers/twilio",
+                        null),
+                caseOf("connected apps list",
+                        c -> c.connectedApps().list("ten_1", "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/connected-apps",
+                        null),
+                caseOf("connected apps revoke",
+                        c -> c.connectedApps().revoke("ten_1", "env_1", mapOf(
+                                "clientId",
+                                "cli_1",
+                                "userId",
+                                "usr_1")),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/connected-apps/revoke",
+                        "{\"clientId\":\"cli_1\",\"userId\":\"usr_1\"}"),
+                caseOf("client allowlist list",
+                        c -> c.connectedApps().listAllowlist(
+                                "ten_1",
+                                "env_1"),
+                        "GET",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/client-allowlist",
+                        null),
+                caseOf("client allowlist save",
+                        c -> c.connectedApps().saveAllowlist(
+                                "ten_1",
+                                "env_1",
+                                mapOf("clientId", "cli_1", "allowed", true)),
+                        "POST",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/client-allowlist",
+                        "{\"clientId\":\"cli_1\",\"allowed\":true}"),
+                caseOf("client allowlist delete",
+                        c -> c.connectedApps().deleteAllowlist(
+                                "ten_1",
+                                "env_1",
+                                "cli_1"),
+                        "DELETE",
+                        "/v1/tenants/ten_1/environments/env_1"
+                                + "/client-allowlist/cli_1",
+                        null)
         );
     }
 

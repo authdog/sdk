@@ -21,7 +21,7 @@ Catalog files (already in git):
 ## Inventory gate
 
 Every path in the snapshot must appear in the inventory with Wave 1,
-2, 3, or 4. Wave 1 count must be 56.
+2, 3, 4, or 5. Wave 1 count must be 56.
 
 ```bash
 python3 - <<'PY'
@@ -37,7 +37,7 @@ for path, methods in snap["paths"].items():
             ops += 1
             assert f"`{path}`" in inv, path
 print("snapshot operations", ops)
-assert ops == 268
+assert ops == 277
 assert inv.count("| 1 |") >= 1
 PY
 ```
@@ -99,4 +99,4 @@ Wave 1 is implemented. It should link here.
 moon run :test
 ```
 
-Expected: all core projects green; Wave 1–4 tests included in each.
+Expected: all core projects green; Wave 1–5 tests included in each.

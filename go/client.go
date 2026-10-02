@@ -78,6 +78,8 @@ type Client struct {
 	Threats              *ThreatsService
 	VanityDomains        *VanityDomainsService
 	Widgets              *WidgetsService
+	SmsProviders         *SmsProvidersService
+	ConnectedApps        *ConnectedAppsService
 }
 
 // ClientConfig holds configuration for the Authdog client
@@ -147,6 +149,8 @@ func NewClient(config ClientConfig) *Client {
 	c.Threats = &ThreatsService{client: c}
 	c.VanityDomains = &VanityDomainsService{client: c}
 	c.Widgets = &WidgetsService{client: c}
+	c.SmsProviders = &SmsProvidersService{client: c}
+	c.ConnectedApps = &ConnectedAppsService{client: c}
 	return c
 }
 

@@ -33,6 +33,7 @@ import com.authdog.resources.ApiSecretsResource;
 import com.authdog.resources.AuditResource;
 import com.authdog.resources.AuthzenResource;
 import com.authdog.resources.BillingResource;
+import com.authdog.resources.ConnectedAppsResource;
 import com.authdog.resources.ElevateResource;
 import com.authdog.resources.EmailProvidersResource;
 import com.authdog.resources.EnvironmentsResource;
@@ -56,6 +57,7 @@ import com.authdog.resources.ScimResource;
 import com.authdog.resources.SecurityResource;
 import com.authdog.resources.ServiceAccountsResource;
 import com.authdog.resources.SettingsResource;
+import com.authdog.resources.SmsProvidersResource;
 import com.authdog.resources.TenantsResource;
 import com.authdog.resources.ThreatsResource;
 import com.authdog.resources.UsersResource;
@@ -330,6 +332,16 @@ public class AuthdogClient implements AutoCloseable {
     private final WidgetsResource widgets;
 
     /**
+     * SMS providers resource.
+     */
+    private final SmsProvidersResource smsProviders;
+
+    /**
+     * Connected apps resource.
+     */
+    private final ConnectedAppsResource connectedApps;
+
+    /**
      * Initialize the Authdog client.
      * @param baseUrlParam The base URL of the Authdog API
      */
@@ -439,6 +451,8 @@ public class AuthdogClient implements AutoCloseable {
         this.threats = new ThreatsResource(this);
         this.vanityDomains = new VanityDomainsResource(this);
         this.widgets = new WidgetsResource(this);
+        this.smsProviders = new SmsProvidersResource(this);
+        this.connectedApps = new ConnectedAppsResource(this);
     }
 
     /**
@@ -753,6 +767,22 @@ public class AuthdogClient implements AutoCloseable {
      */
     public WidgetsResource widgets() {
         return widgets;
+    }
+
+    /**
+     * Environment SMS provider helpers.
+     * @return SMS providers resource
+     */
+    public SmsProvidersResource smsProviders() {
+        return smsProviders;
+    }
+
+    /**
+     * Connected-app and client-allowlist helpers.
+     * @return connected apps resource
+     */
+    public ConnectedAppsResource connectedApps() {
+        return connectedApps;
     }
 
     /**

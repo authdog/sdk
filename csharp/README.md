@@ -116,8 +116,9 @@ public AuthdogClient(string baseUrl, string? apiKey = null, HttpClient? httpClie
 `Mcp`, `Otel`, `OidcClients`, `Actions`, `Addons`, `Billing`,
 `Settings`, `Elevate`, `EmailProviders`, `FeatureFlags`, `Forms`,
 `ProvisioningTokens`, `Impersonation`, `Portal`, `Security`,
-`Threats`, `VanityDomains`, and `Widgets` wrap Waves 1–4 of the
-public API. AuthZEN discovery is unauthenticated. See
+`Threats`, `VanityDomains`, `Widgets`, `SmsProviders`, and
+`ConnectedApps` wrap Waves 1–5 of the public API. AuthZEN discovery
+is unauthenticated. See
 `specs/004-api-parity/`.
 
 #### Methods

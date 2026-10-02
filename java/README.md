@@ -100,8 +100,9 @@ public AuthdogClient(String baseUrl, String apiKey, int timeoutMs)
 `actions()`, `addons()`, `billing()`, `settings()`, `elevate()`,
 `emailProviders()`, `featureFlags()`, `forms()`,
 `provisioningTokens()`, `impersonation()`, `portal()`, `security()`,
-`threats()`, `vanityDomains()`, and `widgets()` wrap Waves 1–4 of
-the public API. Optional constructor credentials:
+`threats()`, `vanityDomains()`, `widgets()`, `smsProviders()`, and
+`connectedApps()` wrap Waves 1–5 of the public API. Optional
+constructor credentials:
 `environmentSecret` (AuthZEN + MCP runtime), `scimToken`,
 `hrisToken`. AuthZEN discovery is unauthenticated. See
 `specs/004-api-parity/`.

@@ -35,6 +35,7 @@ from .resources import (
     AuditResource,
     AuthzenResource,
     BillingResource,
+    ConnectedAppsResource,
     ElevateResource,
     EmailProvidersResource,
     EnvironmentsResource,
@@ -58,6 +59,7 @@ from .resources import (
     SecurityResource,
     ServiceAccountsResource,
     SettingsResource,
+    SmsProvidersResource,
     TenantsResource,
     ThreatsResource,
     UsersResource,
@@ -137,6 +139,8 @@ class AuthdogClient:
         self.threats = ThreatsResource(self)
         self.vanity_domains = VanityDomainsResource(self)
         self.widgets = WidgetsResource(self)
+        self.sms_providers = SmsProvidersResource(self)
+        self.connected_apps = ConnectedAppsResource(self)
 
     def _get_default_headers(self) -> Dict[str, str]:
         """Get default headers for API requests."""

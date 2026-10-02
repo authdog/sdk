@@ -1610,6 +1610,47 @@ func TestWave3MethodAndPath(t *testing.T) {
 	}
 }
 
+func wave5Cases() []wave3Case {
+	return []wave3Case{
+		{"sms_providers.list", func(ctx context.Context, c *Client) error {
+			_, err := c.SmsProviders.List(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/sms-providers", nil},
+		{"sms_providers.save", func(ctx context.Context, c *Client) error {
+			_, err := c.SmsProviders.Save(ctx, "ten_1", "env_1", map[string]interface{}{"provider": "twilio"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/sms-providers", map[string]interface{}{"provider": "twilio"}},
+		{"sms_providers.test", func(ctx context.Context, c *Client) error {
+			_, err := c.SmsProviders.Test(ctx, "ten_1", "env_1", map[string]interface{}{"recipient": "+15551212"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/sms-providers/test", map[string]interface{}{"recipient": "+15551212"}},
+		{"sms_providers.delete", func(ctx context.Context, c *Client) error {
+			_, err := c.SmsProviders.Delete(ctx, "ten_1", "env_1", "twilio")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/sms-providers/twilio", nil},
+		{"connected_apps.list", func(ctx context.Context, c *Client) error {
+			_, err := c.ConnectedApps.List(ctx, "ten_1", "env_1", nil)
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/connected-apps", nil},
+		{"connected_apps.revoke", func(ctx context.Context, c *Client) error {
+			_, err := c.ConnectedApps.Revoke(ctx, "ten_1", "env_1", map[string]interface{}{"clientId": "cli_1", "userId": "usr_1"})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/connected-apps/revoke", map[string]interface{}{"clientId": "cli_1", "userId": "usr_1"}},
+		{"connected_apps.list_allowlist", func(ctx context.Context, c *Client) error {
+			_, err := c.ConnectedApps.ListAllowlist(ctx, "ten_1", "env_1")
+			return err
+		}, "GET", "/v1/tenants/ten_1/environments/env_1/client-allowlist", nil},
+		{"connected_apps.save_allowlist", func(ctx context.Context, c *Client) error {
+			_, err := c.ConnectedApps.SaveAllowlist(ctx, "ten_1", "env_1", map[string]interface{}{"clientId": "cli_1", "allowed": true})
+			return err
+		}, "POST", "/v1/tenants/ten_1/environments/env_1/client-allowlist", map[string]interface{}{"clientId": "cli_1", "allowed": true}},
+		{"connected_apps.delete_allowlist", func(ctx context.Context, c *Client) error {
+			_, err := c.ConnectedApps.DeleteAllowlist(ctx, "ten_1", "env_1", "cli_1")
+			return err
+		}, "DELETE", "/v1/tenants/ten_1/environments/env_1/client-allowlist/cli_1", nil},
+	}
+}
+
 func TestWave4MethodAndPath(t *testing.T) {
 	cases := wave4Cases()
 	if len(cases) != 2 {
@@ -1648,6 +1689,69 @@ func TestWave4MethodAndPath(t *testing.T) {
 				t.Errorf("body = %#v, want %#v", gotBody, tt.body)
 			}
 		})
+	}
+}
+
+func TestWave5MethodAndPath(t *testing.T) {
+	cases := wave5Cases()
+	if len(cases) != 9 {
+		t.Fatalf("wave5 resource cases = %d, want 9", len(cases))
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			var gotMethod, gotPath, gotAuth string
+			var gotBody map[string]interface{}
+			client := managementClient(t, func(w http.ResponseWriter, r *http.Request) {
+				gotMethod = r.Method
+				gotPath = r.URL.Path
+				gotAuth = r.Header.Get("Authorization")
+				if r.Body != nil {
+					if err := json.NewDecoder(r.Body).Decode(&gotBody); err != nil && err != io.EOF {
+						t.Errorf("decode body: %v", err)
+					}
+				}
+				writeJSON(t, w, http.StatusOK, map[string]interface{}{})
+			})
+
+			if err := tt.call(context.Background(), client); err != nil {
+				t.Fatalf("call error = %v", err)
+			}
+			if gotAuth != "Bearer key-1" {
+				t.Errorf("Authorization = %q, want Bearer key-1", gotAuth)
+			}
+			if gotMethod != tt.method {
+				t.Errorf("method = %s, want %s", gotMethod, tt.method)
+			}
+			if gotPath != tt.path {
+				t.Errorf("path = %s, want %s", gotPath, tt.path)
+			}
+			if !reflect.DeepEqual(gotBody, tt.body) {
+				t.Errorf("body = %#v, want %#v", gotBody, tt.body)
+			}
+		})
+	}
+}
+
+func TestWave5_ConnectedAppsForwardsQueryParams(t *testing.T) {
+	var gotPath string
+	var gotQuery url.Values
+	client := managementClient(t, func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		gotQuery = r.URL.Query()
+		writeJSON(t, w, http.StatusOK, map[string]interface{}{})
+	})
+	if _, err := client.ConnectedApps.List(context.Background(), "ten_1", "env_1", &ConnectedAppsListOptions{
+		UserID:   "usr_1",
+		ClientID: "cli_1",
+	}); err != nil {
+		t.Fatalf("List() error = %v", err)
+	}
+	if gotPath != "/v1/tenants/ten_1/environments/env_1/connected-apps" {
+		t.Errorf("path = %s", gotPath)
+	}
+	if gotQuery.Get("userId") != "usr_1" || gotQuery.Get("clientId") != "cli_1" {
+		t.Errorf("query = %v", gotQuery)
 	}
 }
 

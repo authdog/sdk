@@ -88,6 +88,8 @@ pub const SecurityResource = @import("client.zig").SecurityResource;
 pub const ThreatsResource = @import("client.zig").ThreatsResource;
 pub const VanityDomainsResource = @import("client.zig").VanityDomainsResource;
 pub const WidgetsResource = @import("client.zig").WidgetsResource;
+pub const SmsProvidersResource = @import("client.zig").SmsProvidersResource;
+pub const ConnectedAppsResource = @import("client.zig").ConnectedAppsResource;
 
 test {
     std.testing.refAllDecls(@This());

@@ -1,8 +1,8 @@
 # Platform API operation inventory
 
-**Source**: `openapi.snapshot.json` (Authdog API 1.0.0, refreshed 2026-09-22 from `https://api.authdog.com/v1/openapi`; original snapshot 2026-09-17)
+**Source**: `openapi.snapshot.json` (Authdog API 1.0.0, refreshed 2026-10-02 from `https://api.authdog.com/v1/openapi`; original snapshot 2026-09-17)
 
-Wave assignment follows `spec.md` FR-004–FR-006. Environment connections/redirects and directory bulk/MFA/session ops are Wave 3 even though they share a tag with Wave 1 families. Wave 4 is catalog growth after the original snapshot.
+Wave assignment follows `spec.md` FR-004–FR-006. Environment connections/redirects and directory bulk/MFA/session ops are Wave 3 even though they share a tag with Wave 1 families. Waves 4 and 5 are catalog growth after the original snapshot.
 
 | Wave | Operations |
 |------|------------|
@@ -10,7 +10,8 @@ Wave assignment follows `spec.md` FR-004–FR-006. Environment connections/redir
 | 2 | 58 |
 | 3 | 152 |
 | 4 | 2 |
-| **Total** | **268** |
+| 5 | 9 |
+| **Total** | **277** |
 
 ## Wave 1
 
@@ -301,4 +302,20 @@ Catalog growth after the 2026-09-17 snapshot. Management credential (`apiKey`).
 | Vanity domains | POST | `/v1/tenants/{tenantId}/environments/{environmentId}/vanity-domains/{domainId}/check` | `vanityDomainCheck` | Re-check a vanity domain's DNS/TLS status |
 | Widgets | POST | `/v1/tenants/{tenantId}/environments/{environmentId}/widgets/token` | `createWidgetToken` | Create a widget token |
 | OpenTelemetry | POST | `/v1/traces` | `otelExportTraces` | Export OTLP traces |
+
+## Wave 5
+
+Catalog growth after the 2026-09-22 snapshot. Management credential (`apiKey`).
+
+| Tag | Method | Path | operationId | Summary |
+|-----|--------|------|-------------|---------|
+| SMS providers | GET | `/v1/tenants/{tenantId}/environments/{environmentId}/sms-providers` | `smsProvidersList` | List SMS delivery providers |
+| SMS providers | POST | `/v1/tenants/{tenantId}/environments/{environmentId}/sms-providers` | `smsProviderSave` | Create or update an SMS provider |
+| SMS providers | POST | `/v1/tenants/{tenantId}/environments/{environmentId}/sms-providers/test` | `smsProviderTest` | Send a test SMS through the configured providers |
+| SMS providers | DELETE | `/v1/tenants/{tenantId}/environments/{environmentId}/sms-providers/{provider}` | `smsProviderDelete` | Delete an SMS provider |
+| Connected apps | GET | `/v1/tenants/{tenantId}/environments/{environmentId}/connected-apps` | `connectedAppsList` | List per-user OIDC client grants |
+| Connected apps | POST | `/v1/tenants/{tenantId}/environments/{environmentId}/connected-apps/revoke` | `connectedAppRevoke` | Revoke a user's grant for an OIDC client |
+| Connected apps | GET | `/v1/tenants/{tenantId}/environments/{environmentId}/client-allowlist` | `clientAllowlistList` | List the environment OIDC client allowlist |
+| Connected apps | POST | `/v1/tenants/{tenantId}/environments/{environmentId}/client-allowlist` | `clientAllowlistSave` | Upsert an OIDC client allowlist entry |
+| Connected apps | DELETE | `/v1/tenants/{tenantId}/environments/{environmentId}/client-allowlist/{clientId}` | `clientAllowlistDelete` | Remove an OIDC client from the allowlist |
 

@@ -496,9 +496,37 @@ def test_wave4_covers_all_inventory_operations():
     assert len(WAVE4_CASES) == 2
 
 
+WAVE5_CASES = [
+    (lambda c: c.sms_providers.list("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/sms-providers", None),
+    (lambda c: c.sms_providers.save("ten_1", "env_1", {"provider": "twilio"}), "POST", "/v1/tenants/ten_1/environments/env_1/sms-providers", {"provider": "twilio"}),
+    (lambda c: c.sms_providers.test("ten_1", "env_1", {"recipient": "+15551212"}), "POST", "/v1/tenants/ten_1/environments/env_1/sms-providers/test", {"recipient": "+15551212"}),
+    (lambda c: c.sms_providers.delete("ten_1", "env_1", "twilio"), "DELETE", "/v1/tenants/ten_1/environments/env_1/sms-providers/twilio", None),
+    (lambda c: c.connected_apps.list("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/connected-apps", None),
+    (lambda c: c.connected_apps.revoke("ten_1", "env_1", {"clientId": "cli_1", "userId": "usr_1"}), "POST", "/v1/tenants/ten_1/environments/env_1/connected-apps/revoke", {"clientId": "cli_1", "userId": "usr_1"}),
+    (lambda c: c.connected_apps.list_allowlist("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/client-allowlist", None),
+    (lambda c: c.connected_apps.save_allowlist("ten_1", "env_1", {"clientId": "cli_1", "allowed": True}), "POST", "/v1/tenants/ten_1/environments/env_1/client-allowlist", {"clientId": "cli_1", "allowed": True}),
+    (lambda c: c.connected_apps.delete_allowlist("ten_1", "env_1", "cli_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/client-allowlist/cli_1", None),
+]
+
+
+def test_wave5_covers_all_inventory_operations():
+    assert len(WAVE5_CASES) == 9
+
+
 @pytest.mark.parametrize("call,method,path,body", WAVE3_CASES)
 @patch("httpx.Client")
 def test_wave3_method_and_path(mock_client_class, call, method, path, body):
+    client, mock_http = _client_with_request(mock_client_class, _json_response({}))
+    call(client)
+    args, kwargs = mock_http.request.call_args
+    assert args[0] == method
+    assert args[1] == path
+    assert kwargs.get("json") == body
+
+
+@pytest.mark.parametrize("call,method,path,body", WAVE5_CASES)
+@patch("httpx.Client")
+def test_wave5_method_and_path(mock_client_class, call, method, path, body):
     client, mock_http = _client_with_request(mock_client_class, _json_response({}))
     call(client)
     args, kwargs = mock_http.request.call_args
@@ -584,3 +612,7 @@ def test_wave3_query_params_forwarded(mock_client_class):
     client.elevate.list_requests("ten_1", "env_1", status="pending")
     args, kwargs = mock_http.request.call_args
     assert kwargs.get("params") == {"status": "pending"}
+    client.connected_apps.list("ten_1", "env_1", user_id="usr_1", client_id="cli_1")
+    args, kwargs = mock_http.request.call_args
+    assert args[1] == "/v1/tenants/ten_1/environments/env_1/connected-apps"
+    assert kwargs.get("params") == {"userId": "usr_1", "clientId": "cli_1"}

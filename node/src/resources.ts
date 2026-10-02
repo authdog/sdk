@@ -1857,3 +1857,68 @@ export class WidgetsResource {
     });
   }
 }
+
+export class SmsProvidersResource {
+  constructor(private readonly client: ManagementRequester) {}
+
+  list(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request('GET', `${envPath(tenantId, environmentId)}/sms-providers`);
+  }
+
+  save(tenantId: string, environmentId: string, body: Json): Promise<Json> {
+    return this.client.request('POST', `${envPath(tenantId, environmentId)}/sms-providers`, {
+      data: body,
+    });
+  }
+
+  test(tenantId: string, environmentId: string, body: Json): Promise<Json> {
+    return this.client.request('POST', `${envPath(tenantId, environmentId)}/sms-providers/test`, {
+      data: body,
+    });
+  }
+
+  delete(tenantId: string, environmentId: string, provider: string): Promise<Json> {
+    return this.client.request(
+      'DELETE',
+      `${envPath(tenantId, environmentId)}/sms-providers/${provider}`
+    );
+  }
+}
+
+export class ConnectedAppsResource {
+  constructor(private readonly client: ManagementRequester) {}
+
+  list(
+    tenantId: string,
+    environmentId: string,
+    userId?: string,
+    clientId?: string
+  ): Promise<Json> {
+    return this.client.request('GET', `${envPath(tenantId, environmentId)}/connected-apps`, {
+      params: compactParams({ userId, clientId }),
+    });
+  }
+
+  revoke(tenantId: string, environmentId: string, body: Json): Promise<Json> {
+    return this.client.request('POST', `${envPath(tenantId, environmentId)}/connected-apps/revoke`, {
+      data: body,
+    });
+  }
+
+  listAllowlist(tenantId: string, environmentId: string): Promise<Json> {
+    return this.client.request('GET', `${envPath(tenantId, environmentId)}/client-allowlist`);
+  }
+
+  saveAllowlist(tenantId: string, environmentId: string, body: Json): Promise<Json> {
+    return this.client.request('POST', `${envPath(tenantId, environmentId)}/client-allowlist`, {
+      data: body,
+    });
+  }
+
+  deleteAllowlist(tenantId: string, environmentId: string, clientId: string): Promise<Json> {
+    return this.client.request(
+      'DELETE',
+      `${envPath(tenantId, environmentId)}/client-allowlist/${clientId}`
+    );
+  }
+}

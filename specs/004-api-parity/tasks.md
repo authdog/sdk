@@ -241,3 +241,21 @@ Wave 1 is the MVP for this feature. Wave 2 follows below.
 - [x] T094 [P] Implement Wave 4 in `csharp/Resources/McpResource.cs` with tests in `csharp/Tests/ManagementTests.cs`
 - [x] T095 [P] Implement Wave 4 in `zig/src/client.zig` with tests in `zig/src/management_test.zig`
 - [x] T096 Document Wave 4 MCP verify methods in core READMEs, `specs/README.md`, and `specs/004-api-parity/quickstart.md`
+
+---
+
+## Phase 10: Wave 5 - SMS providers and connected apps
+
+**Goal**: Catalog growth after the 2026-09-22 snapshot — 9 operations: SMS providers, per-user OIDC grants, and the environment client allowlist
+
+**Independent Test**: Table-driven path/method tests; connected-app list forwards `userId` and `clientId`; both namespaces use the constructor management credential
+
+- [x] T097 Refresh `specs/004-api-parity/contracts/openapi.snapshot.json` and assign the nine new operations in `specs/004-api-parity/contracts/operation-inventory.md`
+- [x] T098 Add `sms_providers` and `connected_apps` plus Wave 5 path/query tests in `python/authdog/resources.py` and `python/tests/test_management.py`
+- [x] T099 [P] Implement Wave 5 in `node/src/resources.ts` with tests in `node/tests/management.test.ts`
+- [x] T100 [P] Implement Wave 5 in `go/resources_wave3.go` with tests in `go/management_test.go`
+- [x] T101 [P] Implement Wave 5 in `rust/src/resources.rs` with tests in `rust/tests/management_test.rs`
+- [x] T102 [P] Implement Wave 5 in `java/src/main/java/com/authdog/resources/` with tests in `java/src/test/java/com/authdog/ManagementTest.java`
+- [x] T103 [P] Implement Wave 5 in `csharp/Resources/` with tests in `csharp/Tests/ManagementTests.cs`
+- [x] T104 [P] Implement Wave 5 in `zig/src/client.zig` with tests in `zig/src/management_test.zig`
+- [x] T105 Document Wave 5 SMS and connected-app methods in core READMEs, `specs/README.md`, and `specs/004-api-parity/quickstart.md`

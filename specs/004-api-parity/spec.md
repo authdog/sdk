@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-17
 
-**Status**: Waves 1–3 implemented
+**Status**: Waves 1–5 implemented
 
 **Input**: Keep official SDKs at parity with the public Authdog
 platform API at api.authdog.com, not only the current user-info call.
@@ -372,7 +372,9 @@ method and path; AuthZEN discovery remains unauthenticated.
   behavior.
 - Catalog growth after the 2026-09-17 snapshot is assigned to Wave
   4 (MCP trust-store key challenge and SPIFFE JWT-SVID verify)
-  without changing Waves 1–3.
+  without changing Waves 1–3. Growth after the 2026-09-22 snapshot
+  is Wave 5 (SMS providers, connected-app grants, and the OIDC
+  client allowlist).
 - Constructor `apiKey` is the management credential. No new required
   constructor argument is added in Wave 1.
 - Default base URL stays caller-supplied. Documentation examples use

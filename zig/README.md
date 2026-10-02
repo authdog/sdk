@@ -72,8 +72,9 @@ pub fn main() !void {
 `actions`, `addons`, `billing`, `settings`, `elevate`,
 `emailProviders`, `featureFlags`, `forms`, `provisioningTokens`,
 `impersonation`, `portal`, `security`, `threats`, `vanityDomains`,
-and `widgets` wrap Waves 1–4 of the public API. Optional constructor
-fields `environment_secret`, `scim_token`, and `hris_token` are the
+`widgets`, `smsProviders`, and `connectedApps` wrap Waves 1–5 of the
+public API. Optional constructor fields `environment_secret`,
+`scim_token`, and `hris_token` are the
 AuthZEN/MCP runtime, SCIM, and HRIS Bearers. AuthZEN discovery is
 unauthenticated. See `specs/004-api-parity/`.
 

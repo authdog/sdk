@@ -3216,6 +3216,159 @@ async fn test_wave4_mcp_verify_key_and_svid() {
 }
 
 #[tokio::test]
+async fn test_wave5_sms_and_connected_apps() {
+    let cases = [
+        (
+            "sms_providers_list",
+            "GET",
+            "/v1/tenants/ten_1/environments/env_1/sms-providers",
+            None,
+        ),
+        (
+            "sms_providers_save",
+            "POST",
+            "/v1/tenants/ten_1/environments/env_1/sms-providers",
+            Some(json!({ "provider": "twilio" })),
+        ),
+        (
+            "sms_providers_test",
+            "POST",
+            "/v1/tenants/ten_1/environments/env_1/sms-providers/test",
+            Some(json!({ "recipient": "+15551212" })),
+        ),
+        (
+            "sms_providers_delete",
+            "DELETE",
+            "/v1/tenants/ten_1/environments/env_1/sms-providers/twilio",
+            None,
+        ),
+        (
+            "connected_apps_list",
+            "GET",
+            "/v1/tenants/ten_1/environments/env_1/connected-apps",
+            None,
+        ),
+        (
+            "connected_apps_revoke",
+            "POST",
+            "/v1/tenants/ten_1/environments/env_1/connected-apps/revoke",
+            Some(json!({ "clientId": "cli_1", "userId": "usr_1" })),
+        ),
+        (
+            "connected_apps_list_allowlist",
+            "GET",
+            "/v1/tenants/ten_1/environments/env_1/client-allowlist",
+            None,
+        ),
+        (
+            "connected_apps_save_allowlist",
+            "POST",
+            "/v1/tenants/ten_1/environments/env_1/client-allowlist",
+            Some(json!({ "clientId": "cli_1", "allowed": true })),
+        ),
+        (
+            "connected_apps_delete_allowlist",
+            "DELETE",
+            "/v1/tenants/ten_1/environments/env_1/client-allowlist/cli_1",
+            None,
+        ),
+    ];
+    assert_eq!(cases.len(), 9);
+
+    for (name, expected_method, expected_path, body) in cases {
+        let mock_server = MockServer::start().await;
+        Mock::given(method(expected_method))
+            .and(path(expected_path))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({})))
+            .expect(1)
+            .mount(&mock_server)
+            .await;
+
+        let client = client_against(&mock_server).await;
+        match name {
+            "sms_providers_list" => client.sms_providers().list("ten_1", "env_1").await.unwrap(),
+            "sms_providers_save" => client
+                .sms_providers()
+                .save("ten_1", "env_1", body.clone().unwrap())
+                .await
+                .unwrap(),
+            "sms_providers_test" => client
+                .sms_providers()
+                .test("ten_1", "env_1", body.clone().unwrap())
+                .await
+                .unwrap(),
+            "sms_providers_delete" => client
+                .sms_providers()
+                .delete("ten_1", "env_1", "twilio")
+                .await
+                .unwrap(),
+            "connected_apps_list" => client
+                .connected_apps()
+                .list("ten_1", "env_1", None, None)
+                .await
+                .unwrap(),
+            "connected_apps_revoke" => client
+                .connected_apps()
+                .revoke("ten_1", "env_1", body.clone().unwrap())
+                .await
+                .unwrap(),
+            "connected_apps_list_allowlist" => client
+                .connected_apps()
+                .list_allowlist("ten_1", "env_1")
+                .await
+                .unwrap(),
+            "connected_apps_save_allowlist" => client
+                .connected_apps()
+                .save_allowlist("ten_1", "env_1", body.clone().unwrap())
+                .await
+                .unwrap(),
+            "connected_apps_delete_allowlist" => client
+                .connected_apps()
+                .delete_allowlist("ten_1", "env_1", "cli_1")
+                .await
+                .unwrap(),
+            other => panic!("unknown case {other}"),
+        };
+
+        let requests = mock_server.received_requests().await.unwrap();
+        assert_eq!(requests.len(), 1, "{name}");
+        assert_eq!(requests[0].method.as_str(), expected_method, "{name}");
+        assert_eq!(requests[0].url.path(), expected_path, "{name}");
+        if let Some(expected) = body {
+            let actual: Value = serde_json::from_slice(&requests[0].body).unwrap_or(Value::Null);
+            assert_eq!(actual, expected, "body mismatch for {name}");
+        }
+    }
+}
+
+#[tokio::test]
+async fn test_wave5_connected_apps_forwards_query_params() {
+    let mock_server = MockServer::start().await;
+    Mock::given(wiremock::matchers::any())
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({})))
+        .mount(&mock_server)
+        .await;
+
+    let client = client_against(&mock_server).await;
+    client
+        .connected_apps()
+        .list("ten_1", "env_1", Some("usr_1"), Some("cli_1"))
+        .await
+        .unwrap();
+
+    let requests = mock_server.received_requests().await.unwrap();
+    assert_eq!(requests.len(), 1);
+    assert_eq!(
+        requests[0].url.path(),
+        "/v1/tenants/ten_1/environments/env_1/connected-apps"
+    );
+    let pairs: std::collections::HashMap<String, String> =
+        requests[0].url.query_pairs().into_owned().collect();
+    assert_eq!(pairs.get("userId").map(String::as_str), Some("usr_1"));
+    assert_eq!(pairs.get("clientId").map(String::as_str), Some("cli_1"));
+}
+
+#[tokio::test]
 async fn test_wave3_authzen_discovery_omits_bearer() {
     let mock_server = MockServer::start().await;
     Mock::given(method("GET"))

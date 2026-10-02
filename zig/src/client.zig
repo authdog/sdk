@@ -549,6 +549,14 @@ pub const AuthdogClient = struct {
         return .{ .client = self };
     }
 
+    pub fn smsProviders(self: *Self) SmsProvidersResource {
+        return .{ .client = self };
+    }
+
+    pub fn connectedApps(self: *Self) ConnectedAppsResource {
+        return .{ .client = self };
+    }
+
     fn fail(self: *Self, comptime err: AuthdogError, message: []const u8) AuthdogError {
         if (self.last_error_message) |old| {
             self.allocator.free(old);
@@ -1928,6 +1936,54 @@ pub const WidgetsResource = struct {
 
     pub fn createToken(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
         return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/widgets/token", .{ tenant_id, environment_id }, &.{}, body);
+    }
+};
+
+pub const SmsProvidersResource = struct {
+    client: *AuthdogClient,
+
+    pub fn list(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/sms-providers", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn save(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/sms-providers", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn @"test"(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/sms-providers/test", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn delete(self: @This(), tenant_id: []const u8, environment_id: []const u8, provider: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/sms-providers/{s}", .{ tenant_id, environment_id, provider }, &.{}, null);
+    }
+};
+
+pub const ConnectedAppsResource = struct {
+    client: *AuthdogClient,
+
+    pub fn list(self: @This(), tenant_id: []const u8, environment_id: []const u8, user_id: ?[]const u8, client_id: ?[]const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        const query = [_]AuthdogClient.QueryParam{
+            .{ .name = "userId", .value = user_id },
+            .{ .name = "clientId", .value = client_id },
+        };
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/connected-apps", .{ tenant_id, environment_id }, &query, null);
+    }
+
+    pub fn revoke(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/connected-apps/revoke", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn listAllowlist(self: @This(), tenant_id: []const u8, environment_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.GET, "/v1/tenants/{s}/environments/{s}/client-allowlist", .{ tenant_id, environment_id }, &.{}, null);
+    }
+
+    pub fn saveAllowlist(self: @This(), tenant_id: []const u8, environment_id: []const u8, body: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.POST, "/v1/tenants/{s}/environments/{s}/client-allowlist", .{ tenant_id, environment_id }, &.{}, body);
+    }
+
+    pub fn deleteAllowlist(self: @This(), tenant_id: []const u8, environment_id: []const u8, client_id: []const u8) AuthdogError!std.json.Parsed(std.json.Value) {
+        return self.client.requestValuePath(.DELETE, "/v1/tenants/{s}/environments/{s}/client-allowlist/{s}", .{ tenant_id, environment_id, client_id }, &.{}, null);
     }
 };
 

@@ -95,8 +95,9 @@ new AuthdogClient(config: AuthdogClientConfig)
 `oidcClients`, `actions`, `addons`, `billing`, `settings`,
 `elevate`, `emailProviders`, `featureFlags`, `forms`,
 `provisioningTokens`, `impersonation`, `portal`, `security`,
-`threats`, `vanityDomains`, and `widgets` wrap Waves 1–4 of the
-public API (`specs/004-api-parity/`). AuthZEN discovery is
+`threats`, `vanityDomains`, `widgets`, `smsProviders`, and
+`connectedApps` wrap Waves 1–5 of the public API
+(`specs/004-api-parity/`). AuthZEN discovery is
 unauthenticated; evaluate/search and MCP runtime use
 `environmentSecret`. SCIM uses `scimToken`; HRIS uses `hrisToken`.
 

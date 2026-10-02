@@ -4652,3 +4652,180 @@ impl<'a> WidgetsResource<'a> {
             .await
     }
 }
+
+/// Environment SMS provider namespace.
+pub struct SmsProvidersResource<'a> {
+    client: &'a AuthdogClient,
+}
+
+impl<'a> SmsProvidersResource<'a> {
+    pub(crate) fn new(client: &'a AuthdogClient) -> Self {
+        Self { client }
+    }
+
+    pub async fn list(&self, tenant_id: &str, environment_id: &str) -> Result<Value, AuthdogError> {
+        self.client
+            .request(
+                "GET",
+                &format!("{}/sms-providers", env(tenant_id, environment_id)),
+                None,
+                &[],
+            )
+            .await
+    }
+
+    pub async fn save(
+        &self,
+        tenant_id: &str,
+        environment_id: &str,
+        body: impl Serialize,
+    ) -> Result<Value, AuthdogError> {
+        let body = to_value(body)?;
+        self.client
+            .request(
+                "POST",
+                &format!("{}/sms-providers", env(tenant_id, environment_id)),
+                Some(&body),
+                &[],
+            )
+            .await
+    }
+
+    pub async fn test(
+        &self,
+        tenant_id: &str,
+        environment_id: &str,
+        body: impl Serialize,
+    ) -> Result<Value, AuthdogError> {
+        let body = to_value(body)?;
+        self.client
+            .request(
+                "POST",
+                &format!("{}/sms-providers/test", env(tenant_id, environment_id)),
+                Some(&body),
+                &[],
+            )
+            .await
+    }
+
+    pub async fn delete(
+        &self,
+        tenant_id: &str,
+        environment_id: &str,
+        provider: &str,
+    ) -> Result<Value, AuthdogError> {
+        self.client
+            .request(
+                "DELETE",
+                &format!(
+                    "{}/sms-providers/{}",
+                    env(tenant_id, environment_id),
+                    provider
+                ),
+                None,
+                &[],
+            )
+            .await
+    }
+}
+
+/// Connected-app grants and OIDC client allowlist.
+pub struct ConnectedAppsResource<'a> {
+    client: &'a AuthdogClient,
+}
+
+impl<'a> ConnectedAppsResource<'a> {
+    pub(crate) fn new(client: &'a AuthdogClient) -> Self {
+        Self { client }
+    }
+
+    pub async fn list(
+        &self,
+        tenant_id: &str,
+        environment_id: &str,
+        user_id: Option<&str>,
+        client_id: Option<&str>,
+    ) -> Result<Value, AuthdogError> {
+        let query = query_pairs(vec![
+            ("userId", user_id.map(str::to_string)),
+            ("clientId", client_id.map(str::to_string)),
+        ]);
+        self.client
+            .request(
+                "GET",
+                &format!("{}/connected-apps", env(tenant_id, environment_id)),
+                None,
+                &query,
+            )
+            .await
+    }
+
+    pub async fn revoke(
+        &self,
+        tenant_id: &str,
+        environment_id: &str,
+        body: impl Serialize,
+    ) -> Result<Value, AuthdogError> {
+        let body = to_value(body)?;
+        self.client
+            .request(
+                "POST",
+                &format!("{}/connected-apps/revoke", env(tenant_id, environment_id)),
+                Some(&body),
+                &[],
+            )
+            .await
+    }
+
+    pub async fn list_allowlist(
+        &self,
+        tenant_id: &str,
+        environment_id: &str,
+    ) -> Result<Value, AuthdogError> {
+        self.client
+            .request(
+                "GET",
+                &format!("{}/client-allowlist", env(tenant_id, environment_id)),
+                None,
+                &[],
+            )
+            .await
+    }
+
+    pub async fn save_allowlist(
+        &self,
+        tenant_id: &str,
+        environment_id: &str,
+        body: impl Serialize,
+    ) -> Result<Value, AuthdogError> {
+        let body = to_value(body)?;
+        self.client
+            .request(
+                "POST",
+                &format!("{}/client-allowlist", env(tenant_id, environment_id)),
+                Some(&body),
+                &[],
+            )
+            .await
+    }
+
+    pub async fn delete_allowlist(
+        &self,
+        tenant_id: &str,
+        environment_id: &str,
+        client_id: &str,
+    ) -> Result<Value, AuthdogError> {
+        self.client
+            .request(
+                "DELETE",
+                &format!(
+                    "{}/client-allowlist/{}",
+                    env(tenant_id, environment_id),
+                    client_id
+                ),
+                None,
+                &[],
+            )
+            .await
+    }
+}

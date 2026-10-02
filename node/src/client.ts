@@ -30,6 +30,7 @@ import {
   AuditResource,
   AuthzenResource,
   BillingResource,
+  ConnectedAppsResource,
   ElevateResource,
   EmailProvidersResource,
   EnvironmentsResource,
@@ -54,6 +55,7 @@ import {
   SecurityResource,
   ServiceAccountsResource,
   SettingsResource,
+  SmsProvidersResource,
   TenantsResource,
   ThreatsResource,
   UsersResource,
@@ -113,6 +115,8 @@ export class AuthdogClient {
   readonly threats: ThreatsResource;
   readonly vanityDomains: VanityDomainsResource;
   readonly widgets: WidgetsResource;
+  readonly smsProviders: SmsProvidersResource;
+  readonly connectedApps: ConnectedAppsResource;
 
   constructor(config: AuthdogClientConfig) {
     this.config = config;
@@ -163,6 +167,8 @@ export class AuthdogClient {
     this.threats = new ThreatsResource(this);
     this.vanityDomains = new VanityDomainsResource(this);
     this.widgets = new WidgetsResource(this);
+    this.smsProviders = new SmsProvidersResource(this);
+    this.connectedApps = new ConnectedAppsResource(this);
   }
 
   async request<T = Record<string, unknown>>(

@@ -2262,3 +2262,99 @@ class WidgetsResource:
                 "POST", f"{_env(tenant_id, environment_id)}/widgets/token", json=body
             )
         )
+
+
+class SmsProvidersResource:
+    def __init__(self, client: "AuthdogClient") -> None:
+        self._client = client
+
+    def list(self, tenant_id: str, environment_id: str) -> JsonMap:
+        return JsonMap.from_dict(
+            self._client.request("GET", f"{_env(tenant_id, environment_id)}/sms-providers")
+        )
+
+    def save(self, tenant_id: str, environment_id: str, body: Dict[str, Any]) -> JsonMap:
+        return JsonMap.from_dict(
+            self._client.request(
+                "POST", f"{_env(tenant_id, environment_id)}/sms-providers", json=body
+            )
+        )
+
+    def test(self, tenant_id: str, environment_id: str, body: Dict[str, Any]) -> JsonMap:
+        return JsonMap.from_dict(
+            self._client.request(
+                "POST",
+                f"{_env(tenant_id, environment_id)}/sms-providers/test",
+                json=body,
+            )
+        )
+
+    def delete(self, tenant_id: str, environment_id: str, provider: str) -> JsonMap:
+        return JsonMap.from_dict(
+            self._client.request(
+                "DELETE",
+                f"{_env(tenant_id, environment_id)}/sms-providers/{provider}",
+            )
+        )
+
+
+class ConnectedAppsResource:
+    def __init__(self, client: "AuthdogClient") -> None:
+        self._client = client
+
+    def list(
+        self,
+        tenant_id: str,
+        environment_id: str,
+        user_id: Optional[str] = None,
+        client_id: Optional[str] = None,
+    ) -> JsonMap:
+        params: Dict[str, Any] = {}
+        if user_id is not None:
+            params["userId"] = user_id
+        if client_id is not None:
+            params["clientId"] = client_id
+        return JsonMap.from_dict(
+            self._client.request(
+                "GET",
+                f"{_env(tenant_id, environment_id)}/connected-apps",
+                params=params or None,
+            )
+        )
+
+    def revoke(self, tenant_id: str, environment_id: str, body: Dict[str, Any]) -> JsonMap:
+        return JsonMap.from_dict(
+            self._client.request(
+                "POST",
+                f"{_env(tenant_id, environment_id)}/connected-apps/revoke",
+                json=body,
+            )
+        )
+
+    def list_allowlist(self, tenant_id: str, environment_id: str) -> JsonMap:
+        return JsonMap.from_dict(
+            self._client.request(
+                "GET", f"{_env(tenant_id, environment_id)}/client-allowlist"
+            )
+        )
+
+    def save_allowlist(
+        self, tenant_id: str, environment_id: str, body: Dict[str, Any]
+    ) -> JsonMap:
+        return JsonMap.from_dict(
+            self._client.request(
+                "POST",
+                f"{_env(tenant_id, environment_id)}/client-allowlist",
+                json=body,
+            )
+        )
+
+    def delete_allowlist(
+        self, tenant_id: str, environment_id: str, client_id: str
+    ) -> JsonMap:
+        return JsonMap.from_dict(
+            self._client.request(
+                "DELETE",
+                f"{_env(tenant_id, environment_id)}/client-allowlist/{client_id}",
+            )
+        )

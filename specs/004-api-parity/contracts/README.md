@@ -4,8 +4,8 @@ Dated public catalog for `004-api-parity`.
 
 | File | Role |
 |------|------|
-| [openapi.snapshot.json](./openapi.snapshot.json) | Full OpenAPI 3.0 document from `https://api.authdog.com/v1/openapi`, refreshed 2026-09-22 (Authdog API 1.0.0, 268 operations) |
-| [operation-inventory.md](./operation-inventory.md) | Every operation assigned to Wave 1, 2, 3, or 4 |
+| [openapi.snapshot.json](./openapi.snapshot.json) | Full OpenAPI 3.0 document from `https://api.authdog.com/v1/openapi`, refreshed 2026-10-02 (Authdog API 1.0.0, 277 operations) |
+| [operation-inventory.md](./operation-inventory.md) | Every operation assigned to Wave 1, 2, 3, 4, or 5 |
 | [wave1-operations.json](./wave1-operations.json) | Wave 1 method, path, parameters, and response codes |
 
 User-info remains documented in

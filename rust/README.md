@@ -112,8 +112,9 @@ Creates a new Authdog client.
 `hris()`, `mcp()`, `otel()`, `oidc_clients()`, `actions()`, `addons()`,
 `billing()`, `settings()`, `elevate()`, `email_providers()`,
 `feature_flags()`, `forms()`, `provisioning_tokens()`, `impersonation()`,
-`portal()`, `security()`, `threats()`, `vanity_domains()`, and
-`widgets()` wrap Waves 1–4 of the public API. AuthZEN discovery is
+`portal()`, `security()`, `threats()`, `vanity_domains()`,
+`widgets()`, `sms_providers()`, and `connected_apps()` wrap Waves 1–5
+of the public API. AuthZEN discovery is
 unauthenticated. See `specs/004-api-parity/`.
 
 #### Methods

@@ -808,3 +808,64 @@ type WidgetsService struct {
 func (s *WidgetsService) CreateToken(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
 	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/widgets/token", body, nil)
 }
+
+// SmsProvidersService is the environment SMS-providers namespace.
+type SmsProvidersService struct {
+	client *Client
+}
+
+func (s *SmsProvidersService) List(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/sms-providers", nil, nil)
+}
+
+func (s *SmsProvidersService) Save(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/sms-providers", body, nil)
+}
+
+func (s *SmsProvidersService) Test(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/sms-providers/test", body, nil)
+}
+
+func (s *SmsProvidersService) Delete(ctx context.Context, tenantID, environmentID, provider string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, envPath(tenantID, environmentID)+"/sms-providers/"+provider, nil, nil)
+}
+
+// ConnectedAppsListOptions are optional query parameters for ConnectedApps.List.
+type ConnectedAppsListOptions struct {
+	UserID   string
+	ClientID string
+}
+
+// ConnectedAppsService is the environment connected-apps and client-allowlist namespace.
+type ConnectedAppsService struct {
+	client *Client
+}
+
+func (s *ConnectedAppsService) List(ctx context.Context, tenantID, environmentID string, opts *ConnectedAppsListOptions) (map[string]interface{}, error) {
+	q := url.Values{}
+	if opts != nil {
+		if opts.UserID != "" {
+			q.Set("userId", opts.UserID)
+		}
+		if opts.ClientID != "" {
+			q.Set("clientId", opts.ClientID)
+		}
+	}
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/connected-apps", nil, q)
+}
+
+func (s *ConnectedAppsService) Revoke(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/connected-apps/revoke", body, nil)
+}
+
+func (s *ConnectedAppsService) ListAllowlist(ctx context.Context, tenantID, environmentID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodGet, envPath(tenantID, environmentID)+"/client-allowlist", nil, nil)
+}
+
+func (s *ConnectedAppsService) SaveAllowlist(ctx context.Context, tenantID, environmentID string, body interface{}) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodPost, envPath(tenantID, environmentID)+"/client-allowlist", body, nil)
+}
+
+func (s *ConnectedAppsService) DeleteAllowlist(ctx context.Context, tenantID, environmentID, clientID string) (map[string]interface{}, error) {
+	return s.client.requestMap(ctx, http.MethodDelete, envPath(tenantID, environmentID)+"/client-allowlist/"+clientID, nil, nil)
+}

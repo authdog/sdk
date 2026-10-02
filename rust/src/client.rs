@@ -30,13 +30,14 @@ use std::time::Duration;
 
 pub use crate::resources::{
     ActionsResource, AddonsResource, ApiSecretsResource, AuditResource, AuthzenResource,
-    BillingResource, ElevateResource, EmailProvidersResource, EnvironmentsResource, EventsResource,
-    FeatureFlagsResource, FormsResource, GroupsResource, HrisResource, ImpersonationResource,
-    McpResource, NotificationChannelsResource, OidcClientsResource, OrganizationsResource,
-    OtelResource, PersonalAccessTokensResource, PortalResource, ProjectsResource,
-    ProvisioningTokensResource, RbacResource, ScimResource, SecurityResource,
-    ServiceAccountsResource, SettingsResource, TenantsResource, ThreatsResource, UsersResource,
-    VanityDomainsResource, WebhooksResource, WidgetsResource,
+    BillingResource, ConnectedAppsResource, ElevateResource, EmailProvidersResource,
+    EnvironmentsResource, EventsResource, FeatureFlagsResource, FormsResource, GroupsResource,
+    HrisResource, ImpersonationResource, McpResource, NotificationChannelsResource,
+    OidcClientsResource, OrganizationsResource, OtelResource, PersonalAccessTokensResource,
+    PortalResource, ProjectsResource, ProvisioningTokensResource, RbacResource, ScimResource,
+    SecurityResource, ServiceAccountsResource, SettingsResource, SmsProvidersResource,
+    TenantsResource, ThreatsResource, UsersResource, VanityDomainsResource, WebhooksResource,
+    WidgetsResource,
 };
 
 /// Configuration for the Authdog client
@@ -370,6 +371,14 @@ impl AuthdogClient {
 
     pub fn widgets(&self) -> WidgetsResource<'_> {
         WidgetsResource::new(self)
+    }
+
+    pub fn sms_providers(&self) -> SmsProvidersResource<'_> {
+        SmsProvidersResource::new(self)
+    }
+
+    pub fn connected_apps(&self) -> ConnectedAppsResource<'_> {
+        ConnectedAppsResource::new(self)
     }
 
     /// Get user information using an access token

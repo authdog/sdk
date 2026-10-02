@@ -514,12 +514,37 @@ describe('Wave 3 management', () => {
     ],
   ];
 
+  const wave5Cases: Array<[string, () => Promise<unknown>, string, string, unknown]> = [
+    ['sms providers list', () => client.smsProviders.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/sms-providers', undefined],
+    ['sms providers save', () => client.smsProviders.save('ten_1', 'env_1', { provider: 'twilio' }), 'POST', '/v1/tenants/ten_1/environments/env_1/sms-providers', { provider: 'twilio' }],
+    ['sms providers test', () => client.smsProviders.test('ten_1', 'env_1', { recipient: '+15551212' }), 'POST', '/v1/tenants/ten_1/environments/env_1/sms-providers/test', { recipient: '+15551212' }],
+    ['sms providers delete', () => client.smsProviders.delete('ten_1', 'env_1', 'twilio'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/sms-providers/twilio', undefined],
+    ['connected apps list', () => client.connectedApps.list('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/connected-apps', undefined],
+    ['connected apps revoke', () => client.connectedApps.revoke('ten_1', 'env_1', { clientId: 'cli_1', userId: 'usr_1' }), 'POST', '/v1/tenants/ten_1/environments/env_1/connected-apps/revoke', { clientId: 'cli_1', userId: 'usr_1' }],
+    ['client allowlist list', () => client.connectedApps.listAllowlist('ten_1', 'env_1'), 'GET', '/v1/tenants/ten_1/environments/env_1/client-allowlist', undefined],
+    ['client allowlist save', () => client.connectedApps.saveAllowlist('ten_1', 'env_1', { clientId: 'cli_1', allowed: true }), 'POST', '/v1/tenants/ten_1/environments/env_1/client-allowlist', { clientId: 'cli_1', allowed: true }],
+    ['client allowlist delete', () => client.connectedApps.deleteAllowlist('ten_1', 'env_1', 'cli_1'), 'DELETE', '/v1/tenants/ten_1/environments/env_1/client-allowlist/cli_1', undefined],
+  ];
+
   it('covers all inventory operations', () => {
     expect(wave3Cases).toHaveLength(152);
     expect(wave4Cases).toHaveLength(2);
+    expect(wave5Cases).toHaveLength(9);
   });
 
   it.each(wave3Cases)('%s hits %s %s', async (_name, call, method, url, data) => {
+    mockAxiosInstance.request.mockResolvedValue({ data: {} });
+    await call();
+    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method,
+        url,
+        ...(data !== undefined ? { data } : {}),
+      })
+    );
+  });
+
+  it.each(wave5Cases)('%s hits %s %s', async (_name, call, method, url, data) => {
     mockAxiosInstance.request.mockResolvedValue({ data: {} });
     await call();
     expect(mockAxiosInstance.request).toHaveBeenCalledWith(
@@ -629,6 +654,14 @@ describe('Wave 3 management', () => {
         method: 'GET',
         url: '/v1/tenants/ten_1/environments/env_1/elevate/access-requests',
         params: { status: 'pending' },
+      })
+    );
+    await client.connectedApps.list('ten_1', 'env_1', 'usr_1', 'cli_1');
+    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        url: '/v1/tenants/ten_1/environments/env_1/connected-apps',
+        params: { userId: 'usr_1', clientId: 'cli_1' },
       })
     );
   });

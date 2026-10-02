@@ -3172,6 +3172,133 @@ test "wave3 method and path" {
     }
 }
 
+const wave5_cases = [_]Wave1Case{
+    .{
+        .name = "smsProviders.list",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/sms-providers",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.smsProviders().list("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "smsProviders.save",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/sms-providers",
+        .body = "{\"provider\":\"twilio\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.smsProviders().save("ten_1", "env_1", "{\"provider\":\"twilio\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "smsProviders.test",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/sms-providers/test",
+        .body = "{\"recipient\":\"+15551212\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.smsProviders().@"test"("ten_1", "env_1", "{\"recipient\":\"+15551212\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "smsProviders.delete",
+        .method = .DELETE,
+        .path = "/v1/tenants/ten_1/environments/env_1/sms-providers/twilio",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.smsProviders().delete("ten_1", "env_1", "twilio")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "connectedApps.list",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/connected-apps",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.connectedApps().list("ten_1", "env_1", null, null)).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "connectedApps.revoke",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/connected-apps/revoke",
+        .body = "{\"clientId\":\"cli_1\",\"userId\":\"usr_1\"}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.connectedApps().revoke("ten_1", "env_1", "{\"clientId\":\"cli_1\",\"userId\":\"usr_1\"}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "connectedApps.listAllowlist",
+        .method = .GET,
+        .path = "/v1/tenants/ten_1/environments/env_1/client-allowlist",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.connectedApps().listAllowlist("ten_1", "env_1")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "connectedApps.saveAllowlist",
+        .method = .POST,
+        .path = "/v1/tenants/ten_1/environments/env_1/client-allowlist",
+        .body = "{\"clientId\":\"cli_1\",\"allowed\":true}",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.connectedApps().saveAllowlist("ten_1", "env_1", "{\"clientId\":\"cli_1\",\"allowed\":true}")).deinit();
+            }
+        }.f,
+    },
+    .{
+        .name = "connectedApps.deleteAllowlist",
+        .method = .DELETE,
+        .path = "/v1/tenants/ten_1/environments/env_1/client-allowlist/cli_1",
+        .invoke = struct {
+            fn f(c: *AuthdogClient) !void {
+                (try c.connectedApps().deleteAllowlist("ten_1", "env_1", "cli_1")).deinit();
+            }
+        }.f,
+    },
+};
+
+test "wave5 method and path" {
+    try std.testing.expectEqual(@as(usize, 9), wave5_cases.len);
+    for (wave5_cases) |case| {
+        const mock = try MockHttp.start(std.testing.allocator, .ok, case.response, case.expected_authorization);
+        defer mock.deinit();
+
+        var started = try startClient(mock, "key-1");
+        defer std.testing.allocator.free(started.url);
+        defer started.client.deinit();
+
+        case.invoke(&started.client) catch |err| {
+            std.debug.print("wave5 case {s} failed: {s} ({s})\n", .{
+                case.name,
+                @errorName(err),
+                started.client.lastErrorMessage(),
+            });
+            return err;
+        };
+
+        try std.testing.expectEqual(case.method, mock.seen_method.?);
+        try std.testing.expectEqualStrings(case.path, mock.seen_target.?);
+        try std.testing.expectEqualStrings(case.expected_authorization.?, mock.seen_authorization.?);
+        if (case.body) |body| {
+            try std.testing.expectEqualStrings(body, mock.seen_body.?);
+        } else {
+            try std.testing.expectEqual(@as(?[]u8, null), mock.seen_body);
+        }
+    }
+}
+
 test "wave4 method and path" {
     try std.testing.expectEqual(@as(usize, 2), wave4_cases.len);
     for (wave4_cases) |case| {
@@ -3314,5 +3441,18 @@ test "wave3 query params forwarded" {
         const listed = try started.client.elevate().listRequests("ten_1", "env_1", "pending");
         defer listed.deinit();
         try std.testing.expectEqualStrings("/v1/tenants/ten_1/environments/env_1/elevate/access-requests?status=pending", mock.seen_target.?);
+    }
+
+    {
+        const mock = try MockHttp.start(std.testing.allocator, .ok, "{}", "Bearer key-1");
+        defer mock.deinit();
+
+        var started = try startClient(mock, "key-1");
+        defer std.testing.allocator.free(started.url);
+        defer started.client.deinit();
+
+        const listed = try started.client.connectedApps().list("ten_1", "env_1", "usr_1", "cli_1");
+        defer listed.deinit();
+        try std.testing.expectEqualStrings("/v1/tenants/ten_1/environments/env_1/connected-apps?userId=usr_1&clientId=cli_1", mock.seen_target.?);
     }
 }

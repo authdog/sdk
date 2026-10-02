@@ -143,6 +143,10 @@ namespace Authdog
 
         public WidgetsResource Widgets { get; }
 
+        public SmsProvidersResource SmsProviders { get; }
+
+        public ConnectedAppsResource ConnectedApps { get; }
+
         /// <summary>
         /// Initialize the Authdog client
         /// </summary>
@@ -210,6 +214,8 @@ namespace Authdog
             Threats = new ThreatsResource(this);
             VanityDomains = new VanityDomainsResource(this);
             Widgets = new WidgetsResource(this);
+            SmsProviders = new SmsProvidersResource(this);
+            ConnectedApps = new ConnectedAppsResource(this);
         }
 
         /// <summary>

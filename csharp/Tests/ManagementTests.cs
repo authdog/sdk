@@ -317,6 +317,34 @@ namespace Authdog.Sdk.Tests
             Wave4Cases().Should().HaveCount(2);
         }
 
+        [Theory]
+        [MemberData(nameof(Wave5Cases))]
+        public async Task Wave5_MethodAndPath(Func<AuthdogClient, Task> call, string method, string path, object? body)
+        {
+            var (client, captured, _) = ClientFor(JsonResponse(new { }));
+
+            await call(client);
+
+            captured().Should().NotBeNull();
+            captured()!.Method.Method.Should().Be(method);
+            captured()!.RequestUri!.AbsolutePath.Should().Be(path);
+            if (body == null)
+            {
+                captured()!.Content.Should().BeNull();
+            }
+            else
+            {
+                var sent = await captured()!.Content!.ReadAsStringAsync();
+                JToken.DeepEquals(JObject.FromObject(body), JObject.Parse(sent)).Should().BeTrue();
+            }
+        }
+
+        [Fact]
+        public void Wave5_CoversAllInventoryOperations()
+        {
+            Wave5Cases().Should().HaveCount(9);
+        }
+
         [Fact]
         public async Task Wave3_AuthzenDiscovery_OmitsBearer()
         {
@@ -392,6 +420,11 @@ namespace Authdog.Sdk.Tests
 
             await client.Elevate.ListRequestsAsync("ten_1", "env_1", status: "pending");
             captured()!.RequestUri!.Query.Should().Be("?status=pending");
+
+            await client.ConnectedApps.ListAsync("ten_1", "env_1", userId: "usr_1", clientId: "cli_1");
+            captured()!.RequestUri!.AbsolutePath.Should().Be(
+                "/v1/tenants/ten_1/environments/env_1/connected-apps");
+            captured()!.RequestUri!.Query.Should().Be("?userId=usr_1&clientId=cli_1");
         }
 
         public static IEnumerable<object[]> Wave1Cases()
@@ -629,6 +662,19 @@ namespace Authdog.Sdk.Tests
         {
             yield return Case(c => c.Mcp.VerifyKeyAsync("ten_1", "env_1", "ent_1", new Dictionary<string, object> { ["message"] = "nonce", ["signature"] = "sig" }), "POST", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-key", new Dictionary<string, object> { ["message"] = "nonce", ["signature"] = "sig" });
             yield return Case(c => c.Mcp.VerifySvidAsync("ten_1", "env_1", "ent_1", new Dictionary<string, object> { ["svid"] = "jwt-svid" }), "POST", "/v1/tenants/ten_1/environments/env_1/mcp/trust-store/ent_1/verify-svid", new Dictionary<string, object> { ["svid"] = "jwt-svid" });
+        }
+
+        public static IEnumerable<object[]> Wave5Cases()
+        {
+            yield return Case(c => c.SmsProviders.ListAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/sms-providers", null);
+            yield return Case(c => c.SmsProviders.SaveAsync("ten_1", "env_1", new Dictionary<string, object> { ["provider"] = "twilio" }), "POST", "/v1/tenants/ten_1/environments/env_1/sms-providers", new Dictionary<string, object> { ["provider"] = "twilio" });
+            yield return Case(c => c.SmsProviders.TestAsync("ten_1", "env_1", new Dictionary<string, object> { ["recipient"] = "+15551212" }), "POST", "/v1/tenants/ten_1/environments/env_1/sms-providers/test", new Dictionary<string, object> { ["recipient"] = "+15551212" });
+            yield return Case(c => c.SmsProviders.DeleteAsync("ten_1", "env_1", "twilio"), "DELETE", "/v1/tenants/ten_1/environments/env_1/sms-providers/twilio", null);
+            yield return Case(c => c.ConnectedApps.ListAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/connected-apps", null);
+            yield return Case(c => c.ConnectedApps.RevokeAsync("ten_1", "env_1", new Dictionary<string, object> { ["clientId"] = "cli_1", ["userId"] = "usr_1" }), "POST", "/v1/tenants/ten_1/environments/env_1/connected-apps/revoke", new Dictionary<string, object> { ["clientId"] = "cli_1", ["userId"] = "usr_1" });
+            yield return Case(c => c.ConnectedApps.ListAllowlistAsync("ten_1", "env_1"), "GET", "/v1/tenants/ten_1/environments/env_1/client-allowlist", null);
+            yield return Case(c => c.ConnectedApps.SaveAllowlistAsync("ten_1", "env_1", new Dictionary<string, object> { ["clientId"] = "cli_1", ["allowed"] = true }), "POST", "/v1/tenants/ten_1/environments/env_1/client-allowlist", new Dictionary<string, object> { ["clientId"] = "cli_1", ["allowed"] = true });
+            yield return Case(c => c.ConnectedApps.DeleteAllowlistAsync("ten_1", "env_1", "cli_1"), "DELETE", "/v1/tenants/ten_1/environments/env_1/client-allowlist/cli_1", null);
         }
 
         private static IEnumerable<object[]> OrgTenantCases()

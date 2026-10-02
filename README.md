@@ -41,11 +41,11 @@ GET /v1/userinfo
 Authorization: Bearer <access-token>
 ```
 
-Waves 1–4 cover the dated public catalog: health, organizations,
+Waves 1–5 cover the dated public catalog: health, organizations,
 tenants, projects, environments, directory, RBAC, audit, events,
 webhooks, machine credentials, AuthZEN, SCIM, HRIS, MCP, OTEL,
-elevate, and environment configuration. Wave 4 adds MCP trust-store
-key-challenge and SPIFFE JWT-SVID verify. See
+elevate, and environment configuration. Wave 5 adds SMS providers
+and connected-app grants plus the OIDC client allowlist. See
 [`specs/004-api-parity/`](./specs/004-api-parity/).
 
 See individual SDK READMEs for language-specific usage.
@@ -58,7 +58,7 @@ to describe what the SDKs already do and to drive changes.
 - Constitution: [`.specify/memory/constitution.md`](./.specify/memory/constitution.md)
 - Baseline (as-is): [`specs/001-userinfo-sdk/`](./specs/001-userinfo-sdk/)
 - Cross-SDK hardening: [`specs/002-cross-sdk-parity/`](./specs/002-cross-sdk-parity/)
-- Platform API parity (Waves 1–4 shipped): [`specs/004-api-parity/`](./specs/004-api-parity/)
+- Platform API parity (Waves 1–5 shipped): [`specs/004-api-parity/`](./specs/004-api-parity/)
 - How to iterate: [`specs/README.md`](./specs/README.md)
 
 In Cursor: `/speckit-specify` → `/speckit-plan` → `/speckit-tasks` →
