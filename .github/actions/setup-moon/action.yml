@@ -36,7 +36,7 @@ runs:
         echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
     - name: Cache proto tools
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.proto/tools
         key: ${{ runner.os }}-proto-${{ hashFiles('.prototools') }}
@@ -48,7 +48,7 @@ runs:
       run: proto use
 
     - name: Cache moon
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: .moon/cache
         key: ${{ runner.os }}-moon-${{ github.sha }}
@@ -57,13 +57,13 @@ runs:
 
     - name: Setup Java
       if: inputs.needs-java == 'true'
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: ${{ inputs.java-version }}
         distribution: 'temurin'
 
     - name: Setup .NET
       if: inputs.needs-dotnet == 'true'
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ inputs.dotnet-version }}
